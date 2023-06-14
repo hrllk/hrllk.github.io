@@ -73,3 +73,5 @@ Pod내부에 구동되고있는 포트로 요청을 인계한다. <br>
 kubectl port-forward {pod-name} {local-port}:{pod:port}
 kubectl port-forward hrkim 8080:8000
 ```
+
+kubectl get nodes 
