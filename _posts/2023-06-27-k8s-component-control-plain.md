@@ -1,5 +1,7 @@
 --- 
 title: k8s component - Control Plane
+categories: 
+    - modernSoftware 
 ---
 
 
@@ -36,7 +38,7 @@ kube ctontrol manager == contorller 프로세스 실행 매니저 (하기에 있
 노드다운시 통지 및 대응 책임 <br>
 
 #### 4-2. job controller
-잡(일회성 작업) 오브젝트 감시 하고, 해당 작업을 완료할 때까지 동작하는 파드를생성 
+잡(일회성 작업) 오브젝트 감시 하고, 해당 작업을 완료할 때까지 동작하는 파드를생성 <br>
 
 #### 4-3. endpoint slice controller
 endpoint slice controller == service 와 pod의 hub<br>
@@ -46,7 +48,6 @@ endpoint slice controller == service 와 pod의 hub<br>
 새로운 네임스페이스에 대해 기본 service account를 생성 <br>
 
 ### 5. cloud controller manager
-
 cloud controller manager == 클라우드 서비스와 kubenetes간의 연결, 관리하는 컴포넌트.<br>
 ※ (on-premise 환경애서의 k8s는 이 컴포넌트가 필요없음)<br>
 
