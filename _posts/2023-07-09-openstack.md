@@ -24,6 +24,7 @@ VM 제공 및 compute 리소스 매니징 in OpenStack<br>
 2. Neutron == VPC<br>
 network, router, LB 매니징 <br>
 3. Cinder == EBS<br>
+독립적인 스토리지가 아님 <br>
 Volumn(EBS) attach or detach <br>
 4. Swift == S3<br>
 Object Storage 제공 <br>
