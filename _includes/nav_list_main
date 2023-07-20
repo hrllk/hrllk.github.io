@@ -111,6 +111,14 @@
 
             <ul>
                 {% for category in site.categories %}
+                    {% if category[0] == "softwareArchitecturePattern" %}
+                        <li><a href="/categories/softwareArchitecturePattern" class="">Software Architecture Pattern({{category[1].size}})</a></li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+
+            <ul>
+                {% for category in site.categories %}
                     {% if category[0] == "network" %}
                         <li><a href="/categories/network" class="">Network({{category[1].size}})</a></li>
                     {% endif %}
