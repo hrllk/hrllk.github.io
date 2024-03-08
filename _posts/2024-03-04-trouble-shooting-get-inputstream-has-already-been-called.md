@@ -79,5 +79,3 @@ true를 반환하게끔 재설정한다. <br>
 https://www.baeldung.com/spring-http-logging<br>
 
 
-음.. 내용 보충 필요 
-
