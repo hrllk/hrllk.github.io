@@ -22,6 +22,7 @@
 ### what is hexagonal architecture
 hexagonal architecture === 소프트웨어 설계 방식 <br>
 도메인 로직 중심 소프트웨어 설계 방식<br>
+aka ddd <br>
 
 ### principle 
 역할 분기(외부와 내부) <br>
@@ -31,7 +32,7 @@ application(outside), domain(inside), infrastucture(outside) <br>
 #### application
 외부와 접점되는 구간<br>
 접점되는 컴포넌트들을 포함 (user interfaces, restful controller ...)<br>
-+ 도메인 로직을 okestration 함(호출)<br>
+도메인 로직을 okestration 함(호출)<br>
 
 
 #### domain
@@ -49,11 +50,11 @@ DB configuration, spring configuration, Repository ...<br>
 #### 1. focus 
 계층 분기로 인한 각 layer별로 다른 부분에 영향을 주지 않으면서 집중할 수 있음
 #### 2. easier to understand 
-각 계층별 역할에대해 이해 쉬움
-가장큰 이점은 도메인 로직의 분기 from 모든것으로부터
+각 계층별 역할에대해 이해 쉬움<br>
+가장큰 이점은 도메인 로직의 분기 from 모든것으로부터<br>
 
-domain엔 비즈니스로직만 들어감
+domain엔 비즈니스로직만 들어감<br>
 
 
 ### References
-https://www.baeldung.com/hexagonal-architecture-ddd-spring
+[!https://www.baeldung.com/hexagonal-architecture-ddd-spring](https://www.baeldung.com/hexagonal-architecture-ddd-spring)
