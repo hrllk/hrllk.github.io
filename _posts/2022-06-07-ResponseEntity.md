@@ -6,7 +6,28 @@ toc: true
 toc_sticky: true
 toc_label: Content 
 ---
+
+
+
+### ResponseEntity ?
+> In Spring, ResponseEntity is a class that represents the entire HTTP response and is derived from the HttpEntity class.
+전체 HTTP 응답을 나타내는 클래스
+HttpEntity의 파생품
+
+> What we mean by the entire HTTP response is; status code, headers and body. We can change these features of the response from your endpoints, that is, controller methods, and use them flexibly. Let’s examine the example below:
+Response 상태에대해 핸들링 가능
+
+
+
+
+
+Spring에서 HttpResponse를 핸들링 하기위한 객체
+
+
+
 ## ResponseEntity란??
+
+
 > 서버가 사용자에게 데이터를 제공해줌에 있어서 예외처리를 할 수(?) 있는 방법이다. 
 > e.g) 사용자가 게시판을 접속했으나, 해당게시판에는 게시물이 존재하지 않을 수 있다. 
 > ResponseEntity는 개발자가 직접 결과 데이터와 HTTP 상태코드를 직접 제어할 수 있는 클래스로, 
