@@ -1,5 +1,5 @@
 ---
- title: message converter 
+ title: default message converter of spring 
  categories: 
      - spring
      - troubleShooting 
@@ -59,26 +59,26 @@ public class WebMvcConfig implements WebMvcConfigurer {
 Jackson 순서 앞단에 추가해주면 우선적으로 사용하여 gson을 converting 할 수 있음<br>
 
 #### Before 
-0 = {ByteArrayHttpMessageConverter@12871} 
-1 = {StringHttpMessageConverter@12872} 
-2 = {StringHttpMessageConverter@12873} 
-3 = {ResourceHttpMessageConverter@12874} 
-4 = {ResourceRegionHttpMessageConverter@12875} 
-5 = {AllEncompassingFormHttpMessageConverter@12876} 
-6 = {MappingJackson2HttpMessageConverter@12877} 
-7 = {MappingJackson2HttpMessageConverter@12878} 
-8 = {Jaxb2RootElementHttpMessageConverter@12879} 
+0 = {ByteArrayHttpMessageConverter@12871} <br>
+1 = {StringHttpMessageConverter@12872} <br>
+2 = {StringHttpMessageConverter@12873} <br>
+3 = {ResourceHttpMessageConverter@12874} <br>
+4 = {ResourceRegionHttpMessageConverter@12875} <br>
+5 = {AllEncompassingFormHttpMessageConverter@12876} <br>
+6 = {MappingJackson2HttpMessageConverter@12877} <br>
+7 = {MappingJackson2HttpMessageConverter@12878} <br>
+8 = {Jaxb2RootElementHttpMessageConverter@12879} <br>
 
 #### After
-0 = {ByteArrayHttpMessageConverter@12902} 
-1 = {StringHttpMessageConverter@12903} 
-2 = {StringHttpMessageConverter@12904} 
-3 = {ResourceHttpMessageConverter@12905} 
-4 = {ResourceRegionHttpMessageConverter@12906} 
-5 = {AllEncompassingFormHttpMessageConverter@12907} 
-6 = {GsonHttpMessageConverter@12908}  <<
-7 = {MappingJackson2HttpMessageConverter@12909} 
-8 = {Jaxb2RootElementHttpMessageConverter@12910} 
+0 = {ByteArrayHttpMessageConverter@12902} <br>
+1 = {StringHttpMessageConverter@12903} <br>
+2 = {StringHttpMessageConverter@12904} <br>
+3 = {ResourceHttpMessageConverter@12905} <br>
+4 = {ResourceRegionHttpMessageConverter@12906} <br>
+5 = {AllEncompassingFormHttpMessageConverter@12907} <br>
+6 = {GsonHttpMessageConverter@12908}  <<<br>
+7 = {MappingJackson2HttpMessageConverter@12909} <br>
+8 = {Jaxb2RootElementHttpMessageConverter@12910} <br>
 
 ### references 
 https://www.baeldung.com/spring-httpmessageconverter-rest
