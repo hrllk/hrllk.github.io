@@ -1,8 +1,8 @@
 ---
- title: default message converter of spring 
+ title: Could not write JSON JsonObject (default message converter of spring)
  categories: 
-     - spring
      - troubleShooting 
+     - spring
 ---
 
 
@@ -76,7 +76,7 @@ Jackson 순서 앞단에 추가해주면 우선적으로 사용하여 gson을 co
 3 = {ResourceHttpMessageConverter@12905} <br>
 4 = {ResourceRegionHttpMessageConverter@12906} <br>
 5 = {AllEncompassingFormHttpMessageConverter@12907} <br>
-6 = {GsonHttpMessageConverter@12908}  <<<br>
+6 = {GsonHttpMessageConverter@12908}  << <br>
 7 = {MappingJackson2HttpMessageConverter@12909} <br>
 8 = {Jaxb2RootElementHttpMessageConverter@12910} <br>
 
