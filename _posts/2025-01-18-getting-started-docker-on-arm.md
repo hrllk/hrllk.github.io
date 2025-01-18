@@ -8,11 +8,12 @@
 
 
 ### Overview
-> Since macOS doesn't natively support Docker's underlying Linux kernel features, 
+> Since macOS doesn't natively support Docker's underlying Linux kernel features,
 you need a lightweight virtual machine (VM) to run the Docker daemon.
 
-colima == vm (to start docker daemon)
-(리눅스의 커널기반의 기능들을 미제공)
+colima == vm (to start docker daemon) <br>
+MacOS 환경에서 기본적으로 리눅스 커널환경 미제공 <br>
+Docker를 구동하기위한 VM을 설치 <br>
 
 > Colima is optimized for local development environments where portability and simplicity are more important than performance or stability.
 It is not designed to match the production-grade reliability of container orchestration platforms like Kubernetes, Docker Swarm, or directly running Docker on Linux servers.
