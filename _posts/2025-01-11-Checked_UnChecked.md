@@ -5,9 +5,9 @@
 ---
 
 
-## Checked Exception
+### Checked Exception (Exception)
+---
 
-### Definition
 > These are exceptions that are checked at compile-time by the Java compiler. <br>
 > The programmer is required to handle these exceptions explicitly, 
 > either by using a try-catch block or by declaring them in the method signature with the throws keyword.
@@ -19,25 +19,32 @@
 - SQLException
 - FileNotFoundException
 
-### usecase
+#### usecase
 > Checked exceptions are typically used for situations where the program can recover, such as when dealing with file handling, database access, or network operations.
 
 프로그램내 어떤프로세스에서 원복이 가능할 때 고려 <br>
 
 
-## UnChecked Exception <br>
+### UnChecked Exception (RuntimeException)<br>
+---
 
-
-
-### Definition 
 > These are exHandling these exceptions is optional. The programmer may or may not catch them.
 > Handling these exceptions is optional. The programmer may or may not catch them.
 
-컴파일시점이 아닌, 런타임시점에 확인가능한 예외<br>
-예외처리는 필수가 아닌 선택사항<br>
-예시)<br>
+컴파일시점이 아닌, 런타임시점에 확인가능한 예외이며, 예외처리는 선택사항<br>
+<!-- 예외처리는 필수가 아닌 선택사항<br> -->
+<!-- 예시)<br> -->
 
 - NullPointerException
 - ArrayIndexOutOfBoundsException
 - ArithmeticException
+
+
+
+### summary
+| 구분 | Checked Exception | UnChecked Exception|
+| --------------- | --------------- | --------------- |
+| 검출시점 | 컴파일 | 런타임 |
+| 처리강제여부  | Y | N |
+| 예시 | IOException, SQLException | NPE, IllegalArgumentException |
 
