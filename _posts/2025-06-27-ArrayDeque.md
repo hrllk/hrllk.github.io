@@ -2,6 +2,8 @@
 title: ArrayDeque?
 categories:
    - data-structure
+toc: true
+toc_label: "What is ArrayDeque?"
 ---
 
 ### Overview 
