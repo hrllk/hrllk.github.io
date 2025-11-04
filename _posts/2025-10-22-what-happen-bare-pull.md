@@ -119,6 +119,8 @@ POST /<repo>.git/git-upload-pack
 #### 5. Merge or Rebase
 Fetch가 완료되면, 클라이언트는 로컬 브랜치와 병합하거나 리베이스를 수행해 최종적으로 로컬 상태를 갱신한다.
 
+<!-- TODO: 과정 추가 -->
+
 
 
 ### Conclusion
