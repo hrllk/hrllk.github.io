@@ -3,10 +3,13 @@
  categories:
     - java
     - troubleShooting
+ published: false
 ---
 
+<!-- TODO:  -->
+
 ### overview
-`READ_UNCOMMITTED` is the lowest isolation level in database transaction management. It allows a transaction to read data that has been modified by other transactions but not yet committed. This means that a transaction operating under `READ_UNCOMMITTED` can see "dirty" data.
+> `READ_UNCOMMITTED` is the lowest isolation level in database transaction management. It allows a transaction to read data that has been modified by other transactions but not yet committed. This means that a transaction operating under `READ_UNCOMMITTED` can see "dirty" data.
 
 
 낮은 독립레벨의 트랜잭션 관리
@@ -45,3 +48,6 @@ To illustrate `READ_UNCOMMITTED`, you could provide a simple Java (or chosen lan
 - Thread 2: Starts a transaction with `READ_UNCOMMITTED` isolation level, reads the balance.
 - Thread 1: Either commits or rolls back.
 - Thread 2: Reads the balance again (if Thread 1 rolled back, Thread 2's initial read was a dirty read).
+
+### References
+
