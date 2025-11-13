@@ -11,6 +11,7 @@ published: true
 
 ### Overview
 ---
+클라이언트에서 `pull event` 가 발생했을때의 흐름을 설명한다. <br>
 클라이언트에서 `git pull` 명령이 실행되면, 서버에서는 Fetch 요청에 응답하는 과정만 담당한다. <br>
 이때 서버는 <b>읽기 중심의 동작(read only)을 수행하며</b>, 실제 Merge나 Rebase 등의 작업은 클라이언트 측에서 진행된다.
 
@@ -56,72 +57,159 @@ sequenceDiagram
 
 ### Flow Detail
 ---
+
 #### 1. Discovery
-르라이언트가 `git pull` (Smart HTTP방식)을 수행하면, 내부적으로 서버의 `git-upload-pack` 엔드포인트로 refs 정보를 요청한다.
+원격 상태 파악과 필요 데이터 판단까지의 전반 흐름
 
+##### 1-1. [Advertise-Refs](https://hrllk.github.io/git/Git-Adverties-Refs-Deep-Dive/)
+클라이언트가 `git pull` 수행 시, 서버의 `git-upload-pack` 엔드포인트로 refs 정보를 요청
 
-##### 1-1. 클라이언트 요청 
-``` bash
+- 클라이언트 요청
+```bash
 GET /<repo>.git/info/refs?service=git-upload-pack
 ```
 
-refs 조회 요청
+- 서버 응답 항목
+  - `HEAD`
+  - `refs/heads/*` (브랜치 정보)
+  - `refs/tags/*` (태그 정보)
+  - capabilities 목록
 
+##### 1-2. Negotiation (wants/haves 결정)
+서버 광고(refs)와 로컬 상태를 대조해 필요한 객체 산출
+`wants`, `have` 산출,
 
-
-
-
-##### 1-2 서버 응답
-서버는 파일 시스템 내 Bare Repository를 탐색해 아래 정보를 클라이언트에게 전달한다.
-
-
-- HEAD
-- refs/heads/* (브랜치정보)
-- refs/tags/* (태그정보)
-
-> 이 과정을 ref광고(Discovery) 라고 칭하며, 클라이언트가 이후에 Fetch 요청을 구성할 수 있도록 정보를 제공한다.
-
-
-
-
-
-
-#### 2. Fetch 
-클라이언트는 Discovery 단계에서 받은 refs 정보를 바탕으로, 서버가 가지고 있지만 로컬에는 없는 커밋들을 요청한다.
-``` bash 
+- 요청 전송
+```bash
 POST /<repo>.git/git-upload-pack
 ```
-- 요청에는 `want`, `have`, `shallow` 옵션 등이 포함된다.
+- 요청 구성: `want`, `have`, `shallow` 등
+- 목적: 공통 조상 확인, 부족한 객체만 선별 요청
+
+#### 2. Packfile 송수신
+필요 객체에 대한 팩 생성, 전송, 수신 및 적용 흐름(클라이언트는 위 Negotiation 단계에서 받은 refs 정보를 바탕으로, 서버가 가지고 있지만 로컬에는 없는 커밋들을 요청한다.)
+요청에는 `want`, `have`, `shallow` 옵션 등이 포함됨
+
+##### 2-1. 서버 → 클라이언트 전송 (side-band)
+- side-band 스트림: ch1(pack 데이터), ch2(진행률), ch3(에러)
+- thin-pack, ofs-delta, bitmap index 등 최적화 적용 가능
+
+##### 2-2. 클라이언트 수신·적용
+- `.pack` 수신 및 `.idx` 인덱스 생성
+- 로컬 객체 DB 반영
+
+#### 3. Merge or Rebase
+Fetch 완료 후 로컬 브랜치 반영 단계
 
 
-
-
-
-#### 3. Negotiation (비교를 통한 동기화 결정)
-- 클라이언트와 서버간의 refs 정보를 비교(handshake)
-- 로컬에 없는 객체만 선별후 요청(효율적 데이터 전송)
-- 서버는 필요한 객체를 계산한 후 packfile을 생성하여 응답
-
-
-#### 4. Packfile 전송 및 수신
-서버는 side-band 스트림을 통해 데이터를 전송한다.
-
-| 채널 | 내용 |
-| -------------- | --------------- |
-| ch1 | pack 데이터 |
-| ch2 | 진행률 정보 |
-| ch3 | 오류 메세지 |
-
-클라이언트는 수신한 `.pack` 파일을 로컬 객체 DB에 반영하고 인덱스를 작성한다.
-
-
-
-#### 5. Merge or Rebase
-Fetch가 완료되면, 클라이언트는 로컬 브랜치와 병합하거나 리베이스를 수행해 최종적으로 로컬 상태를 갱신한다.
-
+<!-- #### [1. Advertise-Refs](https://dev.to/mochafreddo/running-docker-on-macos-without-docker-desktop-64o) -->
+<!---->
+<!-- 르라이언트가 `git pull` (Smart HTTP방식)을 수행하면, 내부적으로 서버의 `git-upload-pack` 엔드포인트로 refs 정보를 요청한다. -->
+<!---->
+<!---->
+<!-- ##### 1-1. 클라이언트 요청  -->
+<!-- ``` bash -->
+<!-- GET /<repo>.git/info/refs?service=git-upload-pack -->
+<!-- ``` -->
+<!---->
+<!-- refs 조회 요청 -->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!-- ##### 1-2 서버 응답 -->
+<!-- 서버는 파일 시스템 내 Bare Repository를 탐색해 아래 정보를 클라이언트에게 전달한다. -->
+<!---->
+<!---->
+<!-- - HEAD -->
+<!-- - refs/heads/* (브랜치정보) -->
+<!-- - refs/tags/* (태그정보) -->
+<!---->
+<!-- > 이 과정을 ref광고(Discovery) 라고 칭하며, 클라이언트가 이후에 Fetch 요청을 구성할 수 있도록 정보를 제공한다. -->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!-- #### [1. Advertise-Refs](https://dev.to/mochafreddo/running-docker-on-macos-without-docker-desktop-64o) -->
+<!---->
+<!-- 르라이언트가 `git pull` (Smart HTTP방식)을 수행하면, 내부적으로 서버의 `git-upload-pack` 엔드포인트로 refs 정보를 요청한다. -->
+<!---->
+<!---->
+<!-- ##### 1-1. 클라이언트 요청  -->
+<!-- ``` bash -->
+<!-- GET /<repo>.git/info/refs?service=git-upload-pack -->
+<!-- ``` -->
+<!---->
+<!-- refs 조회 요청 -->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!-- ##### 1-2 서버 응답 -->
+<!-- 서버는 파일 시스템 내 Bare Repository를 탐색해 아래 정보를 클라이언트에게 전달한다. -->
+<!---->
+<!---->
+<!-- - HEAD -->
+<!-- - refs/heads/* (브랜치정보) -->
+<!-- - refs/tags/* (태그정보) -->
+<!---->
+<!-- > 이 과정을 ref광고(Discovery) 라고 칭하며, 클라이언트가 이후에 Fetch 요청을 구성할 수 있도록 정보를 제공한다. -->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!-- #### 2. Fetch  -->
+<!-- 클라이언트는 Discovery 단계에서 받은 refs 정보를 바탕으로, 서버가 가지고 있지만 로컬에는 없는 커밋들을 요청한다. -->
+<!-- ``` bash  -->
+<!-- POST /<repo>.git/git-upload-pack -->
+<!-- ``` -->
+<!-- - 요청에는 `want`, `have`, `shallow` 옵션 등이 포함된다. -->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!-- #### 3. Negotiation (비교를 통한 동기화 결정) -->
+<!-- - 클라이언트와 서버간의 refs 정보를 비교(handshake) -->
+<!-- - 로컬에 없는 객체만 선별후 요청(효율적 데이터 전송) -->
+<!-- - 서버는 필요한 객체를 계산한 후 packfile을 생성하여 응답 -->
+<!---->
+<!---->
+<!-- #### 4. Packfile 전송 및 수신 -->
+<!-- 서버는 side-band 스트림을 통해 데이터를 전송한다. -->
+<!---->
+<!-- | 채널 | 내용 | -->
+<!-- | -------------- | --------------- | -->
+<!-- | ch1 | pack 데이터 | -->
+<!-- | ch2 | 진행률 정보 | -->
+<!-- | ch3 | 오류 메세지 | -->
+<!---->
+<!-- 클라이언트는 수신한 `.pack` 파일을 로컬 객체 DB에 반영하고 인덱스를 작성한다. -->
+<!---->
+<!---->
+<!---->
+<!-- #### 5. Merge or Rebase -->
+<!-- Fetch가 완료되면, 클라이언트는 로컬 브랜치와 병합하거나 리베이스를 수행해 최종적으로 로컬 상태를 갱신한다. -->
+<!---->
 <!-- TODO: 과정 추가 -->
 
 
+
+### Trace
+---
+<details>
+  <summary>TL;DR</summary>
+
+
+
+
+</details>
 
 ### Conclusion
 ---
