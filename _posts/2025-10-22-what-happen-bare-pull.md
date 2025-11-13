@@ -75,7 +75,7 @@ GET /<repo>.git/info/refs?service=git-upload-pack
   - `refs/tags/*` (태그 정보)
   - capabilities 목록
 
-##### 1-2. Negotiation (wants/haves 결정)
+##### 1-2. [Negotiation (wants/haves 결정) ](https://hrllk.github.io/git/Git-Negotiation-Deep-Dive/)
 서버 광고(refs)와 로컬 상태를 대조해 필요한 객체 산출
 `wants`, `have` 산출,
 
