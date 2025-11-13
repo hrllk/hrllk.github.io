@@ -147,7 +147,7 @@ sequenceDiagram
     participant Client
     participant Server
 
-    alt
+    alt Advertise-Refs
     Client->>Server: GET /info/refs?service=git-upload-pack
     Server-->>Client: Advertise refs<br>(tip commit hashes + capabilities)
     else
