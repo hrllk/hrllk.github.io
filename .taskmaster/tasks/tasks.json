@@ -282,11 +282,205 @@
             "testStrategy": "핸드셰이크 단계별 목적과 보안 속성을 검증한다."
           }
         ]
+      },
+      {
+        "id": 2,
+        "title": "네트워크 CS 집중 시리즈 (초급/중급/상급)",
+        "description": "네트워크 주제를 난이도별로 분리해 체계적으로 포스트를 작성한다.",
+        "status": "pending",
+        "dependencies": [
+          1
+        ],
+        "priority": "high",
+        "details": "초급은 기본 개념 정리, 중급은 실무 트러블슈팅, 상급은 설계/최적화 중심으로 구성한다.",
+        "testStrategy": "각 글마다 패킷 흐름도 + 장애 시나리오 + 실무 체크리스트를 포함해 정확성을 검증한다.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "[초급] OSI 7계층 vs TCP/IP 4계층",
+            "description": "모델 간 매핑과 백엔드 실무에서 자주 쓰는 계층 관점을 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "초급 난이도 관점에서 개념→실무 예시→체크리스트 순서로 구성한다.",
+            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다."
+          },
+          {
+            "id": 2,
+            "title": "[초급] IP, Subnet, CIDR 기초",
+            "description": "사설/공인 IP, 서브넷 마스크, CIDR 계산의 실전 감각을 익힌다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "초급 난이도 관점에서 개념→실무 예시→체크리스트 순서로 구성한다.",
+            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다."
+          },
+          {
+            "id": 3,
+            "title": "[초급] ARP와 로컬 네트워크 통신",
+            "description": "같은 서브넷에서 MAC 해석이 어떻게 동작하는지 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "초급 난이도 관점에서 개념→실무 예시→체크리스트 순서로 구성한다.",
+            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다."
+          },
+          {
+            "id": 4,
+            "title": "[초급] TCP/UDP 선택 기준",
+            "description": "신뢰성/지연/오버헤드 관점에서 프로토콜 선택 기준을 제시한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "초급 난이도 관점에서 개념→실무 예시→체크리스트 순서로 구성한다.",
+            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다."
+          },
+          {
+            "id": 5,
+            "title": "[초급] TCP 3-way/4-way와 연결 생명주기",
+            "description": "연결 수립/종료와 TIME_WAIT 의미를 설명한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "초급 난이도 관점에서 개념→실무 예시→체크리스트 순서로 구성한다.",
+            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다."
+          },
+          {
+            "id": 6,
+            "title": "[초급] DNS 조회 흐름과 캐시",
+            "description": "재귀/권한 서버, TTL, negative cache를 이해한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "초급 난이도 관점에서 개념→실무 예시→체크리스트 순서로 구성한다.",
+            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다."
+          },
+          {
+            "id": 7,
+            "title": "[초급] HTTP 요청-응답 기본과 Keep-Alive",
+            "description": "커넥션 재사용이 지연과 자원에 주는 영향을 다룬다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "초급 난이도 관점에서 개념→실무 예시→체크리스트 순서로 구성한다.",
+            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다."
+          },
+          {
+            "id": 8,
+            "title": "[중급] TLS 핸드셰이크와 HTTPS 성능",
+            "description": "암호화 과정, 인증서 검증, 세션 재개를 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "중급 난이도 관점에서 개념→실무 예시→체크리스트 순서로 구성한다.",
+            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다."
+          },
+          {
+            "id": 9,
+            "title": "[중급] HTTP/2, HTTP/3(QUIC) 비교",
+            "description": "멀티플렉싱, HOL blocking, UDP 기반 전환 이유를 설명한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "중급 난이도 관점에서 개념→실무 예시→체크리스트 순서로 구성한다.",
+            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다."
+          },
+          {
+            "id": 10,
+            "title": "[중급] 로드밸런서(L4/L7)와 헬스체크",
+            "description": "분산 알고리즘과 장애 감지, sticky session trade-off를 다룬다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "중급 난이도 관점에서 개념→실무 예시→체크리스트 순서로 구성한다.",
+            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다."
+          },
+          {
+            "id": 11,
+            "title": "[중급] NAT/SNAT/DNAT와 포트 고갈",
+            "description": "ephemeral port/conntrack 한계로 생기는 장애를 설명한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "중급 난이도 관점에서 개념→실무 예시→체크리스트 순서로 구성한다.",
+            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다."
+          },
+          {
+            "id": 12,
+            "title": "[중급] 리버스 프록시/포워드 프록시",
+            "description": "Nginx/Envoy 기반 라우팅, 캐시, 보안 경계 역할을 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "중급 난이도 관점에서 개념→실무 예시→체크리스트 순서로 구성한다.",
+            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다."
+          },
+          {
+            "id": 13,
+            "title": "[중급] CORS, SameSite, 쿠키 보안",
+            "description": "브라우저 보안 정책과 API 설계 시 주의점을 다룬다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "중급 난이도 관점에서 개념→실무 예시→체크리스트 순서로 구성한다.",
+            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다."
+          },
+          {
+            "id": 14,
+            "title": "[중급] 네트워크 디버깅 도구 실전",
+            "description": "ping, traceroute, ss/netstat, tcpdump, wireshark 사용 흐름을 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "중급 난이도 관점에서 개념→실무 예시→체크리스트 순서로 구성한다.",
+            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다."
+          },
+          {
+            "id": 15,
+            "title": "[상급] 혼잡제어(CUBIC/BBR)와 처리량 튜닝",
+            "description": "RTT/손실 환경별 성능 차이와 튜닝 포인트를 제시한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "상급 난이도 관점에서 개념→실무 예시→체크리스트 순서로 구성한다.",
+            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다."
+          },
+          {
+            "id": 16,
+            "title": "[상급] 커널 네트워크 큐와 소켓 버퍼",
+            "description": "NIC ring buffer, backlog, rmem/wmem, SYN queue를 분석한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "상급 난이도 관점에서 개념→실무 예시→체크리스트 순서로 구성한다.",
+            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다."
+          },
+          {
+            "id": 17,
+            "title": "[상급] 대규모 트래픽에서 타임아웃/재시도 설계",
+            "description": "retry storm 방지와 백오프/서킷브레이커 조합을 다룬다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "상급 난이도 관점에서 개념→실무 예시→체크리스트 순서로 구성한다.",
+            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다."
+          },
+          {
+            "id": 18,
+            "title": "[상급] 멀티 리전 네트워크 아키텍처",
+            "description": "Anycast, GeoDNS, failover, 데이터 일관성 비용을 설명한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "상급 난이도 관점에서 개념→실무 예시→체크리스트 순서로 구성한다.",
+            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다."
+          },
+          {
+            "id": 19,
+            "title": "[상급] 서비스 메시와 eBPF 관측성",
+            "description": "L7 정책, mTLS, 커널 계측 기반 트러블슈팅을 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "상급 난이도 관점에서 개념→실무 예시→체크리스트 순서로 구성한다.",
+            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다."
+          },
+          {
+            "id": 20,
+            "title": "[상급] DDoS/봇 트래픽 대응 전략",
+            "description": "rate limiting, WAF, challenge, upstream 보호계층 설계를 다룬다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "상급 난이도 관점에서 개념→실무 예시→체크리스트 순서로 구성한다.",
+            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다."
+          }
+        ]
       }
     ],
     "metadata": {
       "created": "2026-02-11T00:00:00.000Z",
-      "updated": "2026-02-11T14:10:00.000Z",
+      "updated": "2026-02-11T14:08:40Z",
       "description": "Master task list"
     }
   }
