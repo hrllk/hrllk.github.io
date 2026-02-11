@@ -1,0 +1,293 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "CS 지식 축적을 위한 블로그 포스트 시리즈",
+        "description": "자바/스프링 백엔드 개발자 관점으로 핵심 CS 주제를 학습하고 포스트로 정리한다.",
+        "status": "pending",
+        "dependencies": [],
+        "priority": "high",
+        "details": "운영체제, 커널, 네트워크, 자료구조/알고리즘, DB, 분산시스템, 보안, 런타임, 관측성 등 핵심 주제를 다룬다.",
+        "testStrategy": "각 포스트별 아웃라인 검토와 기술적 정확성 체크리스트를 통해 검증한다.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "포스트 01: 프로세스와 스레드, 컨텍스트 스위칭의 비용",
+            "description": "프로세스/스레드 모델과 컨텍스트 스위칭 오버헤드를 백엔드 성능 관점에서 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "PCB, 스케줄링 큐, 컨텍스트 저장/복원, 스레드 모델과 서버 동시성 설계 포인트를 다룬다.",
+            "testStrategy": "핵심 개념 정의와 실무 사례 매핑 체크리스트로 검증한다."
+          },
+          {
+            "id": 2,
+            "title": "포스트 02: Linux CFS 스케줄러와 서버 응답성",
+            "description": "CFS의 기본 동작과 latency 영향 요소를 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "vruntime, timeslice, load average, CPU 바운드/IO 바운드 워크로드 차이를 설명한다.",
+            "testStrategy": "스케줄링 메트릭 해석 예시를 포함해 정확성을 검증한다."
+          },
+          {
+            "id": 3,
+            "title": "포스트 03: 가상 메모리, 페이지 폴트, TLB",
+            "description": "가상 메모리 계층과 TLB miss가 성능에 주는 영향을 설명한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "페이지 테이블, 페이지 폴트, swap, locality와 성능 상관관계를 다룬다.",
+            "testStrategy": "메모리 접근 경로를 단계별 다이어그램으로 점검한다."
+          },
+          {
+            "id": 4,
+            "title": "포스트 04: 시스템 콜과 유저/커널 모드 전환",
+            "description": "시스템 콜의 비용 구조와 API 서버 설계에 미치는 영향을 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "trap, syscall boundary, copy overhead, batching 필요성을 실무 예로 설명한다.",
+            "testStrategy": "대표 시스템 콜 경로와 비용 가정을 교차 검토한다."
+          },
+          {
+            "id": 5,
+            "title": "포스트 05: 파일 시스템과 저널링의 핵심",
+            "description": "파일 시스템의 일관성 보장 방식과 저널링 전략을 설명한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "ext4 journaling mode, fsync 의미, 장애 시 데이터 보존 시나리오를 다룬다.",
+            "testStrategy": "크래시 시나리오별 결과를 표로 검증한다."
+          },
+          {
+            "id": 6,
+            "title": "포스트 06: Mutex, Semaphore, RWLock의 선택 기준",
+            "description": "동기화 primitive들의 차이와 선택 기준을 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "임계구역, 경쟁 상태, 교착상태 회피, read-heavy 워크로드 전략을 다룬다.",
+            "testStrategy": "경합 시나리오별 올바른 primitive 선택 여부를 검증한다."
+          },
+          {
+            "id": 7,
+            "title": "포스트 07: TCP 연결 수립, 흐름제어, 혼잡제어",
+            "description": "TCP의 핵심 메커니즘과 API 지연의 연관성을 설명한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "3-way handshake, sliding window, slow start, retransmission을 정리한다.",
+            "testStrategy": "패킷 흐름 타임라인으로 개념 정확성을 점검한다."
+          },
+          {
+            "id": 8,
+            "title": "포스트 08: HTTP/1.1 vs HTTP/2 vs HTTP/3",
+            "description": "프로토콜별 특징과 백엔드 시스템 영향도를 비교한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "keep-alive, multiplexing, head-of-line blocking, QUIC 차이를 다룬다.",
+            "testStrategy": "프로토콜별 장단점 비교표로 검증한다."
+          },
+          {
+            "id": 9,
+            "title": "포스트 09: DNS 해석, 캐싱, 장애 전파",
+            "description": "DNS 조회 경로와 TTL 설계가 서비스 안정성에 미치는 영향을 설명한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "recursive resolver, authoritative server, negative caching을 다룬다.",
+            "testStrategy": "DNS 장애 시나리오 복구 전략을 점검한다."
+          },
+          {
+            "id": 10,
+            "title": "포스트 10: L4/L7 로드밸런싱과 트래픽 분산",
+            "description": "로드밸런서 계층별 차이와 선택 기준을 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "round robin, least connection, health check, sticky session을 다룬다.",
+            "testStrategy": "트래픽 패턴별 LB 전략 적합성을 검증한다."
+          },
+          {
+            "id": 11,
+            "title": "포스트 11: NAT, 방화벽, 포트 고갈 이슈",
+            "description": "실무에서 자주 겪는 네트워크 경계 이슈를 설명한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "ephemeral port, SNAT 한계, connection tracking과 장애 원인을 다룬다.",
+            "testStrategy": "재현 가능한 증상-원인 매핑으로 검증한다."
+          },
+          {
+            "id": 12,
+            "title": "포스트 12: 해시 테이블과 충돌 해결 전략",
+            "description": "해시 충돌과 성능 열화를 자료구조 관점에서 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "chaining, open addressing, load factor, rehash trade-off를 다룬다.",
+            "testStrategy": "복잡도 변화와 분포 가정의 타당성을 검증한다."
+          },
+          {
+            "id": 13,
+            "title": "포스트 13: 트리/힙/B-Tree와 DB 인덱스 연결",
+            "description": "자료구조 이론이 데이터베이스 인덱스에 어떻게 연결되는지 설명한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "B+Tree 구조, fan-out, height, range scan 특성을 다룬다.",
+            "testStrategy": "인덱스 탐색 경로를 사례로 검증한다."
+          },
+          {
+            "id": 14,
+            "title": "포스트 14: 정렬 알고리즘과 캐시 친화성",
+            "description": "정렬 알고리즘 복잡도와 메모리 접근 패턴의 차이를 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "quick sort, merge sort, heap sort의 locality 관점 비교를 다룬다.",
+            "testStrategy": "복잡도와 실제 성능 차이를 설명 가능한지 점검한다."
+          },
+          {
+            "id": 15,
+            "title": "포스트 15: 시간복잡도와 Amdahl's Law",
+            "description": "성능 최적화 우선순위를 수학적으로 판단하는 법을 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "Big-O 해석, 병렬화 한계, 병목 구간 집중 전략을 다룬다.",
+            "testStrategy": "가정 기반 계산 예제를 통해 개념을 검증한다."
+          },
+          {
+            "id": 16,
+            "title": "포스트 16: JVM 메모리 구조와 GC 알고리즘",
+            "description": "JVM 런타임 메모리와 GC 동작이 서버 지연에 미치는 영향을 설명한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "heap generation, stop-the-world, G1/ZGC 기본 개념을 다룬다.",
+            "testStrategy": "GC 로그 해석 포인트와 튜닝 기준을 검증한다."
+          },
+          {
+            "id": 17,
+            "title": "포스트 17: Java Memory Model과 happens-before",
+            "description": "멀티스레드 코드의 가시성과 순서 보장을 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "volatile, synchronized, reordering, safe publication을 다룬다.",
+            "testStrategy": "데이터 레이스 예제로 규칙 적용 정확성을 검증한다."
+          },
+          {
+            "id": 18,
+            "title": "포스트 18: 스프링 비동기 처리와 스레드풀 설계",
+            "description": "Spring 환경에서 비동기 실행과 backpressure 고려사항을 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "@Async, Executor 설정, queue capacity, rejection policy를 다룬다.",
+            "testStrategy": "부하 시나리오별 스레드풀 동작 기대값을 점검한다."
+          },
+          {
+            "id": 19,
+            "title": "포스트 19: 트랜잭션 격리 수준과 MVCC",
+            "description": "트랜잭션 이상현상과 DB 격리 모델을 실무 관점으로 설명한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "read committed, repeatable read, phantom read, snapshot isolation을 다룬다.",
+            "testStrategy": "격리 수준별 현상 재현 시나리오로 검증한다."
+          },
+          {
+            "id": 20,
+            "title": "포스트 20: 인덱스 설계와 실행 계획 읽기",
+            "description": "SQL 성능 개선을 위한 인덱스/플랜 해석 방법을 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "covering index, cardinality, explain plan, filesort 회피 전략을 다룬다.",
+            "testStrategy": "튜닝 전후 실행 계획 비교로 유효성을 검증한다."
+          },
+          {
+            "id": 21,
+            "title": "포스트 21: 정규화와 역정규화의 트레이드오프",
+            "description": "데이터 모델링에서 일관성과 성능 균형점을 설명한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정규형 목적, 조인 비용, 쓰기 증폭, 읽기 최적화를 다룬다.",
+            "testStrategy": "도메인 예시 기반 의사결정 근거를 검증한다."
+          },
+          {
+            "id": 22,
+            "title": "포스트 22: CAP와 PACELC로 분산 시스템 읽기",
+            "description": "분산 시스템의 일관성/가용성/지연 트레이드오프를 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "네트워크 분할 가정, eventual consistency, latency cost를 다룬다.",
+            "testStrategy": "시스템 사례를 프레임워크에 매핑해 검증한다."
+          },
+          {
+            "id": 23,
+            "title": "포스트 23: 복제, 샤딩, 파티셔닝 전략",
+            "description": "데이터 확장 전략의 장단점과 운영 난이도를 비교한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "leader-follower, key-based sharding, hotspot 대응을 다룬다.",
+            "testStrategy": "확장 시나리오별 병목 위치를 검증한다."
+          },
+          {
+            "id": 24,
+            "title": "포스트 24: 분산 락과 리더 선출 패턴",
+            "description": "분산 환경에서 상호배제를 구현할 때의 주의점을 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "lease, fencing token, split-brain 위험과 보완책을 다룬다.",
+            "testStrategy": "락 실패 시나리오에서 안전성 조건을 점검한다."
+          },
+          {
+            "id": 25,
+            "title": "포스트 25: 메시지 큐와 전달 보장 모델",
+            "description": "at-most-once, at-least-once, effectively-once 개념을 비교한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "idempotency key, deduplication, consumer retry 패턴을 다룬다.",
+            "testStrategy": "중복/유실 시나리오 대응 설계를 검증한다."
+          },
+          {
+            "id": 26,
+            "title": "포스트 26: 캐시 전략과 무효화 설계",
+            "description": "캐시 성능 이득과 일관성 비용을 균형 있게 설명한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "cache-aside, write-through, TTL, stampede 방지 전략을 다룬다.",
+            "testStrategy": "캐시 hit ratio와 정합성 목표를 함께 검증한다."
+          },
+          {
+            "id": 27,
+            "title": "포스트 27: 관측성(로그/메트릭/트레이싱) 기본기",
+            "description": "운영 환경 디버깅을 위한 관측성 3축을 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "SLI/SLO, 분산 트레이싱, 구조화 로그, 고카디널리티 주의점을 다룬다.",
+            "testStrategy": "장애 원인 역추적 시나리오로 유효성을 검증한다."
+          },
+          {
+            "id": 28,
+            "title": "포스트 28: 타임아웃, 재시도, 서킷 브레이커 설계",
+            "description": "장애 전파를 줄이는 회복탄력성 패턴을 설명한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "retry storm, exponential backoff, bulkhead, fallback 전략을 다룬다.",
+            "testStrategy": "연쇄 장애 시나리오에서 보호 효과를 점검한다."
+          },
+          {
+            "id": 29,
+            "title": "포스트 29: 인증과 인가, OAuth2와 JWT",
+            "description": "인증/인가 모델과 토큰 기반 보안의 핵심을 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "access token, refresh token, scope, 토큰 검증 경로를 다룬다.",
+            "testStrategy": "위협 시나리오 기반 보안 체크리스트로 검증한다."
+          },
+          {
+            "id": 30,
+            "title": "포스트 30: TLS 핸드셰이크와 PKI",
+            "description": "전송 구간 보안의 원리와 운영 시 고려사항을 설명한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "대칭/비대칭 암호 결합, 인증서 체인, TLS 종료 지점 설계를 다룬다.",
+            "testStrategy": "핸드셰이크 단계별 목적과 보안 속성을 검증한다."
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "created": "2026-02-11T00:00:00.000Z",
+      "updated": "2026-02-11T14:10:00.000Z",
+      "description": "Master task list"
+    }
+  }
+}
