@@ -2,7 +2,7 @@
   "master": {
     "tasks": [
       {
-        "id": 1,
+        "id": "1",
         "title": "CS 지식 축적을 위한 블로그 포스트 시리즈",
         "description": "자바/스프링 백엔드 개발자 관점으로 핵심 CS 주제를 학습하고 포스트로 정리한다.",
         "status": "pending",
@@ -18,7 +18,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "PCB, 스케줄링 큐, 컨텍스트 저장/복원, 스레드 모델과 서버 동시성 설계 포인트를 다룬다.",
-            "testStrategy": "핵심 개념 정의와 실무 사례 매핑 체크리스트로 검증한다."
+            "testStrategy": "핵심 개념 정의와 실무 사례 매핑 체크리스트로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -27,7 +28,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "vruntime, timeslice, load average, CPU 바운드/IO 바운드 워크로드 차이를 설명한다.",
-            "testStrategy": "스케줄링 메트릭 해석 예시를 포함해 정확성을 검증한다."
+            "testStrategy": "스케줄링 메트릭 해석 예시를 포함해 정확성을 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -36,7 +38,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "페이지 테이블, 페이지 폴트, swap, locality와 성능 상관관계를 다룬다.",
-            "testStrategy": "메모리 접근 경로를 단계별 다이어그램으로 점검한다."
+            "testStrategy": "메모리 접근 경로를 단계별 다이어그램으로 점검한다.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -45,7 +48,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "trap, syscall boundary, copy overhead, batching 필요성을 실무 예로 설명한다.",
-            "testStrategy": "대표 시스템 콜 경로와 비용 가정을 교차 검토한다."
+            "testStrategy": "대표 시스템 콜 경로와 비용 가정을 교차 검토한다.",
+            "parentId": "undefined"
           },
           {
             "id": 5,
@@ -54,7 +58,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "ext4 journaling mode, fsync 의미, 장애 시 데이터 보존 시나리오를 다룬다.",
-            "testStrategy": "크래시 시나리오별 결과를 표로 검증한다."
+            "testStrategy": "크래시 시나리오별 결과를 표로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 6,
@@ -63,7 +68,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "임계구역, 경쟁 상태, 교착상태 회피, read-heavy 워크로드 전략을 다룬다.",
-            "testStrategy": "경합 시나리오별 올바른 primitive 선택 여부를 검증한다."
+            "testStrategy": "경합 시나리오별 올바른 primitive 선택 여부를 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 7,
@@ -72,7 +78,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "3-way handshake, sliding window, slow start, retransmission을 정리한다.",
-            "testStrategy": "패킷 흐름 타임라인으로 개념 정확성을 점검한다."
+            "testStrategy": "패킷 흐름 타임라인으로 개념 정확성을 점검한다.",
+            "parentId": "undefined"
           },
           {
             "id": 8,
@@ -81,7 +88,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "keep-alive, multiplexing, head-of-line blocking, QUIC 차이를 다룬다.",
-            "testStrategy": "프로토콜별 장단점 비교표로 검증한다."
+            "testStrategy": "프로토콜별 장단점 비교표로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 9,
@@ -90,7 +98,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "recursive resolver, authoritative server, negative caching을 다룬다.",
-            "testStrategy": "DNS 장애 시나리오 복구 전략을 점검한다."
+            "testStrategy": "DNS 장애 시나리오 복구 전략을 점검한다.",
+            "parentId": "undefined"
           },
           {
             "id": 10,
@@ -99,7 +108,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "round robin, least connection, health check, sticky session을 다룬다.",
-            "testStrategy": "트래픽 패턴별 LB 전략 적합성을 검증한다."
+            "testStrategy": "트래픽 패턴별 LB 전략 적합성을 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 11,
@@ -108,7 +118,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "ephemeral port, SNAT 한계, connection tracking과 장애 원인을 다룬다.",
-            "testStrategy": "재현 가능한 증상-원인 매핑으로 검증한다."
+            "testStrategy": "재현 가능한 증상-원인 매핑으로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 12,
@@ -117,7 +128,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "chaining, open addressing, load factor, rehash trade-off를 다룬다.",
-            "testStrategy": "복잡도 변화와 분포 가정의 타당성을 검증한다."
+            "testStrategy": "복잡도 변화와 분포 가정의 타당성을 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 13,
@@ -126,7 +138,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "B+Tree 구조, fan-out, height, range scan 특성을 다룬다.",
-            "testStrategy": "인덱스 탐색 경로를 사례로 검증한다."
+            "testStrategy": "인덱스 탐색 경로를 사례로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 14,
@@ -135,7 +148,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "quick sort, merge sort, heap sort의 locality 관점 비교를 다룬다.",
-            "testStrategy": "복잡도와 실제 성능 차이를 설명 가능한지 점검한다."
+            "testStrategy": "복잡도와 실제 성능 차이를 설명 가능한지 점검한다.",
+            "parentId": "undefined"
           },
           {
             "id": 15,
@@ -144,7 +158,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "Big-O 해석, 병렬화 한계, 병목 구간 집중 전략을 다룬다.",
-            "testStrategy": "가정 기반 계산 예제를 통해 개념을 검증한다."
+            "testStrategy": "가정 기반 계산 예제를 통해 개념을 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 16,
@@ -153,7 +168,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "heap generation, stop-the-world, G1/ZGC 기본 개념을 다룬다.",
-            "testStrategy": "GC 로그 해석 포인트와 튜닝 기준을 검증한다."
+            "testStrategy": "GC 로그 해석 포인트와 튜닝 기준을 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 17,
@@ -162,7 +178,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "volatile, synchronized, reordering, safe publication을 다룬다.",
-            "testStrategy": "데이터 레이스 예제로 규칙 적용 정확성을 검증한다."
+            "testStrategy": "데이터 레이스 예제로 규칙 적용 정확성을 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 18,
@@ -171,7 +188,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "@Async, Executor 설정, queue capacity, rejection policy를 다룬다.",
-            "testStrategy": "부하 시나리오별 스레드풀 동작 기대값을 점검한다."
+            "testStrategy": "부하 시나리오별 스레드풀 동작 기대값을 점검한다.",
+            "parentId": "undefined"
           },
           {
             "id": 19,
@@ -180,7 +198,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "read committed, repeatable read, phantom read, snapshot isolation을 다룬다.",
-            "testStrategy": "격리 수준별 현상 재현 시나리오로 검증한다."
+            "testStrategy": "격리 수준별 현상 재현 시나리오로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 20,
@@ -189,7 +208,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "covering index, cardinality, explain plan, filesort 회피 전략을 다룬다.",
-            "testStrategy": "튜닝 전후 실행 계획 비교로 유효성을 검증한다."
+            "testStrategy": "튜닝 전후 실행 계획 비교로 유효성을 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 21,
@@ -198,7 +218,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "정규형 목적, 조인 비용, 쓰기 증폭, 읽기 최적화를 다룬다.",
-            "testStrategy": "도메인 예시 기반 의사결정 근거를 검증한다."
+            "testStrategy": "도메인 예시 기반 의사결정 근거를 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 22,
@@ -207,7 +228,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "네트워크 분할 가정, eventual consistency, latency cost를 다룬다.",
-            "testStrategy": "시스템 사례를 프레임워크에 매핑해 검증한다."
+            "testStrategy": "시스템 사례를 프레임워크에 매핑해 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 23,
@@ -216,7 +238,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "leader-follower, key-based sharding, hotspot 대응을 다룬다.",
-            "testStrategy": "확장 시나리오별 병목 위치를 검증한다."
+            "testStrategy": "확장 시나리오별 병목 위치를 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 24,
@@ -225,7 +248,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "lease, fencing token, split-brain 위험과 보완책을 다룬다.",
-            "testStrategy": "락 실패 시나리오에서 안전성 조건을 점검한다."
+            "testStrategy": "락 실패 시나리오에서 안전성 조건을 점검한다.",
+            "parentId": "undefined"
           },
           {
             "id": 25,
@@ -234,7 +258,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "idempotency key, deduplication, consumer retry 패턴을 다룬다.",
-            "testStrategy": "중복/유실 시나리오 대응 설계를 검증한다."
+            "testStrategy": "중복/유실 시나리오 대응 설계를 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 26,
@@ -243,7 +268,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "cache-aside, write-through, TTL, stampede 방지 전략을 다룬다.",
-            "testStrategy": "캐시 hit ratio와 정합성 목표를 함께 검증한다."
+            "testStrategy": "캐시 hit ratio와 정합성 목표를 함께 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 27,
@@ -252,7 +278,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "SLI/SLO, 분산 트레이싱, 구조화 로그, 고카디널리티 주의점을 다룬다.",
-            "testStrategy": "장애 원인 역추적 시나리오로 유효성을 검증한다."
+            "testStrategy": "장애 원인 역추적 시나리오로 유효성을 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 28,
@@ -261,7 +288,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "retry storm, exponential backoff, bulkhead, fallback 전략을 다룬다.",
-            "testStrategy": "연쇄 장애 시나리오에서 보호 효과를 점검한다."
+            "testStrategy": "연쇄 장애 시나리오에서 보호 효과를 점검한다.",
+            "parentId": "undefined"
           },
           {
             "id": 29,
@@ -270,7 +298,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "access token, refresh token, scope, 토큰 검증 경로를 다룬다.",
-            "testStrategy": "위협 시나리오 기반 보안 체크리스트로 검증한다."
+            "testStrategy": "위협 시나리오 기반 보안 체크리스트로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 30,
@@ -279,17 +308,18 @@
             "status": "pending",
             "dependencies": [],
             "details": "대칭/비대칭 암호 결합, 인증서 체인, TLS 종료 지점 설계를 다룬다.",
-            "testStrategy": "핸드셰이크 단계별 목적과 보안 속성을 검증한다."
+            "testStrategy": "핸드셰이크 단계별 목적과 보안 속성을 검증한다.",
+            "parentId": "undefined"
           }
         ]
       },
       {
-        "id": 2,
+        "id": "2",
         "title": "네트워크 CS 집중 시리즈 (초급/중급/상급)",
         "description": "네트워크 주제를 난이도별로 분리해 체계적으로 포스트를 작성한다.",
-        "status": "pending",
+        "status": "in-progress",
         "dependencies": [
-          1
+          "1"
         ],
         "priority": "high",
         "details": "초급은 기본 개념 정리, 중급은 실무 트러블슈팅, 상급은 설계/최적화 중심으로 구성한다.",
@@ -302,7 +332,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "초급 난이도 관점에서 개념→실무 예시→체크리스트 순서로 구성한다.",
-            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다."
+            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -311,7 +342,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "초급 난이도 관점에서 개념→실무 예시→체크리스트 순서로 구성한다.",
-            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다."
+            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -320,7 +352,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "초급 난이도 관점에서 개념→실무 예시→체크리스트 순서로 구성한다.",
-            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다."
+            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -329,7 +362,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "초급 난이도 관점에서 개념→실무 예시→체크리스트 순서로 구성한다.",
-            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다."
+            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 5,
@@ -338,7 +372,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "초급 난이도 관점에서 개념→실무 예시→체크리스트 순서로 구성한다.",
-            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다."
+            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 6,
@@ -347,7 +382,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "초급 난이도 관점에서 개념→실무 예시→체크리스트 순서로 구성한다.",
-            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다."
+            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 7,
@@ -356,16 +392,19 @@
             "status": "pending",
             "dependencies": [],
             "details": "초급 난이도 관점에서 개념→실무 예시→체크리스트 순서로 구성한다.",
-            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다."
+            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 8,
             "title": "[중급] TLS 핸드셰이크와 HTTPS 성능",
             "description": "암호화 과정, 인증서 검증, 세션 재개를 정리한다.",
-            "status": "pending",
+            "status": "in-progress",
             "dependencies": [],
             "details": "중급 난이도 관점에서 개념→실무 예시→체크리스트 순서로 구성한다.",
-            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다."
+            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다.",
+            "updatedAt": "2026-02-11T14:12:21.369Z",
+            "parentId": "undefined"
           },
           {
             "id": 9,
@@ -374,7 +413,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "중급 난이도 관점에서 개념→실무 예시→체크리스트 순서로 구성한다.",
-            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다."
+            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 10,
@@ -383,7 +423,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "중급 난이도 관점에서 개념→실무 예시→체크리스트 순서로 구성한다.",
-            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다."
+            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 11,
@@ -392,7 +433,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "중급 난이도 관점에서 개념→실무 예시→체크리스트 순서로 구성한다.",
-            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다."
+            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 12,
@@ -401,7 +443,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "중급 난이도 관점에서 개념→실무 예시→체크리스트 순서로 구성한다.",
-            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다."
+            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 13,
@@ -410,7 +453,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "중급 난이도 관점에서 개념→실무 예시→체크리스트 순서로 구성한다.",
-            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다."
+            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 14,
@@ -419,7 +463,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "중급 난이도 관점에서 개념→실무 예시→체크리스트 순서로 구성한다.",
-            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다."
+            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 15,
@@ -428,7 +473,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "상급 난이도 관점에서 개념→실무 예시→체크리스트 순서로 구성한다.",
-            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다."
+            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 16,
@@ -437,7 +483,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "상급 난이도 관점에서 개념→실무 예시→체크리스트 순서로 구성한다.",
-            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다."
+            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 17,
@@ -446,7 +493,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "상급 난이도 관점에서 개념→실무 예시→체크리스트 순서로 구성한다.",
-            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다."
+            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 18,
@@ -455,7 +503,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "상급 난이도 관점에서 개념→실무 예시→체크리스트 순서로 구성한다.",
-            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다."
+            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 19,
@@ -464,7 +513,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "상급 난이도 관점에서 개념→실무 예시→체크리스트 순서로 구성한다.",
-            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다."
+            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 20,
@@ -473,15 +523,349 @@
             "status": "pending",
             "dependencies": [],
             "details": "상급 난이도 관점에서 개념→실무 예시→체크리스트 순서로 구성한다.",
-            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다."
+            "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다.",
+            "parentId": "undefined"
+          }
+        ],
+        "updatedAt": "2026-02-11T14:12:21.369Z"
+      },
+      {
+        "id": 3,
+        "title": "JVM 심화 로드맵 (백엔드 성능/안정성 중심)",
+        "description": "JVM 내부 동작을 이해해 성능 문제를 구조적으로 진단하고 개선한다.",
+        "status": "pending",
+        "dependencies": [
+          1
+        ],
+        "priority": "high",
+        "details": "ClassLoading, JIT, GC, JMM, 프로파일링, 컨테이너 환경까지 단계적으로 학습한다.",
+        "testStrategy": "각 서브태스크별로 아웃라인/핵심질문/실무사례 1개 이상을 포함해 품질을 검증한다.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "JVM 아키텍처 맵: ClassLoader, Runtime Data Areas, Execution Engine",
+            "description": "핵심 개념, 실무 적용 포인트, 트러블슈팅 사례까지 포함해 학습 포스트를 작성한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+          },
+          {
+            "id": 2,
+            "title": "Class Loading 생명주기(Loading-Linking-Initialization)와 초기화 함정",
+            "description": "핵심 개념, 실무 적용 포인트, 트러블슈팅 사례까지 포함해 학습 포스트를 작성한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+          },
+          {
+            "id": 3,
+            "title": "JIT 컴파일(C1/C2), 인라이닝, Escape Analysis 기초",
+            "description": "핵심 개념, 실무 적용 포인트, 트러블슈팅 사례까지 포함해 학습 포스트를 작성한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+          },
+          {
+            "id": 4,
+            "title": "JVM 메모리 구조(Heap/Metaspace/Stack)와 객체 생명주기",
+            "description": "핵심 개념, 실무 적용 포인트, 트러블슈팅 사례까지 포함해 학습 포스트를 작성한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+          },
+          {
+            "id": 5,
+            "title": "GC 기본: Minor/Major/Full GC, STW가 지연에 주는 영향",
+            "description": "핵심 개념, 실무 적용 포인트, 트러블슈팅 사례까지 포함해 학습 포스트를 작성한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+          },
+          {
+            "id": 6,
+            "title": "G1 GC 심화: Region, Pause Target, 튜닝 포인트",
+            "description": "핵심 개념, 실무 적용 포인트, 트러블슈팅 사례까지 포함해 학습 포스트를 작성한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+          },
+          {
+            "id": 7,
+            "title": "ZGC/Shenandoah 비교: 저지연 GC 선택 기준",
+            "description": "핵심 개념, 실무 적용 포인트, 트러블슈팅 사례까지 포함해 학습 포스트를 작성한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+          },
+          {
+            "id": 8,
+            "title": "GC 로그 읽기 실전(jdk gc log)과 병목 추적",
+            "description": "핵심 개념, 실무 적용 포인트, 트러블슈팅 사례까지 포함해 학습 포스트를 작성한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+          },
+          {
+            "id": 9,
+            "title": "Thread/Lock 모델: synchronized, volatile, CAS, JMM",
+            "description": "핵심 개념, 실무 적용 포인트, 트러블슈팅 사례까지 포함해 학습 포스트를 작성한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+          },
+          {
+            "id": 10,
+            "title": "Thread Pool 설계와 비동기 처리(CompletableFuture/Executor)",
+            "description": "핵심 개념, 실무 적용 포인트, 트러블슈팅 사례까지 포함해 학습 포스트를 작성한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+          },
+          {
+            "id": 11,
+            "title": "JVM 성능 분석 도구: jcmd, jstack, jmap, JFR, async-profiler",
+            "description": "핵심 개념, 실무 적용 포인트, 트러블슈팅 사례까지 포함해 학습 포스트를 작성한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+          },
+          {
+            "id": 12,
+            "title": "OOM 종류별 대응(Heap OOM, Metaspace OOM, Native OOM)",
+            "description": "핵심 개념, 실무 적용 포인트, 트러블슈팅 사례까지 포함해 학습 포스트를 작성한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+          },
+          {
+            "id": 13,
+            "title": "JVM in Container: cgroup 메모리/CPU 인식과 옵션",
+            "description": "핵심 개념, 실무 적용 포인트, 트러블슈팅 사례까지 포함해 학습 포스트를 작성한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+          },
+          {
+            "id": 14,
+            "title": "Spring Boot 실전 튜닝(메모리, GC, connection/thread pool)",
+            "description": "핵심 개념, 실무 적용 포인트, 트러블슈팅 사례까지 포함해 학습 포스트를 작성한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+          },
+          {
+            "id": 15,
+            "title": "JVM 장애 회고 템플릿: 증상-가설-검증-재발방지",
+            "description": "핵심 개념, 실무 적용 포인트, 트러블슈팅 사례까지 포함해 학습 포스트를 작성한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "시니어 백엔드 개발자가 꼭 알아야 할 CS 핵심",
+        "description": "시니어 레벨 의사결정에 필요한 CS 기반지식을 체계화한다.",
+        "status": "pending",
+        "dependencies": [
+          1,
+          2,
+          3
+        ],
+        "priority": "high",
+        "details": "운영체제/네트워크/DB/분산/관측성/보안을 연결해 트레이드오프 판단력을 강화한다.",
+        "testStrategy": "각 서브태스크별로 아웃라인/핵심질문/실무사례 1개 이상을 포함해 품질을 검증한다.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "운영체제 핵심: 프로세스/스레드/스케줄링과 서버 응답성",
+            "description": "핵심 개념, 실무 적용 포인트, 트러블슈팅 사례까지 포함해 학습 포스트를 작성한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+          },
+          {
+            "id": 2,
+            "title": "메모리 모델: 가상메모리, 페이지폴트, 캐시 locality",
+            "description": "핵심 개념, 실무 적용 포인트, 트러블슈팅 사례까지 포함해 학습 포스트를 작성한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+          },
+          {
+            "id": 3,
+            "title": "동시성 제어: 락, lock-free, deadlock/livelock/starvation",
+            "description": "핵심 개념, 실무 적용 포인트, 트러블슈팅 사례까지 포함해 학습 포스트를 작성한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+          },
+          {
+            "id": 4,
+            "title": "네트워크 필수: TCP 혼잡제어, RTT, 큐잉, 재전송",
+            "description": "핵심 개념, 실무 적용 포인트, 트러블슈팅 사례까지 포함해 학습 포스트를 작성한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+          },
+          {
+            "id": 5,
+            "title": "HTTP 진화: HTTP/1.1~3, 멱등성, 캐시, 백프레셔",
+            "description": "핵심 개념, 실무 적용 포인트, 트러블슈팅 사례까지 포함해 학습 포스트를 작성한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+          },
+          {
+            "id": 6,
+            "title": "데이터베이스 기본기: 인덱스, 실행계획, 트랜잭션 격리",
+            "description": "핵심 개념, 실무 적용 포인트, 트러블슈팅 사례까지 포함해 학습 포스트를 작성한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+          },
+          {
+            "id": 7,
+            "title": "MVCC와 분산 트랜잭션(2PC/Saga) 실무 선택 기준",
+            "description": "핵심 개념, 실무 적용 포인트, 트러블슈팅 사례까지 포함해 학습 포스트를 작성한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+          },
+          {
+            "id": 8,
+            "title": "분산시스템: CAP/PACELC, 합의/리더선출, 복제 전략",
+            "description": "핵심 개념, 실무 적용 포인트, 트러블슈팅 사례까지 포함해 학습 포스트를 작성한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+          },
+          {
+            "id": 9,
+            "title": "캐시 아키텍처: cache-aside/write-through, stampede 대응",
+            "description": "핵심 개념, 실무 적용 포인트, 트러블슈팅 사례까지 포함해 학습 포스트를 작성한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+          },
+          {
+            "id": 10,
+            "title": "메시징 시스템: 전달 보장, 순서, 중복 제거, DLQ",
+            "description": "핵심 개념, 실무 적용 포인트, 트러블슈팅 사례까지 포함해 학습 포스트를 작성한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+          },
+          {
+            "id": 11,
+            "title": "장애 대응 설계: timeout/retry/circuit-breaker/bulkhead",
+            "description": "핵심 개념, 실무 적용 포인트, 트러블슈팅 사례까지 포함해 학습 포스트를 작성한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+          },
+          {
+            "id": 12,
+            "title": "관측성: 로그/메트릭/트레이싱, SLI/SLO, 에러버짓",
+            "description": "핵심 개념, 실무 적용 포인트, 트러블슈팅 사례까지 포함해 학습 포스트를 작성한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+          },
+          {
+            "id": 13,
+            "title": "보안 필수: 인증/인가, OAuth2/OIDC, 시크릿 관리",
+            "description": "핵심 개념, 실무 적용 포인트, 트러블슈팅 사례까지 포함해 학습 포스트를 작성한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+          },
+          {
+            "id": 14,
+            "title": "인프라 감각: 리눅스 성능지표, 파일디스크립터, 네트워크 소켓",
+            "description": "핵심 개념, 실무 적용 포인트, 트러블슈팅 사례까지 포함해 학습 포스트를 작성한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+          },
+          {
+            "id": 15,
+            "title": "시니어 의사결정: 트레이드오프 문서화와 ADR 작성",
+            "description": "핵심 개념, 실무 적용 포인트, 트러블슈팅 사례까지 포함해 학습 포스트를 작성한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+          },
+          {
+            "id": 16,
+            "title": "코드리뷰/아키텍처 리뷰 프레임워크 구축",
+            "description": "핵심 개념, 실무 적용 포인트, 트러블슈팅 사례까지 포함해 학습 포스트를 작성한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+          },
+          {
+            "id": 17,
+            "title": "성능 테스트: 부하모델링, 병목분석, 회귀 방지",
+            "description": "핵심 개념, 실무 적용 포인트, 트러블슈팅 사례까지 포함해 학습 포스트를 작성한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+          },
+          {
+            "id": 18,
+            "title": "장애 포스트모템 문화와 운영 성숙도 향상",
+            "description": "핵심 개념, 실무 적용 포인트, 트러블슈팅 사례까지 포함해 학습 포스트를 작성한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
           }
         ]
       }
     ],
     "metadata": {
-      "created": "2026-02-11T00:00:00.000Z",
-      "updated": "2026-02-11T14:08:40Z",
-      "description": "Master task list"
+      "version": "1.0.0",
+      "lastModified": "2026-02-11T14:12:21.370Z",
+      "taskCount": 2,
+      "completedCount": 0,
+      "tags": [
+        "master"
+      ],
+      "updated": "2026-02-11T14:17:55Z"
     }
   }
 }
