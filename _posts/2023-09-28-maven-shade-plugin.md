@@ -1,5 +1,5 @@
 ---
-title: 
+title: "Maven Shade Plugin"
 categories: 
     - troubleShooting
 ---
@@ -23,4 +23,3 @@ categories:
 
 ### TMI
 해당 플러그인은 Uber(over) jar or fat jar를 생성하게 도와주는 플러그인이다. <br>
-
