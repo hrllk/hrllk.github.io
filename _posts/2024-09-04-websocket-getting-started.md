@@ -2,7 +2,7 @@
  title: websocket getting started in spring boot
  categories: 
      - spring
- published: false
+published: false
 ---
 
 <!-- TODO:  -->

@@ -2,7 +2,7 @@
  title: equals, hashCode, toString
  categories:
     - CS
- published: false
+published: false
 ---
 
 <!-- TODO:  -->

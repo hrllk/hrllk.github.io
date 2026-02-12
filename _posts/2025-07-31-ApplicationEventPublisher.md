@@ -9,7 +9,7 @@ tags:
   - Events
   - Decoupling
   - Spring Boot
- published: false
+published: false
 ---
 
 <!-- TODO:  -->

@@ -2,7 +2,7 @@
  title: "@Valid, @Validate 차이"
  categories:
      - spring
- published: false
+published: false
 ---
 
 <!-- TODO:  -->

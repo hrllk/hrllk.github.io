@@ -38,4 +38,4 @@ JSR 380은 Java 애플리케이션 내에서 사용자 입력을 검증하는 �
 
 
 ### References
-[!https://www.baeldung.com/java-validation](https://www.baeldung.com/java-validation)
+!https://www.baeldung.com/java-validation](https://www.baeldung.com/java-validation)

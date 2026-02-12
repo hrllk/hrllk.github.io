@@ -2,7 +2,7 @@
  title: ArgoCD Getting Started
  categories:
      - java
- published: false
+published: false
 ---
 
 <!-- TODO:  -->

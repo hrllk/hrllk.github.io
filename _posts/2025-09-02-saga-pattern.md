@@ -14,7 +14,7 @@ tags:
   - Compensating Transactions
   - Backend
 last_modified_at: 2025-09-02T00:00:00+09:00
- published: false
+published: false
 ---
 
 <!-- TODO:  -->

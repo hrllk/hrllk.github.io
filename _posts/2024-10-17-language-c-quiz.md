@@ -2,7 +2,7 @@
  title: TPS 오답 노트
  categories: 
      - spring
- published: false
+published: false
 ---
 
 ``` c

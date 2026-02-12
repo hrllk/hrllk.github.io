@@ -2,7 +2,7 @@
  title: Thread Local
  categories:
      - java
- published: false
+published: false
 ---
 
 <!-- TODO:  -->
