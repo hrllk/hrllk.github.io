@@ -525,17 +525,616 @@
             "details": "상급 난이도 관점에서 개념→실무 예시→체크리스트 순서로 구성한다.",
             "testStrategy": "핵심 개념 정의와 실무 장애 사례 매핑으로 검증한다.",
             "parentId": "undefined"
+          },
+          {
+            "id": 21,
+            "title": "RTT 측정과 해석: 네트워크 지연을 숫자로 읽는 법",
+            "description": "핵심 용어를 실무 지표/장애 사례와 연결해 이해한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의 → 왜 중요한지 → 보는 법 → 흔한 오해 순서로 작성.",
+            "testStrategy": "요약 3줄 + 실무 예시 1개 + 체크리스트로 검증.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 22,
+            "title": "TLS와 SSL 차이 실무 정리(용어, 버전, 운영 포인트)",
+            "description": "핵심 용어를 실무 지표/장애 사례와 연결해 이해한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의 → 왜 중요한지 → 보는 법 → 흔한 오해 순서로 작성.",
+            "testStrategy": "요약 3줄 + 실무 예시 1개 + 체크리스트로 검증.",
+            "parentId": "undefined"
           }
         ],
         "updatedAt": "2026-02-11T14:12:21.369Z"
       },
       {
-        "id": 3,
+        "id": "5",
+        "title": "CS 사전지식 부트캠프 (서브태스크 입문 전 필수)",
+        "description": "기존 고난도 서브태스크를 읽기 전에 필요한 기초 개념을 짧은 단위로 학습한다.",
+        "status": "in-progress",
+        "dependencies": [],
+        "priority": "high",
+        "details": "용어/흐름/지표 중심으로 먼저 감각을 만든 뒤, Task #3/#4 심화 트랙으로 연결한다.",
+        "testStrategy": "각 글 말미에 \"다음으로 읽을 심화 글\" 2~3개를 연결하고, 핵심 용어 퀴즈 3문항으로 이해도를 검증한다.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "개발자를 위한 CS 지도: 운영체제/네트워크/DB/분산 한눈에 보기",
+            "description": "심화 주제로 넘어가기 전 반드시 이해해야 할 선행 개념을 다룬다.",
+            "status": "done",
+            "dependencies": [],
+            "details": "한 편당 용어 5개 + 그림 1개 + 실무 예시 1개 + 다음 글 링크를 포함한다.",
+            "testStrategy": "핵심 개념 3문장 요약 가능 여부와 체크리스트로 검증한다.",
+            "updatedAt": "2026-02-11T23:37:27.071Z",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "지연시간 감각 잡기: ns, μs, ms가 의미하는 체감 차이",
+            "description": "심화 주제로 넘어가기 전 반드시 이해해야 할 선행 개념을 다룬다.",
+            "status": "in-progress",
+            "dependencies": [],
+            "details": "한 편당 용어 5개 + 그림 1개 + 실무 예시 1개 + 다음 글 링크를 포함한다.",
+            "testStrategy": "핵심 개념 3문장 요약 가능 여부와 체크리스트로 검증한다.",
+            "parentId": "undefined",
+            "updatedAt": "2026-02-11T23:59:37.844Z"
+          },
+          {
+            "id": 3,
+            "title": "성능지표 입문: throughput, latency(p50/p95/p99), error rate",
+            "description": "심화 주제로 넘어가기 전 반드시 이해해야 할 선행 개념을 다룬다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 편당 용어 5개 + 그림 1개 + 실무 예시 1개 + 다음 글 링크를 포함한다.",
+            "testStrategy": "핵심 개념 3문장 요약 가능 여부와 체크리스트로 검증한다.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "병목 찾기 기본기: 시스템은 가장 느린 곳에서 결정된다",
+            "description": "심화 주제로 넘어가기 전 반드시 이해해야 할 선행 개념을 다룬다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 편당 용어 5개 + 그림 1개 + 실무 예시 1개 + 다음 글 링크를 포함한다.",
+            "testStrategy": "핵심 개념 3문장 요약 가능 여부와 체크리스트로 검증한다.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "프로세스와 스레드 진짜 차이(자바 앱 관점)",
+            "description": "심화 주제로 넘어가기 전 반드시 이해해야 할 선행 개념을 다룬다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 편당 용어 5개 + 그림 1개 + 실무 예시 1개 + 다음 글 링크를 포함한다.",
+            "testStrategy": "핵심 개념 3문장 요약 가능 여부와 체크리스트로 검증한다.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 6,
+            "title": "CPU 코어, 하이퍼스레딩, 컨텍스트 스위칭 기초",
+            "description": "심화 주제로 넘어가기 전 반드시 이해해야 할 선행 개념을 다룬다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 편당 용어 5개 + 그림 1개 + 실무 예시 1개 + 다음 글 링크를 포함한다.",
+            "testStrategy": "핵심 개념 3문장 요약 가능 여부와 체크리스트로 검증한다.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 7,
+            "title": "동기/비동기, 블로킹/논블로킹 쉽게 구분하기",
+            "description": "심화 주제로 넘어가기 전 반드시 이해해야 할 선행 개념을 다룬다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 편당 용어 5개 + 그림 1개 + 실무 예시 1개 + 다음 글 링크를 포함한다.",
+            "testStrategy": "핵심 개념 3문장 요약 가능 여부와 체크리스트로 검증한다.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 8,
+            "title": "JVM 한눈에 보기: Heap/Stack/Metaspace 입문",
+            "description": "심화 주제로 넘어가기 전 반드시 이해해야 할 선행 개념을 다룬다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 편당 용어 5개 + 그림 1개 + 실무 예시 1개 + 다음 글 링크를 포함한다.",
+            "testStrategy": "핵심 개념 3문장 요약 가능 여부와 체크리스트로 검증한다.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 9,
+            "title": "GC가 뭔지부터: 왜 멈추고(STW) 왜 필요한가",
+            "description": "심화 주제로 넘어가기 전 반드시 이해해야 할 선행 개념을 다룬다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 편당 용어 5개 + 그림 1개 + 실무 예시 1개 + 다음 글 링크를 포함한다.",
+            "testStrategy": "핵심 개념 3문장 요약 가능 여부와 체크리스트로 검증한다.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 10,
+            "title": "스레드풀 입문: 왜 직접 Thread를 만들면 안 되는가",
+            "description": "심화 주제로 넘어가기 전 반드시 이해해야 할 선행 개념을 다룬다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 편당 용어 5개 + 그림 1개 + 실무 예시 1개 + 다음 글 링크를 포함한다.",
+            "testStrategy": "핵심 개념 3문장 요약 가능 여부와 체크리스트로 검증한다.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 11,
+            "title": "네트워크 4계층 빠른 입문(TCP/IP 기준)",
+            "description": "심화 주제로 넘어가기 전 반드시 이해해야 할 선행 개념을 다룬다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 편당 용어 5개 + 그림 1개 + 실무 예시 1개 + 다음 글 링크를 포함한다.",
+            "testStrategy": "핵심 개념 3문장 요약 가능 여부와 체크리스트로 검증한다.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 12,
+            "title": "HTTP 요청 1번이 서버까지 가는 길(브라우저→WAS→DB)",
+            "description": "심화 주제로 넘어가기 전 반드시 이해해야 할 선행 개념을 다룬다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 편당 용어 5개 + 그림 1개 + 실무 예시 1개 + 다음 글 링크를 포함한다.",
+            "testStrategy": "핵심 개념 3문장 요약 가능 여부와 체크리스트로 검증한다.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 13,
+            "title": "DNS가 느리면 왜 앱도 느려지는가",
+            "description": "심화 주제로 넘어가기 전 반드시 이해해야 할 선행 개념을 다룬다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 편당 용어 5개 + 그림 1개 + 실무 예시 1개 + 다음 글 링크를 포함한다.",
+            "testStrategy": "핵심 개념 3문장 요약 가능 여부와 체크리스트로 검증한다.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 14,
+            "title": "인덱스 없는 조회가 느린 이유를 그림으로 이해하기",
+            "description": "심화 주제로 넘어가기 전 반드시 이해해야 할 선행 개념을 다룬다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 편당 용어 5개 + 그림 1개 + 실무 예시 1개 + 다음 글 링크를 포함한다.",
+            "testStrategy": "핵심 개념 3문장 요약 가능 여부와 체크리스트로 검증한다.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 15,
+            "title": "트랜잭션과 ACID를 실무 언어로 번역하기",
+            "description": "심화 주제로 넘어가기 전 반드시 이해해야 할 선행 개념을 다룬다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 편당 용어 5개 + 그림 1개 + 실무 예시 1개 + 다음 글 링크를 포함한다.",
+            "testStrategy": "핵심 개념 3문장 요약 가능 여부와 체크리스트로 검증한다.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 16,
+            "title": "격리수준 입문: 더티리드/팬텀리드를 사례로 이해하기",
+            "description": "심화 주제로 넘어가기 전 반드시 이해해야 할 선행 개념을 다룬다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 편당 용어 5개 + 그림 1개 + 실무 예시 1개 + 다음 글 링크를 포함한다.",
+            "testStrategy": "핵심 개념 3문장 요약 가능 여부와 체크리스트로 검증한다.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 17,
+            "title": "단일 서버 vs 분산 시스템: 뭐가 달라지나",
+            "description": "심화 주제로 넘어가기 전 반드시 이해해야 할 선행 개념을 다룬다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 편당 용어 5개 + 그림 1개 + 실무 예시 1개 + 다음 글 링크를 포함한다.",
+            "testStrategy": "핵심 개념 3문장 요약 가능 여부와 체크리스트로 검증한다.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 18,
+            "title": "CAP를 오해 없이 이해하는 가장 쉬운 방법",
+            "description": "심화 주제로 넘어가기 전 반드시 이해해야 할 선행 개념을 다룬다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 편당 용어 5개 + 그림 1개 + 실무 예시 1개 + 다음 글 링크를 포함한다.",
+            "testStrategy": "핵심 개념 3문장 요약 가능 여부와 체크리스트로 검증한다.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 19,
+            "title": "캐시를 쓰면 빨라지는데 왜 더 복잡해질까",
+            "description": "심화 주제로 넘어가기 전 반드시 이해해야 할 선행 개념을 다룬다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 편당 용어 5개 + 그림 1개 + 실무 예시 1개 + 다음 글 링크를 포함한다.",
+            "testStrategy": "핵심 개념 3문장 요약 가능 여부와 체크리스트로 검증한다.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 20,
+            "title": "로그/메트릭/트레이싱 차이 10분 정리",
+            "description": "심화 주제로 넘어가기 전 반드시 이해해야 할 선행 개념을 다룬다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 편당 용어 5개 + 그림 1개 + 실무 예시 1개 + 다음 글 링크를 포함한다.",
+            "testStrategy": "핵심 개념 3문장 요약 가능 여부와 체크리스트로 검증한다.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 21,
+            "title": "재시도는 왜 장애를 키울 수 있을까(재시도 폭풍 입문)",
+            "description": "심화 주제로 넘어가기 전 반드시 이해해야 할 선행 개념을 다룬다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 편당 용어 5개 + 그림 1개 + 실무 예시 1개 + 다음 글 링크를 포함한다.",
+            "testStrategy": "핵심 개념 3문장 요약 가능 여부와 체크리스트로 검증한다.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 22,
+            "title": "인증과 인가 차이: 로그인과 권한의 경계",
+            "description": "심화 주제로 넘어가기 전 반드시 이해해야 할 선행 개념을 다룬다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 편당 용어 5개 + 그림 1개 + 실무 예시 1개 + 다음 글 링크를 포함한다.",
+            "testStrategy": "핵심 개념 3문장 요약 가능 여부와 체크리스트로 검증한다.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 23,
+            "title": "심화 학습 연결 가이드: Task #3 JVM / Task #4 Senior CS 들어가기",
+            "description": "심화 주제로 넘어가기 전 반드시 이해해야 할 선행 개념을 다룬다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 편당 용어 5개 + 그림 1개 + 실무 예시 1개 + 다음 글 링크를 포함한다.",
+            "testStrategy": "핵심 개념 3문장 요약 가능 여부와 체크리스트로 검증한다.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 24,
+            "title": "p99 latency 입문: 평균보다 꼬리 지연이 중요한 이유",
+            "description": "핵심 용어를 실무 지표/장애 사례와 연결해 이해한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의 → 왜 중요한지 → 보는 법 → 흔한 오해 순서로 작성.",
+            "testStrategy": "요약 3줄 + 실무 예시 1개 + 체크리스트로 검증.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 25,
+            "title": "run queue 입문: CPU 대기열이 길어질 때 생기는 현상",
+            "description": "핵심 용어를 실무 지표/장애 사례와 연결해 이해한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의 → 왜 중요한지 → 보는 법 → 흔한 오해 순서로 작성.",
+            "testStrategy": "요약 3줄 + 실무 예시 1개 + 체크리스트로 검증.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 26,
+            "title": "페이지 폴트(page fault) 입문: 언제 발생하고 왜 느려지는가",
+            "description": "핵심 용어를 실무 지표/장애 사례와 연결해 이해한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의 → 왜 중요한지 → 보는 법 → 흔한 오해 순서로 작성.",
+            "testStrategy": "요약 3줄 + 실무 예시 1개 + 체크리스트로 검증.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 27,
+            "title": "RTT 입문: 왕복 지연이 API 체감속도에 미치는 영향",
+            "description": "핵심 용어를 실무 지표/장애 사례와 연결해 이해한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의 → 왜 중요한지 → 보는 법 → 흔한 오해 순서로 작성.",
+            "testStrategy": "요약 3줄 + 실무 예시 1개 + 체크리스트로 검증.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 28,
+            "title": "TLS vs SSL 비교: 지금 TLS를 써야 하는 이유",
+            "description": "핵심 용어를 실무 지표/장애 사례와 연결해 이해한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의 → 왜 중요한지 → 보는 법 → 흔한 오해 순서로 작성.",
+            "testStrategy": "요약 3줄 + 실무 예시 1개 + 체크리스트로 검증.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 29,
+            "title": "CAP 입문: 일관성/가용성/분할내성 쉽게 이해하기",
+            "description": "핵심 용어를 실무 지표/장애 사례와 연결해 이해한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의 → 왜 중요한지 → 보는 법 → 흔한 오해 순서로 작성.",
+            "testStrategy": "요약 3줄 + 실무 예시 1개 + 체크리스트로 검증.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 30,
+            "title": "선행 1: p95/p99가 평균보다 중요한 이유",
+            "description": "latency 단위 포스트 이해를 위한 선행 개념을 짧고 실전적으로 정리한다.",
+            "status": "in-progress",
+            "dependencies": [],
+            "details": "한 편당 핵심 정의 + 왜 중요한지 + 실무 예시 + 다음 글 링크 포함.",
+            "testStrategy": "3줄 요약과 체크리스트로 이해 여부를 검증.",
+            "updatedAt": "2026-02-12T09:42:58.106Z",
+            "parentId": "undefined"
+          },
+          {
+            "id": 31,
+            "title": "선행 2: Prometheus/Grafana로 latency 읽는 법 입문",
+            "description": "latency 단위 포스트 이해를 위한 선행 개념을 짧고 실전적으로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 편당 핵심 정의 + 왜 중요한지 + 실무 예시 + 다음 글 링크 포함.",
+            "testStrategy": "3줄 요약과 체크리스트로 이해 여부를 검증.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 32,
+            "title": "선행 3: 프로세스/스레드/컨텍스트 스위칭 기초",
+            "description": "latency 단위 포스트 이해를 위한 선행 개념을 짧고 실전적으로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 편당 핵심 정의 + 왜 중요한지 + 실무 예시 + 다음 글 링크 포함.",
+            "testStrategy": "3줄 요약과 체크리스트로 이해 여부를 검증.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 33,
+            "title": "선행 4: HTTP 요청 경로(DNS→TCP/TLS→WAS→DB) 한눈에 보기",
+            "description": "latency 단위 포스트 이해를 위한 선행 개념을 짧고 실전적으로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 편당 핵심 정의 + 왜 중요한지 + 실무 예시 + 다음 글 링크 포함.",
+            "testStrategy": "3줄 요약과 체크리스트로 이해 여부를 검증.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 34,
+            "title": "선행 5: DB 지연의 기본(인덱스/락/커넥션풀 대기)",
+            "description": "latency 단위 포스트 이해를 위한 선행 개념을 짧고 실전적으로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 편당 핵심 정의 + 왜 중요한지 + 실무 예시 + 다음 글 링크 포함.",
+            "testStrategy": "3줄 요약과 체크리스트로 이해 여부를 검증.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 35,
+            "title": "관측성 선행 1: Counter/Gauge/Histogram 차이와 선택 기준",
+            "description": "초보자 기준으로 관측성 선행개념을 짧고 실전적으로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의→왜 중요한지→실전 예시→체크리스트 순서로 구성.",
+            "testStrategy": "핵심 개념 3줄 요약과 예시 쿼리 1개 이상 포함 여부 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 36,
+            "title": "관측성 선행 2: PromQL 기초(rate, sum by, histogram_quantile)",
+            "description": "초보자 기준으로 관측성 선행개념을 짧고 실전적으로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의→왜 중요한지→실전 예시→체크리스트 순서로 구성.",
+            "testStrategy": "핵심 개념 3줄 요약과 예시 쿼리 1개 이상 포함 여부 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 37,
+            "title": "관측성 선행 3: Prometheus scrape 구조(target/job/instance/labels)",
+            "description": "초보자 기준으로 관측성 선행개념을 짧고 실전적으로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의→왜 중요한지→실전 예시→체크리스트 순서로 구성.",
+            "testStrategy": "핵심 개념 3줄 요약과 예시 쿼리 1개 이상 포함 여부 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 38,
+            "title": "관측성 선행 4: Grafana 패널 읽는 법(시간범위/step/null/legend)",
+            "description": "초보자 기준으로 관측성 선행개념을 짧고 실전적으로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의→왜 중요한지→실전 예시→체크리스트 순서로 구성.",
+            "testStrategy": "핵심 개념 3줄 요약과 예시 쿼리 1개 이상 포함 여부 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 39,
+            "title": "관측성 선행 5: HTTP latency 메트릭(_bucket/_sum/_count) 해석",
+            "description": "초보자 기준으로 관측성 선행개념을 짧고 실전적으로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의→왜 중요한지→실전 예시→체크리스트 순서로 구성.",
+            "testStrategy": "핵심 개념 3줄 요약과 예시 쿼리 1개 이상 포함 여부 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 40,
+            "title": "관측성 선행 6: 장애 상관분석(지연/에러/DB/외부API/GC) 실전",
+            "description": "초보자 기준으로 관측성 선행개념을 짧고 실전적으로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의→왜 중요한지→실전 예시→체크리스트 순서로 구성.",
+            "testStrategy": "핵심 개념 3줄 요약과 예시 쿼리 1개 이상 포함 여부 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 41,
+            "title": "관측성 기초 추가 1: 시계열 데이터와 샘플링 주기 기본",
+            "description": "초보자 기준으로 관측성 선행개념을 짧고 실전적으로 정리한다.",
+            "status": "done",
+            "dependencies": [],
+            "details": "정의→왜 중요한지→실전 예시→체크리스트 순서로 구성.",
+            "testStrategy": "핵심 개념 3줄 요약과 예시 쿼리 1개 이상 포함 여부 확인.",
+            "updatedAt": "2026-02-12T10:18:30.929Z",
+            "parentId": "undefined"
+          },
+          {
+            "id": 42,
+            "title": "관측성 기초 추가 2: Pull 모델 vs Push 모델 왜 Prometheus는 Pull인가",
+            "description": "초보자 기준으로 관측성 선행개념을 짧고 실전적으로 정리한다.",
+            "status": "done",
+            "dependencies": [],
+            "details": "정의→왜 중요한지→실전 예시→체크리스트 순서로 구성.",
+            "testStrategy": "핵심 개념 3줄 요약과 예시 쿼리 1개 이상 포함 여부 확인.",
+            "parentId": "undefined",
+            "updatedAt": "2026-02-15T00:49:22.399Z"
+          },
+          {
+            "id": 43,
+            "title": "관측성 기초 추가 3: 라벨 카디널리티 폭발이 위험한 이유",
+            "description": "초보자 기준으로 관측성 선행개념을 짧고 실전적으로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의→왜 중요한지→실전 예시→체크리스트 순서로 구성.",
+            "testStrategy": "핵심 개념 3줄 요약과 예시 쿼리 1개 이상 포함 여부 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 44,
+            "title": "관측성 기초 추가 4: 단위 통일(ms/s/bytes)과 대시보드 해석 실수",
+            "description": "초보자 기준으로 관측성 선행개념을 짧고 실전적으로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의→왜 중요한지→실전 예시→체크리스트 순서로 구성.",
+            "testStrategy": "핵심 개념 3줄 요약과 예시 쿼리 1개 이상 포함 여부 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 45,
+            "title": "관측성 기초 추가 5: 알람 입문(Threshold vs SLO 기반 알람)",
+            "description": "초보자 기준으로 관측성 선행개념을 짧고 실전적으로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의→왜 중요한지→실전 예시→체크리스트 순서로 구성.",
+            "testStrategy": "핵심 개념 3줄 요약과 예시 쿼리 1개 이상 포함 여부 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 46,
+            "title": "관측성 기초 추가 6: 로컬 테스트 환경에서 메트릭 검증 루틴",
+            "description": "초보자 기준으로 관측성 선행개념을 짧고 실전적으로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의→왜 중요한지→실전 예시→체크리스트 순서로 구성.",
+            "testStrategy": "핵심 개념 3줄 요약과 예시 쿼리 1개 이상 포함 여부 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 47,
+            "title": "관측성 초기세팅 1: /actuator/prometheus 노출과 기본 점검",
+            "description": "관측성 입문자가 바로 따라할 수 있는 실습 중심 선행학습.",
+            "status": "done",
+            "dependencies": [],
+            "details": "실습 단계 + 확인 포인트 + 흔한 실수 포함.",
+            "testStrategy": "실습 캡처/쿼리 결과로 재현 여부 확인.",
+            "parentId": "undefined",
+            "updatedAt": "2026-02-15T00:49:24.730Z"
+          },
+          {
+            "id": 48,
+            "title": "관측성 초기세팅 2: Prometheus targets 페이지에서 up 확인하는 법",
+            "description": "관측성 입문자가 바로 따라할 수 있는 실습 중심 선행학습.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "실습 단계 + 확인 포인트 + 흔한 실수 포함.",
+            "testStrategy": "실습 캡처/쿼리 결과로 재현 여부 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 49,
+            "title": "관측성 초보실수 1: scrape interval과 evaluation interval 차이",
+            "description": "관측성 입문자가 바로 따라할 수 있는 실습 중심 선행학습.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "실습 단계 + 확인 포인트 + 흔한 실수 포함.",
+            "testStrategy": "실습 캡처/쿼리 결과로 재현 여부 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 50,
+            "title": "관측성 초보실수 2: 패널 단위(초/밀리초) 변환 실수 방지",
+            "description": "관측성 입문자가 바로 따라할 수 있는 실습 중심 선행학습.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "실습 단계 + 확인 포인트 + 흔한 실수 포함.",
+            "testStrategy": "실습 캡처/쿼리 결과로 재현 여부 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 51,
+            "title": "관측성 초보실수 3: 평균 그래프만 보고 장애 놓치는 케이스",
+            "description": "관측성 입문자가 바로 따라할 수 있는 실습 중심 선행학습.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "실습 단계 + 확인 포인트 + 흔한 실수 포함.",
+            "testStrategy": "실습 캡처/쿼리 결과로 재현 여부 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 52,
+            "title": "Grafana 실습 1: p95/p99/avg 한 화면에 배치하기",
+            "description": "관측성 입문자가 바로 따라할 수 있는 실습 중심 선행학습.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "실습 단계 + 확인 포인트 + 흔한 실수 포함.",
+            "testStrategy": "실습 캡처/쿼리 결과로 재현 여부 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 53,
+            "title": "Grafana 실습 2: 에러율과 latency 상관관계 패널 만들기",
+            "description": "관측성 입문자가 바로 따라할 수 있는 실습 중심 선행학습.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "실습 단계 + 확인 포인트 + 흔한 실수 포함.",
+            "testStrategy": "실습 캡처/쿼리 결과로 재현 여부 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 54,
+            "title": "PromQL 실습 1: topk로 느린 endpoint 찾기",
+            "description": "관측성 입문자가 바로 따라할 수 있는 실습 중심 선행학습.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "실습 단계 + 확인 포인트 + 흔한 실수 포함.",
+            "testStrategy": "실습 캡처/쿼리 결과로 재현 여부 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 55,
+            "title": "PromQL 실습 2: increase/rate 차이와 사용 시점",
+            "description": "관측성 입문자가 바로 따라할 수 있는 실습 중심 선행학습.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "실습 단계 + 확인 포인트 + 흔한 실수 포함.",
+            "testStrategy": "실습 캡처/쿼리 결과로 재현 여부 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 56,
+            "title": "운영기초 1: 알람 노이즈 줄이는 룰(지속시간, 임계값, 다중조건)",
+            "description": "관측성 입문자가 바로 따라할 수 있는 실습 중심 선행학습.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "실습 단계 + 확인 포인트 + 흔한 실수 포함.",
+            "testStrategy": "실습 캡처/쿼리 결과로 재현 여부 확인.",
+            "parentId": "undefined"
+          }
+        ],
+        "updatedAt": "2026-02-15T00:49:24.730Z"
+      },
+      {
+        "id": "3",
         "title": "JVM 심화 로드맵 (백엔드 성능/안정성 중심)",
         "description": "JVM 내부 동작을 이해해 성능 문제를 구조적으로 진단하고 개선한다.",
         "status": "pending",
         "dependencies": [
-          1
+          "1"
         ],
         "priority": "high",
         "details": "ClassLoading, JIT, GC, JMM, 프로파일링, 컨테이너 환경까지 단계적으로 학습한다.",
@@ -548,7 +1147,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
-            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -557,7 +1157,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
-            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -566,7 +1167,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
-            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -575,7 +1177,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
-            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 5,
@@ -584,7 +1187,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
-            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 6,
@@ -593,7 +1197,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
-            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 7,
@@ -602,7 +1207,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
-            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 8,
@@ -611,7 +1217,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
-            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 9,
@@ -620,7 +1227,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
-            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 10,
@@ -629,7 +1237,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
-            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 11,
@@ -638,7 +1247,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
-            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 12,
@@ -647,7 +1257,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
-            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 13,
@@ -656,7 +1267,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
-            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 14,
@@ -665,7 +1277,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
-            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 15,
@@ -674,19 +1287,280 @@
             "status": "pending",
             "dependencies": [],
             "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
-            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 16,
+            "title": "JVM 내부 스레드 이해: GC/JIT/Reference Handler 등 런타임 스레드",
+            "description": "자바 애플리케이션 관점에서 개념, 동작 원리, 운영 포인트를 포스팅한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의 → 내부 동작 → 성능 영향 → 운영 체크리스트 순서로 정리한다.",
+            "testStrategy": "스레드 덤프/로그 예시와 함께 설명 정확성을 검증한다.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 17,
+            "title": "GC 스레드 동작과 수집기별 스레드 모델(Parallel/G1/ZGC)",
+            "description": "자바 애플리케이션 관점에서 개념, 동작 원리, 운영 포인트를 포스팅한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의 → 내부 동작 → 성능 영향 → 운영 체크리스트 순서로 정리한다.",
+            "testStrategy": "스레드 덤프/로그 예시와 함께 설명 정확성을 검증한다.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 18,
+            "title": "JIT 컴파일러 스레드와 워밍업 성능 최적화",
+            "description": "자바 애플리케이션 관점에서 개념, 동작 원리, 운영 포인트를 포스팅한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의 → 내부 동작 → 성능 영향 → 운영 체크리스트 순서로 정리한다.",
+            "testStrategy": "스레드 덤프/로그 예시와 함께 설명 정확성을 검증한다.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 19,
+            "title": "Undertow 스레드 모델(XNIO I/O Thread vs Worker Thread)",
+            "description": "자바 애플리케이션 관점에서 개념, 동작 원리, 운영 포인트를 포스팅한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의 → 내부 동작 → 성능 영향 → 운영 체크리스트 순서로 정리한다.",
+            "testStrategy": "스레드 덤프/로그 예시와 함께 설명 정확성을 검증한다.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 20,
+            "title": "Executor/ThreadPool 설계 패턴과 실수 방지 가이드",
+            "description": "자바 애플리케이션 관점에서 개념, 동작 원리, 운영 포인트를 포스팅한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의 → 내부 동작 → 성능 영향 → 운영 체크리스트 순서로 정리한다.",
+            "testStrategy": "스레드 덤프/로그 예시와 함께 설명 정확성을 검증한다.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 21,
+            "title": "Java 스레드 종류 총정리(User/Daemon, Runnable/Waiting/Blocked 상태)",
+            "description": "자바 애플리케이션 관점에서 개념, 동작 원리, 운영 포인트를 포스팅한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의 → 내부 동작 → 성능 영향 → 운영 체크리스트 순서로 정리한다.",
+            "testStrategy": "스레드 덤프/로그 예시와 함께 설명 정확성을 검증한다.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 22,
+            "title": "JVM 스레드 맵 개요: 애플리케이션/런타임/GC 스레드 분류",
+            "description": "이해하기 쉬운 단위로 쪼개 핵심 개념과 실무 포인트를 짧은 포스팅으로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "배경 20% + 실무 80% 원칙으로 예시/체크리스트 포함.",
+            "testStrategy": "짧은 실습 예시 또는 스레드 덤프/로그 스니펫으로 검증.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 23,
+            "title": "Java main 스레드와 애플리케이션 시작 시점 이해",
+            "description": "이해하기 쉬운 단위로 쪼개 핵심 개념과 실무 포인트를 짧은 포스팅으로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "배경 20% + 실무 80% 원칙으로 예시/체크리스트 포함.",
+            "testStrategy": "짧은 실습 예시 또는 스레드 덤프/로그 스니펫으로 검증.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 24,
+            "title": "Daemon Thread vs User Thread: 종료 조건과 운영 함정",
+            "description": "이해하기 쉬운 단위로 쪼개 핵심 개념과 실무 포인트를 짧은 포스팅으로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "배경 20% + 실무 80% 원칙으로 예시/체크리스트 포함.",
+            "testStrategy": "짧은 실습 예시 또는 스레드 덤프/로그 스니펫으로 검증.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 25,
+            "title": "Reference Handler / Finalizer / Cleaner 스레드 역할",
+            "description": "이해하기 쉬운 단위로 쪼개 핵심 개념과 실무 포인트를 짧은 포스팅으로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "배경 20% + 실무 80% 원칙으로 예시/체크리스트 포함.",
+            "testStrategy": "짧은 실습 예시 또는 스레드 덤프/로그 스니펫으로 검증.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 26,
+            "title": "Signal Dispatcher 스레드와 장애 진단 관점",
+            "description": "이해하기 쉬운 단위로 쪼개 핵심 개념과 실무 포인트를 짧은 포스팅으로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "배경 20% + 실무 80% 원칙으로 예시/체크리스트 포함.",
+            "testStrategy": "짧은 실습 예시 또는 스레드 덤프/로그 스니펫으로 검증.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 27,
+            "title": "Parallel GC 스레드 구조와 Throughput 지향 튜닝",
+            "description": "이해하기 쉬운 단위로 쪼개 핵심 개념과 실무 포인트를 짧은 포스팅으로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "배경 20% + 실무 80% 원칙으로 예시/체크리스트 포함.",
+            "testStrategy": "짧은 실습 예시 또는 스레드 덤프/로그 스니펫으로 검증.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 28,
+            "title": "G1 GC 스레드 구조(Young/Mixed/Concurrent) 이해",
+            "description": "이해하기 쉬운 단위로 쪼개 핵심 개념과 실무 포인트를 짧은 포스팅으로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "배경 20% + 실무 80% 원칙으로 예시/체크리스트 포함.",
+            "testStrategy": "짧은 실습 예시 또는 스레드 덤프/로그 스니펫으로 검증.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 29,
+            "title": "ZGC 동시 처리 스레드 모델과 저지연 특성",
+            "description": "이해하기 쉬운 단위로 쪼개 핵심 개념과 실무 포인트를 짧은 포스팅으로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "배경 20% + 실무 80% 원칙으로 예시/체크리스트 포함.",
+            "testStrategy": "짧은 실습 예시 또는 스레드 덤프/로그 스니펫으로 검증.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 30,
+            "title": "GC 스레드 개수 옵션(-XX:ParallelGCThreads 등) 읽는 법",
+            "description": "이해하기 쉬운 단위로 쪼개 핵심 개념과 실무 포인트를 짧은 포스팅으로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "배경 20% + 실무 80% 원칙으로 예시/체크리스트 포함.",
+            "testStrategy": "짧은 실습 예시 또는 스레드 덤프/로그 스니펫으로 검증.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 31,
+            "title": "Tiered Compilation(C1/C2) 동작 흐름",
+            "description": "이해하기 쉬운 단위로 쪼개 핵심 개념과 실무 포인트를 짧은 포스팅으로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "배경 20% + 실무 80% 원칙으로 예시/체크리스트 포함.",
+            "testStrategy": "짧은 실습 예시 또는 스레드 덤프/로그 스니펫으로 검증.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 32,
+            "title": "Code Cache와 컴파일 임계값(CompileThreshold) 기초",
+            "description": "이해하기 쉬운 단위로 쪼개 핵심 개념과 실무 포인트를 짧은 포스팅으로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "배경 20% + 실무 80% 원칙으로 예시/체크리스트 포함.",
+            "testStrategy": "짧은 실습 예시 또는 스레드 덤프/로그 스니펫으로 검증.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 33,
+            "title": "JIT 워밍업 전략: 트래픽 예열/벤치마크 시 주의점",
+            "description": "이해하기 쉬운 단위로 쪼개 핵심 개념과 실무 포인트를 짧은 포스팅으로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "배경 20% + 실무 80% 원칙으로 예시/체크리스트 포함.",
+            "testStrategy": "짧은 실습 예시 또는 스레드 덤프/로그 스니펫으로 검증.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 34,
+            "title": "Undertow XNIO I/O Thread의 책임과 금기사항",
+            "description": "이해하기 쉬운 단위로 쪼개 핵심 개념과 실무 포인트를 짧은 포스팅으로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "배경 20% + 실무 80% 원칙으로 예시/체크리스트 포함.",
+            "testStrategy": "짧은 실습 예시 또는 스레드 덤프/로그 스니펫으로 검증.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 35,
+            "title": "Undertow Worker Thread의 역할과 blocking 처리",
+            "description": "이해하기 쉬운 단위로 쪼개 핵심 개념과 실무 포인트를 짧은 포스팅으로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "배경 20% + 실무 80% 원칙으로 예시/체크리스트 포함.",
+            "testStrategy": "짧은 실습 예시 또는 스레드 덤프/로그 스니펫으로 검증.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 36,
+            "title": "Undertow thread 옵션(io-threads, worker-threads) 설정법",
+            "description": "이해하기 쉬운 단위로 쪼개 핵심 개념과 실무 포인트를 짧은 포스팅으로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "배경 20% + 실무 80% 원칙으로 예시/체크리스트 포함.",
+            "testStrategy": "짧은 실습 예시 또는 스레드 덤프/로그 스니펫으로 검증.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 37,
+            "title": "ExecutorService 기본 타입 비교(Fixed/Cached/Scheduled)",
+            "description": "이해하기 쉬운 단위로 쪼개 핵심 개념과 실무 포인트를 짧은 포스팅으로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "배경 20% + 실무 80% 원칙으로 예시/체크리스트 포함.",
+            "testStrategy": "짧은 실습 예시 또는 스레드 덤프/로그 스니펫으로 검증.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 38,
+            "title": "ThreadPoolExecutor 핵심 파라미터(core/max/queue/rejection)",
+            "description": "이해하기 쉬운 단위로 쪼개 핵심 개념과 실무 포인트를 짧은 포스팅으로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "배경 20% + 실무 80% 원칙으로 예시/체크리스트 포함.",
+            "testStrategy": "짧은 실습 예시 또는 스레드 덤프/로그 스니펫으로 검증.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 39,
+            "title": "RejectedExecutionHandler 전략과 백프레셔 설계",
+            "description": "이해하기 쉬운 단위로 쪼개 핵심 개념과 실무 포인트를 짧은 포스팅으로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "배경 20% + 실무 80% 원칙으로 예시/체크리스트 포함.",
+            "testStrategy": "짧은 실습 예시 또는 스레드 덤프/로그 스니펫으로 검증.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 40,
+            "title": "Java Thread State(NEW/RUNNABLE/BLOCKED/WAITING/TIMED_WAITING/TERMINATED) 실전 읽기",
+            "description": "이해하기 쉬운 단위로 쪼개 핵심 개념과 실무 포인트를 짧은 포스팅으로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "배경 20% + 실무 80% 원칙으로 예시/체크리스트 포함.",
+            "testStrategy": "짧은 실습 예시 또는 스레드 덤프/로그 스니펫으로 검증.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 41,
+            "title": "jstack으로 스레드 덤프 읽는 순서와 패턴",
+            "description": "이해하기 쉬운 단위로 쪼개 핵심 개념과 실무 포인트를 짧은 포스팅으로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "배경 20% + 실무 80% 원칙으로 예시/체크리스트 포함.",
+            "testStrategy": "짧은 실습 예시 또는 스레드 덤프/로그 스니펫으로 검증.",
+            "parentId": "undefined"
           }
         ]
       },
       {
-        "id": 4,
+        "id": "4",
         "title": "시니어 백엔드 개발자가 꼭 알아야 할 CS 핵심",
         "description": "시니어 레벨 의사결정에 필요한 CS 기반지식을 체계화한다.",
-        "status": "pending",
+        "status": "in-progress",
         "dependencies": [
-          1,
-          2,
-          3
+          "1",
+          "2",
+          "3"
         ],
         "priority": "high",
         "details": "운영체제/네트워크/DB/분산/관측성/보안을 연결해 트레이드오프 판단력을 강화한다.",
@@ -696,10 +1570,12 @@
             "id": 1,
             "title": "운영체제 핵심: 프로세스/스레드/스케줄링과 서버 응답성",
             "description": "핵심 개념, 실무 적용 포인트, 트러블슈팅 사례까지 포함해 학습 포스트를 작성한다.",
-            "status": "pending",
+            "status": "in-progress",
             "dependencies": [],
             "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
-            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다.",
+            "updatedAt": "2026-02-11T14:22:15.114Z",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -708,7 +1584,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
-            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -717,7 +1594,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
-            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -726,7 +1604,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
-            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 5,
@@ -735,7 +1614,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
-            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 6,
@@ -744,7 +1624,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
-            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 7,
@@ -753,7 +1634,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
-            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 8,
@@ -762,7 +1644,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
-            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 9,
@@ -771,7 +1654,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
-            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 10,
@@ -780,7 +1664,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
-            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 11,
@@ -789,7 +1674,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
-            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 12,
@@ -798,7 +1684,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
-            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 13,
@@ -807,7 +1694,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
-            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 14,
@@ -816,7 +1704,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
-            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 15,
@@ -825,7 +1714,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
-            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 16,
@@ -834,7 +1724,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
-            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 17,
@@ -843,7 +1734,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
-            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다.",
+            "parentId": "undefined"
           },
           {
             "id": 18,
@@ -852,20 +1744,605 @@
             "status": "pending",
             "dependencies": [],
             "details": "정의→원리→실무 시나리오→체크리스트 순서로 정리한다.",
-            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다."
+            "testStrategy": "기술 정확성 체크리스트와 예시 시나리오로 검증한다.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 19,
+            "title": "리눅스 스케줄링 입문: 프로세스 상태와 Run Queue",
+            "description": "체인 포스팅이 쉽도록 단일 질문에 답하는 작은 단위로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 포스트 한 핵심원칙 + 실무 예시 1개 + 다음 글 링크 포함.",
+            "testStrategy": "요약 3줄, 체크리스트, 관련글 링크가 포함되었는지 점검.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 20,
+            "title": "컨텍스트 스위칭 비용과 p99 latency 관계",
+            "description": "체인 포스팅이 쉽도록 단일 질문에 답하는 작은 단위로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 포스트 한 핵심원칙 + 실무 예시 1개 + 다음 글 링크 포함.",
+            "testStrategy": "요약 3줄, 체크리스트, 관련글 링크가 포함되었는지 점검.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 21,
+            "title": "CPU 바운드 vs I/O 바운드 워크로드 분리 전략",
+            "description": "체인 포스팅이 쉽도록 단일 질문에 답하는 작은 단위로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 포스트 한 핵심원칙 + 실무 예시 1개 + 다음 글 링크 포함.",
+            "testStrategy": "요약 3줄, 체크리스트, 관련글 링크가 포함되었는지 점검.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 22,
+            "title": "메모리 계층 구조(CPU Cache ~ Disk)와 지연 감각",
+            "description": "체인 포스팅이 쉽도록 단일 질문에 답하는 작은 단위로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 포스트 한 핵심원칙 + 실무 예시 1개 + 다음 글 링크 포함.",
+            "testStrategy": "요약 3줄, 체크리스트, 관련글 링크가 포함되었는지 점검.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 23,
+            "title": "락 경합 분석: synchronized/ReentrantLock 비교",
+            "description": "체인 포스팅이 쉽도록 단일 질문에 답하는 작은 단위로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 포스트 한 핵심원칙 + 실무 예시 1개 + 다음 글 링크 포함.",
+            "testStrategy": "요약 3줄, 체크리스트, 관련글 링크가 포함되었는지 점검.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 24,
+            "title": "데드락 4조건과 예방 패턴(순서 고정/타임아웃)",
+            "description": "체인 포스팅이 쉽도록 단일 질문에 답하는 작은 단위로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 포스트 한 핵심원칙 + 실무 예시 1개 + 다음 글 링크 포함.",
+            "testStrategy": "요약 3줄, 체크리스트, 관련글 링크가 포함되었는지 점검.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 25,
+            "title": "TCP 3-way/4-way를 장애 관점으로 읽기",
+            "description": "체인 포스팅이 쉽도록 단일 질문에 답하는 작은 단위로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 포스트 한 핵심원칙 + 실무 예시 1개 + 다음 글 링크 포함.",
+            "testStrategy": "요약 3줄, 체크리스트, 관련글 링크가 포함되었는지 점검.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 26,
+            "title": "RTT/대역폭/큐잉 지연과 처리량의 상관관계",
+            "description": "체인 포스팅이 쉽도록 단일 질문에 답하는 작은 단위로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 포스트 한 핵심원칙 + 실무 예시 1개 + 다음 글 링크 포함.",
+            "testStrategy": "요약 3줄, 체크리스트, 관련글 링크가 포함되었는지 점검.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 27,
+            "title": "HTTP 멱등성과 재시도 설계(POST 중복 방지)",
+            "description": "체인 포스팅이 쉽도록 단일 질문에 답하는 작은 단위로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 포스트 한 핵심원칙 + 실무 예시 1개 + 다음 글 링크 포함.",
+            "testStrategy": "요약 3줄, 체크리스트, 관련글 링크가 포함되었는지 점검.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 28,
+            "title": "인덱스 기본: B-Tree와 커버링 인덱스",
+            "description": "체인 포스팅이 쉽도록 단일 질문에 답하는 작은 단위로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 포스트 한 핵심원칙 + 실무 예시 1개 + 다음 글 링크 포함.",
+            "testStrategy": "요약 3줄, 체크리스트, 관련글 링크가 포함되었는지 점검.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 29,
+            "title": "실행계획(EXPLAIN) 읽는 순서와 안티패턴",
+            "description": "체인 포스팅이 쉽도록 단일 질문에 답하는 작은 단위로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 포스트 한 핵심원칙 + 실무 예시 1개 + 다음 글 링크 포함.",
+            "testStrategy": "요약 3줄, 체크리스트, 관련글 링크가 포함되었는지 점검.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 30,
+            "title": "트랜잭션 격리수준별 이상현상 재현 가이드",
+            "description": "체인 포스팅이 쉽도록 단일 질문에 답하는 작은 단위로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 포스트 한 핵심원칙 + 실무 예시 1개 + 다음 글 링크 포함.",
+            "testStrategy": "요약 3줄, 체크리스트, 관련글 링크가 포함되었는지 점검.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 31,
+            "title": "CAP vs PACELC 실무 의사결정 템플릿",
+            "description": "체인 포스팅이 쉽도록 단일 질문에 답하는 작은 단위로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 포스트 한 핵심원칙 + 실무 예시 1개 + 다음 글 링크 포함.",
+            "testStrategy": "요약 3줄, 체크리스트, 관련글 링크가 포함되었는지 점검.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 32,
+            "title": "복제(Replication) 지연과 읽기 일관성 전략",
+            "description": "체인 포스팅이 쉽도록 단일 질문에 답하는 작은 단위로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 포스트 한 핵심원칙 + 실무 예시 1개 + 다음 글 링크 포함.",
+            "testStrategy": "요약 3줄, 체크리스트, 관련글 링크가 포함되었는지 점검.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 33,
+            "title": "사가(Saga) 보상 트랜잭션 설계 체크리스트",
+            "description": "체인 포스팅이 쉽도록 단일 질문에 답하는 작은 단위로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 포스트 한 핵심원칙 + 실무 예시 1개 + 다음 글 링크 포함.",
+            "testStrategy": "요약 3줄, 체크리스트, 관련글 링크가 포함되었는지 점검.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 34,
+            "title": "타임아웃 기본값 잡는 법(외부/내부 API)",
+            "description": "체인 포스팅이 쉽도록 단일 질문에 답하는 작은 단위로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 포스트 한 핵심원칙 + 실무 예시 1개 + 다음 글 링크 포함.",
+            "testStrategy": "요약 3줄, 체크리스트, 관련글 링크가 포함되었는지 점검.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 35,
+            "title": "재시도 백오프와 지터(jitter) 설계",
+            "description": "체인 포스팅이 쉽도록 단일 질문에 답하는 작은 단위로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 포스트 한 핵심원칙 + 실무 예시 1개 + 다음 글 링크 포함.",
+            "testStrategy": "요약 3줄, 체크리스트, 관련글 링크가 포함되었는지 점검.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 36,
+            "title": "서킷브레이커 상태 전이와 튜닝 포인트",
+            "description": "체인 포스팅이 쉽도록 단일 질문에 답하는 작은 단위로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 포스트 한 핵심원칙 + 실무 예시 1개 + 다음 글 링크 포함.",
+            "testStrategy": "요약 3줄, 체크리스트, 관련글 링크가 포함되었는지 점검.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 37,
+            "title": "SLI/SLO/에러버짓을 팀 KPI로 연결하기",
+            "description": "체인 포스팅이 쉽도록 단일 질문에 답하는 작은 단위로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 포스트 한 핵심원칙 + 실무 예시 1개 + 다음 글 링크 포함.",
+            "testStrategy": "요약 3줄, 체크리스트, 관련글 링크가 포함되었는지 점검.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 38,
+            "title": "로그 상관관계 ID(TraceId) 설계 규칙",
+            "description": "체인 포스팅이 쉽도록 단일 질문에 답하는 작은 단위로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 포스트 한 핵심원칙 + 실무 예시 1개 + 다음 글 링크 포함.",
+            "testStrategy": "요약 3줄, 체크리스트, 관련글 링크가 포함되었는지 점검.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 39,
+            "title": "OAuth2 Role 정리(Resource Owner/Client/AS/RS)",
+            "description": "체인 포스팅이 쉽도록 단일 질문에 답하는 작은 단위로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 포스트 한 핵심원칙 + 실무 예시 1개 + 다음 글 링크 포함.",
+            "testStrategy": "요약 3줄, 체크리스트, 관련글 링크가 포함되었는지 점검.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 40,
+            "title": "JWT 검증 실수 TOP5와 방어 패턴",
+            "description": "체인 포스팅이 쉽도록 단일 질문에 답하는 작은 단위로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 포스트 한 핵심원칙 + 실무 예시 1개 + 다음 글 링크 포함.",
+            "testStrategy": "요약 3줄, 체크리스트, 관련글 링크가 포함되었는지 점검.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 41,
+            "title": "시크릿 회전(Rotation) 운영 절차",
+            "description": "체인 포스팅이 쉽도록 단일 질문에 답하는 작은 단위로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 포스트 한 핵심원칙 + 실무 예시 1개 + 다음 글 링크 포함.",
+            "testStrategy": "요약 3줄, 체크리스트, 관련글 링크가 포함되었는지 점검.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 42,
+            "title": "ADR 템플릿: 문제/대안/트레이드오프/결정",
+            "description": "체인 포스팅이 쉽도록 단일 질문에 답하는 작은 단위로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 포스트 한 핵심원칙 + 실무 예시 1개 + 다음 글 링크 포함.",
+            "testStrategy": "요약 3줄, 체크리스트, 관련글 링크가 포함되었는지 점검.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 43,
+            "title": "코드리뷰 체크리스트(성능/보안/운영성)",
+            "description": "체인 포스팅이 쉽도록 단일 질문에 답하는 작은 단위로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 포스트 한 핵심원칙 + 실무 예시 1개 + 다음 글 링크 포함.",
+            "testStrategy": "요약 3줄, 체크리스트, 관련글 링크가 포함되었는지 점검.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 44,
+            "title": "부하테스트 시나리오 설계(평균말고 분포 중심)",
+            "description": "체인 포스팅이 쉽도록 단일 질문에 답하는 작은 단위로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 포스트 한 핵심원칙 + 실무 예시 1개 + 다음 글 링크 포함.",
+            "testStrategy": "요약 3줄, 체크리스트, 관련글 링크가 포함되었는지 점검.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 45,
+            "title": "포스트모템 문서 구조(사실/원인/액션아이템)",
+            "description": "체인 포스팅이 쉽도록 단일 질문에 답하는 작은 단위로 정리한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "한 포스트 한 핵심원칙 + 실무 예시 1개 + 다음 글 링크 포함.",
+            "testStrategy": "요약 3줄, 체크리스트, 관련글 링크가 포함되었는지 점검.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 46,
+            "title": "p99 중심 성능 의사결정: 평균 지표의 함정 피하기",
+            "description": "핵심 용어를 실무 지표/장애 사례와 연결해 이해한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의 → 왜 중요한지 → 보는 법 → 흔한 오해 순서로 작성.",
+            "testStrategy": "요약 3줄 + 실무 예시 1개 + 체크리스트로 검증.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 47,
+            "title": "CAP 의사결정 사례: CP/AP 선택 기준과 비용",
+            "description": "핵심 용어를 실무 지표/장애 사례와 연결해 이해한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "정의 → 왜 중요한지 → 보는 법 → 흔한 오해 순서로 작성.",
+            "testStrategy": "요약 3줄 + 실무 예시 1개 + 체크리스트로 검증.",
+            "parentId": "undefined"
+          }
+        ],
+        "updatedAt": "2026-02-11T14:22:15.114Z"
+      },
+      {
+        "id": "6",
+        "title": "널널한 개발자 TV 영상 리서치 백로그",
+        "description": "채널 영상 타이틀 기반으로 학습/포스팅 연결 아이디어를 축적한다.",
+        "status": "pending",
+        "dependencies": [
+          "5"
+        ],
+        "priority": "medium",
+        "details": "영상별 핵심 키워드와 연결 가능한 CS/JVM 태스크를 매핑해 후속 포스팅 주제로 전환한다.",
+        "testStrategy": "각 영상 서브태스크에 요약 3줄 + 연결 태스크 번호를 남긴다.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "영상 리서치: Why We Fail at Vibe Coding",
+            "description": "영상 핵심 메시지를 추출하고 블로그 주제와 연결한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "핵심 포인트, 인상 깊은 사례, 후속 포스팅 아이디어 1개 이상 작성.",
+            "testStrategy": "노트에 \"핵심 3줄 + 관련 태스크\"가 있는지 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "영상 리서치: A beginner developer's dilemma: Function return types and parameter declarations!",
+            "description": "영상 핵심 메시지를 추출하고 블로그 주제와 연결한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "핵심 포인트, 인상 깊은 사례, 후속 포스팅 아이디어 1개 이상 작성.",
+            "testStrategy": "노트에 \"핵심 3줄 + 관련 태스크\"가 있는지 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "영상 리서치: Korean Air? KC&D? No. Oracle EBS!",
+            "description": "영상 핵심 메시지를 추출하고 블로그 주제와 연결한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "핵심 포인트, 인상 깊은 사례, 후속 포스팅 아이디어 1개 이상 작성.",
+            "testStrategy": "노트에 \"핵심 3줄 + 관련 태스크\"가 있는지 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "영상 리서치: Free until today, the last day of 2025.",
+            "description": "영상 핵심 메시지를 추출하고 블로그 주제와 연결한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "핵심 포인트, 인상 깊은 사례, 후속 포스팅 아이디어 1개 이상 작성.",
+            "testStrategy": "노트에 \"핵심 3줄 + 관련 태스크\"가 있는지 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "영상 리서치: Job Preparation for a Subscriber Who Successfully Found a Job as an Online Game Server Developer",
+            "description": "영상 핵심 메시지를 추출하고 블로그 주제와 연결한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "핵심 포인트, 인상 깊은 사례, 후속 포스팅 아이디어 1개 이상 작성.",
+            "testStrategy": "노트에 \"핵심 3줄 + 관련 태스크\"가 있는지 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 6,
+            "title": "영상 리서치: Can a field-focused IT engineer take on the challenge of backend?",
+            "description": "영상 핵심 메시지를 추출하고 블로그 주제와 연결한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "핵심 포인트, 인상 깊은 사례, 후속 포스팅 아이디어 1개 이상 작성.",
+            "testStrategy": "노트에 \"핵심 3줄 + 관련 태스크\"가 있는지 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 7,
+            "title": "영상 리서치: Advice for those considering quitting their jobs to pursue government-funded education",
+            "description": "영상 핵심 메시지를 추출하고 블로그 주제와 연결한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "핵심 포인트, 인상 깊은 사례, 후속 포스팅 아이디어 1개 이상 작성.",
+            "testStrategy": "노트에 \"핵심 3줄 + 관련 태스크\"가 있는지 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 8,
+            "title": "영상 리서치: A Vibe Coding Experience and Christmas Gift from a 30-Year C/++ Developer",
+            "description": "영상 핵심 메시지를 추출하고 블로그 주제와 연결한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "핵심 포인트, 인상 깊은 사례, 후속 포스팅 아이디어 1개 이상 작성.",
+            "testStrategy": "노트에 \"핵심 3줄 + 관련 태스크\"가 있는지 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 9,
+            "title": "영상 리서치: Comments containing the opinions of job seekers",
+            "description": "영상 핵심 메시지를 추출하고 블로그 주제와 연결한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "핵심 포인트, 인상 깊은 사례, 후속 포스팅 아이디어 1개 이상 작성.",
+            "testStrategy": "노트에 \"핵심 3줄 + 관련 태스크\"가 있는지 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 10,
+            "title": "영상 리서치: Will a boot camp be helpful for a computer science major who hasn't studied yet?",
+            "description": "영상 핵심 메시지를 추출하고 블로그 주제와 연결한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "핵심 포인트, 인상 깊은 사례, 후속 포스팅 아이디어 1개 이상 작성.",
+            "testStrategy": "노트에 \"핵심 3줄 + 관련 태스크\"가 있는지 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 11,
+            "title": "영상 리서치: Are you a backend job seeker? Then take advantage of this security incident.",
+            "description": "영상 핵심 메시지를 추출하고 블로그 주제와 연결한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "핵심 포인트, 인상 깊은 사례, 후속 포스팅 아이디어 1개 이상 작성.",
+            "testStrategy": "노트에 \"핵심 3줄 + 관련 태스크\"가 있는지 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 12,
+            "title": "영상 리서치: The first snow is coming. It's going to be on sale anyway.",
+            "description": "영상 핵심 메시지를 추출하고 블로그 주제와 연결한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "핵심 포인트, 인상 깊은 사례, 후속 포스팅 아이디어 1개 이상 작성.",
+            "testStrategy": "노트에 \"핵심 3줄 + 관련 태스크\"가 있는지 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 13,
+            "title": "영상 리서치: A Developer's Perspective on the Coupang Personal Information Leak and What Victims Should Do Rig...",
+            "description": "영상 핵심 메시지를 추출하고 블로그 주제와 연결한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "핵심 포인트, 인상 깊은 사례, 후속 포스팅 아이디어 1개 이상 작성.",
+            "testStrategy": "노트에 \"핵심 3줄 + 관련 태스크\"가 있는지 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 14,
+            "title": "영상 리서치: Black Friday Discount Information",
+            "description": "영상 핵심 메시지를 추출하고 블로그 주제와 연결한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "핵심 포인트, 인상 깊은 사례, 후속 포스팅 아이디어 1개 이상 작성.",
+            "testStrategy": "노트에 \"핵심 3줄 + 관련 태스크\"가 있는지 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 15,
+            "title": "영상 리서치: We invite our membership members!",
+            "description": "영상 핵심 메시지를 추출하고 블로그 주제와 연결한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "핵심 포인트, 인상 깊은 사례, 후속 포스팅 아이디어 1개 이상 작성.",
+            "testStrategy": "노트에 \"핵심 3줄 + 관련 태스크\"가 있는지 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 16,
+            "title": "영상 리서치: Announcement of the opening of nullnull.co.kr",
+            "description": "영상 핵심 메시지를 추출하고 블로그 주제와 연결한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "핵심 포인트, 인상 깊은 사례, 후속 포스팅 아이디어 1개 이상 작성.",
+            "testStrategy": "노트에 \"핵심 3줄 + 관련 태스크\"가 있는지 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 17,
+            "title": "영상 리서치: Membership-only ep1 - Vibe Coding Stories and Course Reviews",
+            "description": "영상 핵심 메시지를 추출하고 블로그 주제와 연결한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "핵심 포인트, 인상 깊은 사례, 후속 포스팅 아이디어 1개 이상 작성.",
+            "testStrategy": "노트에 \"핵심 3줄 + 관련 태스크\"가 있는지 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 18,
+            "title": "영상 리서치: A guide to the operation and future plans of the developer TV.",
+            "description": "영상 핵심 메시지를 추출하고 블로그 주제와 연결한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "핵심 포인트, 인상 깊은 사례, 후속 포스팅 아이디어 1개 이상 작성.",
+            "testStrategy": "노트에 \"핵심 3줄 + 관련 태스크\"가 있는지 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 19,
+            "title": "영상 리서치: A Taste of Spring Boot Backend Coding: A Quick Look at the Vibes - Appendix 01",
+            "description": "영상 핵심 메시지를 추출하고 블로그 주제와 연결한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "핵심 포인트, 인상 깊은 사례, 후속 포스팅 아이디어 1개 이상 작성.",
+            "testStrategy": "노트에 \"핵심 3줄 + 관련 태스크\"가 있는지 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 20,
+            "title": "영상 리서치: A Taste of Spring Boot Backend Coding: A Quick Look at the Vibes - Appendix 02",
+            "description": "영상 핵심 메시지를 추출하고 블로그 주제와 연결한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "핵심 포인트, 인상 깊은 사례, 후속 포스팅 아이디어 1개 이상 작성.",
+            "testStrategy": "노트에 \"핵심 3줄 + 관련 태스크\"가 있는지 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 21,
+            "title": "영상 리서치: I was working on a todo list mini project with Copilot CLI and... oh my!",
+            "description": "영상 핵심 메시지를 추출하고 블로그 주제와 연결한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "핵심 포인트, 인상 깊은 사례, 후속 포스팅 아이디어 1개 이상 작성.",
+            "testStrategy": "노트에 \"핵심 3줄 + 관련 태스크\"가 있는지 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 22,
+            "title": "영상 리서치: The AI Vibe Coding Era! (Is Microsoft Alive?) Introducing Copilot CLI",
+            "description": "영상 핵심 메시지를 추출하고 블로그 주제와 연결한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "핵심 포인트, 인상 깊은 사례, 후속 포스팅 아이디어 1개 이상 작성.",
+            "testStrategy": "노트에 \"핵심 3줄 + 관련 태스크\"가 있는지 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 23,
+            "title": "영상 리서치: Infraon lecture 50% discount event extended",
+            "description": "영상 핵심 메시지를 추출하고 블로그 주제와 연결한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "핵심 포인트, 인상 깊은 사례, 후속 포스팅 아이디어 1개 이상 작성.",
+            "testStrategy": "노트에 \"핵심 3줄 + 관련 태스크\"가 있는지 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 24,
+            "title": "영상 리서치: Information on applying the 50 percent student discount",
+            "description": "영상 핵심 메시지를 추출하고 블로그 주제와 연결한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "핵심 포인트, 인상 깊은 사례, 후속 포스팅 아이디어 1개 이상 작성.",
+            "testStrategy": "노트에 \"핵심 3줄 + 관련 태스크\"가 있는지 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 25,
+            "title": "영상 리서치: The Lotte Card Hacking Incident and Everyone's Mental Health",
+            "description": "영상 핵심 메시지를 추출하고 블로그 주제와 연결한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "핵심 포인트, 인상 깊은 사례, 후속 포스팅 아이디어 1개 이상 작성.",
+            "testStrategy": "노트에 \"핵심 3줄 + 관련 태스크\"가 있는지 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 26,
+            "title": "영상 리서치: Let me explain why this KT hacking was possible.",
+            "description": "영상 핵심 메시지를 추출하고 블로그 주제와 연결한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "핵심 포인트, 인상 깊은 사례, 후속 포스팅 아이디어 1개 이상 작성.",
+            "testStrategy": "노트에 \"핵심 3줄 + 관련 태스크\"가 있는지 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 27,
+            "title": "영상 리서치: KT hacking again? Again? But the truth is...",
+            "description": "영상 핵심 메시지를 추출하고 블로그 주제와 연결한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "핵심 포인트, 인상 깊은 사례, 후속 포스팅 아이디어 1개 이상 작성.",
+            "testStrategy": "노트에 \"핵심 3줄 + 관련 태스크\"가 있는지 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 28,
+            "title": "영상 리서치: Java: A Complete Guide to Starting Out Strong - Part 4",
+            "description": "영상 핵심 메시지를 추출하고 블로그 주제와 연결한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "핵심 포인트, 인상 깊은 사례, 후속 포스팅 아이디어 1개 이상 작성.",
+            "testStrategy": "노트에 \"핵심 3줄 + 관련 태스크\"가 있는지 확인.",
+            "parentId": "undefined"
           }
         ]
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-02-11T14:12:21.370Z",
-      "taskCount": 2,
+      "lastModified": "2026-02-15T00:49:24.731Z",
+      "taskCount": 6,
       "completedCount": 0,
       "tags": [
         "master"
-      ],
-      "updated": "2026-02-11T14:17:55Z"
+      ]
     }
   }
 }
