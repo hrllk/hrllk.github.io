@@ -1132,7 +1132,7 @@
         "id": "3",
         "title": "JVM 심화 로드맵 (백엔드 성능/안정성 중심)",
         "description": "JVM 내부 동작을 이해해 성능 문제를 구조적으로 진단하고 개선한다.",
-        "status": "pending",
+        "status": "in-progress",
         "dependencies": [
           "1"
         ],
@@ -1549,8 +1549,90 @@
             "details": "배경 20% + 실무 80% 원칙으로 예시/체크리스트 포함.",
             "testStrategy": "짧은 실습 예시 또는 스레드 덤프/로그 스니펫으로 검증.",
             "parentId": "undefined"
+          },
+          {
+            "id": 42,
+            "title": "Java 객체가 메모리에 올라가는 과정 (new ~ GC 대상까지)",
+            "description": "JVM 메모리/GC 주제를 이해하기 위한 선행 학습 포스트.",
+            "status": "done",
+            "dependencies": [],
+            "details": "개념 정의 + 실행 흐름 + 실무 체크포인트 중심으로 정리.",
+            "testStrategy": "핵심 용어 3개 이상과 예시 코드/시나리오 포함 여부 확인.",
+            "updatedAt": "2026-02-19T06:49:59.414Z",
+            "parentId": "undefined"
+          },
+          {
+            "id": 43,
+            "title": "Heap / Stack / Metaspace 차이 한 번에 이해",
+            "description": "JVM 메모리/GC 주제를 이해하기 위한 선행 학습 포스트.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "개념 정의 + 실행 흐름 + 실무 체크포인트 중심으로 정리.",
+            "testStrategy": "핵심 용어 3개 이상과 예시 코드/시나리오 포함 여부 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 44,
+            "title": "왜 GC가 필요한가? (수동 메모리 관리와 비교)",
+            "description": "JVM 메모리/GC 주제를 이해하기 위한 선행 학습 포스트.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "개념 정의 + 실행 흐름 + 실무 체크포인트 중심으로 정리.",
+            "testStrategy": "핵심 용어 3개 이상과 예시 코드/시나리오 포함 여부 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 45,
+            "title": "Stop-The-World(STW)란 무엇인가",
+            "description": "JVM 메모리/GC 주제를 이해하기 위한 선행 학습 포스트.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "개념 정의 + 실행 흐름 + 실무 체크포인트 중심으로 정리.",
+            "testStrategy": "핵심 용어 3개 이상과 예시 코드/시나리오 포함 여부 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 46,
+            "title": "Minor GC / Major GC / Full GC 차이",
+            "description": "JVM 메모리/GC 주제를 이해하기 위한 선행 학습 포스트.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "개념 정의 + 실행 흐름 + 실무 체크포인트 중심으로 정리.",
+            "testStrategy": "핵심 용어 3개 이상과 예시 코드/시나리오 포함 여부 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 47,
+            "title": "GC 로그에서 제일 먼저 보는 3가지 지표",
+            "description": "JVM 메모리/GC 주제를 이해하기 위한 선행 학습 포스트.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "개념 정의 + 실행 흐름 + 실무 체크포인트 중심으로 정리.",
+            "testStrategy": "핵심 용어 3개 이상과 예시 코드/시나리오 포함 여부 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 48,
+            "title": "스레드 수와 메모리(스택 메모리) 관계",
+            "description": "JVM 메모리/GC 주제를 이해하기 위한 선행 학습 포스트.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "개념 정의 + 실행 흐름 + 실무 체크포인트 중심으로 정리.",
+            "testStrategy": "핵심 용어 3개 이상과 예시 코드/시나리오 포함 여부 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 49,
+            "title": "Spring Boot에서 메모리 관련 기본 옵션(Xms/Xmx) 이해",
+            "description": "JVM 메모리/GC 주제를 이해하기 위한 선행 학습 포스트.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "개념 정의 + 실행 흐름 + 실무 체크포인트 중심으로 정리.",
+            "testStrategy": "핵심 용어 3개 이상과 예시 코드/시나리오 포함 여부 확인.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "updatedAt": "2026-02-19T06:49:59.414Z"
       },
       {
         "id": "4",
@@ -2337,7 +2419,7 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-02-15T00:49:24.731Z",
+      "lastModified": "2026-02-19T06:49:59.415Z",
       "taskCount": 6,
       "completedCount": 0,
       "tags": [
