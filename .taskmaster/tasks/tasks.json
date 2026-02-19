@@ -1630,9 +1630,175 @@
             "details": "개념 정의 + 실행 흐름 + 실무 체크포인트 중심으로 정리.",
             "testStrategy": "핵심 용어 3개 이상과 예시 코드/시나리오 포함 여부 확인.",
             "parentId": "undefined"
+          },
+          {
+            "id": 50,
+            "title": "GC 메커니즘 입문: Mark and Sweep를 그림으로 이해하기",
+            "description": "웹 백엔드 개발자가 GC를 실무 관점에서 이해하도록 구성한다.",
+            "status": "in-progress",
+            "dependencies": [],
+            "details": "핵심 개념 + 운영 지표 + 장애 사례 중심으로 설명.",
+            "testStrategy": "요약 3줄 + 실제 로그/지표 예시 포함 여부 확인.",
+            "updatedAt": "2026-02-19T06:54:55.363Z",
+            "parentId": "undefined"
+          },
+          {
+            "id": 51,
+            "title": "GC Root란 무엇인가: 객체 생존 판정 기준",
+            "description": "웹 백엔드 개발자가 GC를 실무 관점에서 이해하도록 구성한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "핵심 개념 + 운영 지표 + 장애 사례 중심으로 설명.",
+            "testStrategy": "요약 3줄 + 실제 로그/지표 예시 포함 여부 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 52,
+            "title": "Generational GC 설계 이유: Young/Old 분리의 의미",
+            "description": "웹 백엔드 개발자가 GC를 실무 관점에서 이해하도록 구성한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "핵심 개념 + 운영 지표 + 장애 사례 중심으로 설명.",
+            "testStrategy": "요약 3줄 + 실제 로그/지표 예시 포함 여부 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 53,
+            "title": "Minor GC 동작 흐름과 객체 승격(Promotion) 조건",
+            "description": "웹 백엔드 개발자가 GC를 실무 관점에서 이해하도록 구성한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "핵심 개념 + 운영 지표 + 장애 사례 중심으로 설명.",
+            "testStrategy": "요약 3줄 + 실제 로그/지표 예시 포함 여부 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 54,
+            "title": "Major GC / Full GC 차이와 운영 영향",
+            "description": "웹 백엔드 개발자가 GC를 실무 관점에서 이해하도록 구성한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "핵심 개념 + 운영 지표 + 장애 사례 중심으로 설명.",
+            "testStrategy": "요약 3줄 + 실제 로그/지표 예시 포함 여부 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 55,
+            "title": "Stop-The-World(STW) 체감과 대응 전략",
+            "description": "웹 백엔드 개발자가 GC를 실무 관점에서 이해하도록 구성한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "핵심 개념 + 운영 지표 + 장애 사례 중심으로 설명.",
+            "testStrategy": "요약 3줄 + 실제 로그/지표 예시 포함 여부 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 56,
+            "title": "G1 GC 기본 동작(Region, Mixed GC) 빠른 입문",
+            "description": "웹 백엔드 개발자가 GC를 실무 관점에서 이해하도록 구성한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "핵심 개념 + 운영 지표 + 장애 사례 중심으로 설명.",
+            "testStrategy": "요약 3줄 + 실제 로그/지표 예시 포함 여부 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 57,
+            "title": "ZGC/Shenandoah 저지연 GC가 해결하는 문제",
+            "description": "웹 백엔드 개발자가 GC를 실무 관점에서 이해하도록 구성한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "핵심 개념 + 운영 지표 + 장애 사례 중심으로 설명.",
+            "testStrategy": "요약 3줄 + 실제 로그/지표 예시 포함 여부 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 58,
+            "title": "GC 로그 실전 1: pause time, allocation rate 읽는 법",
+            "description": "웹 백엔드 개발자가 GC를 실무 관점에서 이해하도록 구성한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "핵심 개념 + 운영 지표 + 장애 사례 중심으로 설명.",
+            "testStrategy": "요약 3줄 + 실제 로그/지표 예시 포함 여부 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 59,
+            "title": "GC 로그 실전 2: 메모리 압박/OOM 전조 신호 찾기",
+            "description": "웹 백엔드 개발자가 GC를 실무 관점에서 이해하도록 구성한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "핵심 개념 + 운영 지표 + 장애 사례 중심으로 설명.",
+            "testStrategy": "요약 3줄 + 실제 로그/지표 예시 포함 여부 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 60,
+            "title": "Spring Boot JVM 옵션 기초: Xms/Xmx/MaxRAMPercentage",
+            "description": "웹 백엔드 개발자가 GC를 실무 관점에서 이해하도록 구성한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "핵심 개념 + 운영 지표 + 장애 사례 중심으로 설명.",
+            "testStrategy": "요약 3줄 + 실제 로그/지표 예시 포함 여부 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 61,
+            "title": "GC 튜닝의 우선순위: 코드/쿼리/스레드와 같이 보는 법",
+            "description": "웹 백엔드 개발자가 GC를 실무 관점에서 이해하도록 구성한다.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "핵심 개념 + 운영 지표 + 장애 사례 중심으로 설명.",
+            "testStrategy": "요약 3줄 + 실제 로그/지표 예시 포함 여부 확인.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 62,
+            "title": "JVM 메모리 지도: Heap/Stack/Metaspace 5분 정리",
+            "description": "GC/메모리 기초를 이해하기 위한 선행 포스트.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "기초 개념 + 실무 포인트 + 예시 중심으로 구성.",
+            "testStrategy": "핵심 개념 3줄 요약 가능 여부 확인."
+          },
+          {
+            "id": 63,
+            "title": "Young(Eden/Survivor) 구조와 객체 승격(Promotion)",
+            "description": "GC/메모리 기초를 이해하기 위한 선행 포스트.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "기초 개념 + 실무 포인트 + 예시 중심으로 구성.",
+            "testStrategy": "핵심 개념 3줄 요약 가능 여부 확인."
+          },
+          {
+            "id": 64,
+            "title": "Old 영역이 느려지는 이유와 Full GC 조건",
+            "description": "GC/메모리 기초를 이해하기 위한 선행 포스트.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "기초 개념 + 실무 포인트 + 예시 중심으로 구성.",
+            "testStrategy": "핵심 개념 3줄 요약 가능 여부 확인."
+          },
+          {
+            "id": 65,
+            "title": "GC 휴리스틱이 뭘 보고 판단하는지 (할당속도/점유율/pause 목표)",
+            "description": "GC/메모리 기초를 이해하기 위한 선행 포스트.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "기초 개념 + 실무 포인트 + 예시 중심으로 구성.",
+            "testStrategy": "핵심 개념 3줄 요약 가능 여부 확인."
+          },
+          {
+            "id": 66,
+            "title": "GC 로그에서 Young/Old 변화 읽는 법",
+            "description": "GC/메모리 기초를 이해하기 위한 선행 포스트.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "기초 개념 + 실무 포인트 + 예시 중심으로 구성.",
+            "testStrategy": "핵심 개념 3줄 요약 가능 여부 확인."
           }
         ],
-        "updatedAt": "2026-02-19T06:49:59.414Z"
+        "updatedAt": "2026-02-19T06:54:55.363Z"
       },
       {
         "id": "4",
@@ -2419,12 +2585,13 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-02-19T06:49:59.415Z",
+      "lastModified": "2026-02-19T06:54:55.364Z",
       "taskCount": 6,
       "completedCount": 0,
       "tags": [
         "master"
-      ]
+      ],
+      "updated": "2026-02-19T07:22:44Z"
     }
   }
 }
