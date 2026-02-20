@@ -1756,10 +1756,12 @@
             "id": 62,
             "title": "JVM 메모리 지도: Heap/Stack/Metaspace 5분 정리",
             "description": "GC/메모리 기초를 이해하기 위한 선행 포스트.",
-            "status": "pending",
+            "status": "done",
             "dependencies": [],
             "details": "기초 개념 + 실무 포인트 + 예시 중심으로 구성.",
-            "testStrategy": "핵심 개념 3줄 요약 가능 여부 확인."
+            "testStrategy": "핵심 개념 3줄 요약 가능 여부 확인.",
+            "updatedAt": "2026-02-20T13:43:36.198Z",
+            "parentId": "undefined"
           },
           {
             "id": 63,
@@ -1768,7 +1770,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "기초 개념 + 실무 포인트 + 예시 중심으로 구성.",
-            "testStrategy": "핵심 개념 3줄 요약 가능 여부 확인."
+            "testStrategy": "핵심 개념 3줄 요약 가능 여부 확인.",
+            "parentId": "undefined"
           },
           {
             "id": 64,
@@ -1777,7 +1780,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "기초 개념 + 실무 포인트 + 예시 중심으로 구성.",
-            "testStrategy": "핵심 개념 3줄 요약 가능 여부 확인."
+            "testStrategy": "핵심 개념 3줄 요약 가능 여부 확인.",
+            "parentId": "undefined"
           },
           {
             "id": 65,
@@ -1786,7 +1790,8 @@
             "status": "pending",
             "dependencies": [],
             "details": "기초 개념 + 실무 포인트 + 예시 중심으로 구성.",
-            "testStrategy": "핵심 개념 3줄 요약 가능 여부 확인."
+            "testStrategy": "핵심 개념 3줄 요약 가능 여부 확인.",
+            "parentId": "undefined"
           },
           {
             "id": 66,
@@ -1795,10 +1800,11 @@
             "status": "pending",
             "dependencies": [],
             "details": "기초 개념 + 실무 포인트 + 예시 중심으로 구성.",
-            "testStrategy": "핵심 개념 3줄 요약 가능 여부 확인."
+            "testStrategy": "핵심 개념 3줄 요약 가능 여부 확인.",
+            "parentId": "undefined"
           }
         ],
-        "updatedAt": "2026-02-19T06:54:55.363Z"
+        "updatedAt": "2026-02-20T13:43:36.198Z"
       },
       {
         "id": "4",
@@ -2585,13 +2591,12 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-02-19T06:54:55.364Z",
+      "lastModified": "2026-02-20T13:43:36.201Z",
       "taskCount": 6,
       "completedCount": 0,
       "tags": [
         "master"
-      ],
-      "updated": "2026-02-19T07:22:44Z"
+      ]
     }
   }
 }
