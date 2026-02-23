@@ -1767,21 +1767,23 @@
             "id": 63,
             "title": "Young(Eden/Survivor) 구조와 객체 승격(Promotion)",
             "description": "GC/메모리 기초를 이해하기 위한 선행 포스트.",
-            "status": "pending",
+            "status": "done",
             "dependencies": [],
             "details": "기초 개념 + 실무 포인트 + 예시 중심으로 구성.",
             "testStrategy": "핵심 개념 3줄 요약 가능 여부 확인.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-02-23T14:35:28.767Z"
           },
           {
             "id": 64,
             "title": "Old 영역이 느려지는 이유와 Full GC 조건",
             "description": "GC/메모리 기초를 이해하기 위한 선행 포스트.",
-            "status": "pending",
+            "status": "done",
             "dependencies": [],
             "details": "기초 개념 + 실무 포인트 + 예시 중심으로 구성.",
             "testStrategy": "핵심 개념 3줄 요약 가능 여부 확인.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-02-23T14:35:31.073Z"
           },
           {
             "id": 65,
@@ -1804,7 +1806,7 @@
             "parentId": "undefined"
           }
         ],
-        "updatedAt": "2026-02-20T13:43:36.198Z"
+        "updatedAt": "2026-02-23T14:35:31.073Z"
       },
       {
         "id": "4",
@@ -2591,7 +2593,7 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-02-20T13:43:36.201Z",
+      "lastModified": "2026-02-23T14:35:31.074Z",
       "taskCount": 6,
       "completedCount": 0,
       "tags": [
