@@ -548,8 +548,8 @@
           },
           {
             "id": 23,
-            "title": "[연재 확장] Istio Service Mesh 개요와 내부 통신 보안 문제",
-            "description": "MSA 내부 통신 보안 문제를 기존 TLS 방식 한계와 함께 정리한다.",
+            "title": "개요: 내부 443 통신 요구사항, 왜 '앱'이 아닌 'Mesh'인가? (기존 방식 vs Mesh)",
+            "description": "내부 443 통신 요구사항을 배경으로 기존 앱 레벨 TLS 방식과 Mesh 방식의 차이를 개요 수준에서 설명한다.",
             "status": "pending",
             "dependencies": [
               19
@@ -560,8 +560,8 @@
           },
           {
             "id": 24,
-            "title": "[연재 확장] Sidecar 패턴과 Pod 단위 주입 구조",
-            "description": "Sidecar가 Service가 아닌 Pod 단위로 동작하는 이유를 구조적으로 설명한다.",
+            "title": "구조: Sidecar(Envoy)는 어떻게 내 트래픽을 가로채는가? (Transparent Proxy의 원리)",
+            "description": "Sidecar(Envoy)의 트래픽 인터셉트 구조와 Transparent Proxy 동작 원리를 구조적으로 설명한다.",
             "status": "pending",
             "dependencies": [
               23
@@ -572,8 +572,8 @@
           },
           {
             "id": 25,
-            "title": "[연재 확장] Envoy 데이터 플레인과 트래픽 흐름(App→Sidecar→Sidecar→App)",
-            "description": "Envoy가 처리하는 실제 통신 경로와 L7 프록시 역할을 단계별로 설명한다.",
+            "title": "동작: Magic of Mesh - 앱은 80으로 던지고, 네트워크는 443으로 흐르는 원리",
+            "description": "애플리케이션 레벨 호출과 네트워크 레벨 암호화 경로 분리를 통해 Mesh 동작 원리를 설명한다.",
             "status": "pending",
             "dependencies": [
               24
@@ -584,8 +584,8 @@
           },
           {
             "id": 26,
-            "title": "[연재 확장] Istio mTLS 동작 원리와 인증 절차",
-            "description": "일반 TLS와 mTLS 차이, 서비스 간 상호 인증 과정을 실무 관점에서 정리한다.",
+            "title": "보안: Deep Dive - mTLS 핸드셰이크와 신뢰 구축의 기술적 상세",
+            "description": "mTLS 핸드셰이크 과정과 서비스 간 신뢰 형성 메커니즘을 기술적으로 상세히 다룬다.",
             "status": "pending",
             "dependencies": [
               25
@@ -596,8 +596,8 @@
           },
           {
             "id": 27,
-            "title": "[연재 확장] Istiod CA 기반 인증서 발급/갱신과 Pod별 인증서 모델",
-            "description": "Istiod가 인증서를 자동 발급/갱신하고 Pod별로 분리 관리하는 구조를 설명한다.",
+            "title": "인증: Istiod CA 기반의 인증서 라이프사이클 (발급부터 자동 갱신까지)",
+            "description": "Istiod CA 기반 인증서 라이프사이클을 발급부터 자동 갱신까지 운영 관점으로 정리한다.",
             "status": "pending",
             "dependencies": [
               26
@@ -608,8 +608,8 @@
           },
           {
             "id": 28,
-            "title": "[연재 확장] Trombone 실제 경로 분석: HAProxy·TPS·pipeline-api·trb-oss",
-            "description": "실제 배포 구조를 기준으로 외부 HTTPS와 내부 mTLS 경로를 케이스 스터디로 설명한다.",
+            "title": "분석: 실전 트래픽 여정 분석 - HAProxy부터 내부 서비스(xxx-oss)까지",
+            "description": "HAProxy에서 내부 서비스(xxx-oss)까지 실제 트래픽 여정을 케이스 기반으로 분석한다.",
             "status": "pending",
             "dependencies": [
               27
@@ -620,14 +620,26 @@
           },
           {
             "id": 29,
-            "title": "[연재 확장] 운영 점검 체크리스트: mTLS 관측·장애 대응·구성 가이드",
-            "description": "연재 마무리로 실무에서 바로 쓰는 점검 항목과 장애 대응 절차를 정리한다.",
+            "title": "검증: 운영자의 눈 - Kiali와 로그로 mTLS 통신을 증명하고 장애 대응하기",
+            "description": "Kiali와 로그 기반으로 mTLS 통신을 검증하고 장애 대응 절차를 정리한다.",
             "status": "pending",
             "dependencies": [
               28
             ],
             "details": "Kiali/로그/메트릭 기반 관측 포인트, mTLS 미적용·인증서 문제·라우팅 오설정 진단 순서를 정리한다. 팀 운영을 위한 최소 점검 항목(배포 전/배포 후/장애 시)을 템플릿 형태로 제공한다.",
             "testStrategy": "운영 체크리스트 10개 이상, 장애 대응 플로우 1개, 배포 점검 템플릿 포함 여부를 확인한다.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 30,
+            "title": "연재 로드맵: 내부 443/mTLS 이해를 위한 학습·실습 가이드",
+            "description": "#23~#29의 내용을 학습 순서, 실습 항목, 검증 포인트로 재구성한 로드맵 문서를 제공한다.",
+            "status": "pending",
+            "dependencies": [
+              29
+            ],
+            "details": "연재 독자가 바로 실무 적용할 수 있도록 학습 순서(개념→구조→동작→보안→인증→분석→검증), 실습 체크리스트, 팀 공유용 점검표를 정리한다.",
+            "testStrategy": "학습 단계 7개 이상, 실습 항목 5개 이상, 운영 검증 체크리스트 10개 이상 포함 여부를 검토한다.",
             "parentId": "undefined"
           }
         ],
