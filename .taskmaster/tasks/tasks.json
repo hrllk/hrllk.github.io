@@ -562,7 +562,7 @@
             "id": 24,
             "title": "구조: Sidecar(Envoy)는 어떻게 내 트래픽을 가로채는가? (Transparent Proxy의 원리)",
             "description": "Sidecar(Envoy)의 트래픽 인터셉트 구조와 Transparent Proxy 동작 원리를 구조적으로 설명한다.",
-            "status": "pending",
+            "status": "done",
             "dependencies": [
               23
             ],
@@ -574,7 +574,7 @@
             "id": 25,
             "title": "동작: Magic of Mesh - 앱은 80으로 던지고, 네트워크는 443으로 흐르는 원리",
             "description": "애플리케이션 레벨 호출과 네트워크 레벨 암호화 경로 분리를 통해 Mesh 동작 원리를 설명한다.",
-            "status": "pending",
+            "status": "in-progress",
             "dependencies": [
               24
             ],
