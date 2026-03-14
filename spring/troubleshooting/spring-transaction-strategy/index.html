@@ -1,0 +1,2113 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.21.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="ko" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Spring Transaction Strategy - 알잘딱깔센</title>
+<meta name="description" content="Overview">
+
+
+  <meta name="author" content="hr_k">
+  
+  <meta property="article:author" content="hr_k">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:site_name" content="알잘딱깔센">
+<meta property="og:title" content="Spring Transaction Strategy">
+<meta property="og:url" content="https://hrllk.github.io//spring/troubleshooting/spring-transaction-strategy/">
+
+
+  <meta property="og:description" content="Overview">
+
+
+
+
+
+
+
+  <meta property="article:published_time" content="2024-04-17T00:00:00+00:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="https://hrllk.github.io//spring/troubleshooting/spring-transaction-strategy/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "..",
+      "url": "https://hrllk.github.io//"
+    
+  }
+</script>
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+<link href="/feed.xml" type="application/atom+xml" rel="alternate" title="알잘딱깔센 Feed">
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css">
+
+<!--[if IE]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+<!--<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>-->
+<!--<script>mermaid.initialize({startOnLoad:true});</script>-->
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/images/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon-16x16.png">
+<!--<link rel="manifest" href="assets/images/site.webmanifest">-->
+<link rel="mask-icon" href="assets/images/safari-pinned-tab.svg" color="#5bbad5">
+<meta name="msapplication-TileColor" content="#da532c">
+<meta name="theme-color" content="#ffffff">
+  </head>
+
+  <body class="layout--single">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/">
+          알잘딱깔센
+          
+        </a>
+        <ul class="visible-links"></ul>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">토글 메뉴</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+<div class="sidebar sticky">
+    
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="/assets/images/profile/ddange.jpg" alt="hr_k" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    
+      <h3 class="author__name" itemprop="name">hr_k</h3>
+    
+    
+      <div class="author__bio" itemprop="description">
+        
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">팔로우</button>
+    <ul class="author__urls social-icons">
+      
+
+      
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+            <li><a href="https://github.com/hrllk" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+          
+        
+          
+        
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:roovcloudy@gmail.com">
+            <meta itemprop="email" content="roovcloudy@gmail.com" />
+            <i class="fas fa-fw fa-envelope-square" aria-hidden="true"></i><span class="label">이메일</span>
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs" rel="nofollow noopener noreferrer">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+    
+
+    <!-- nav_list_main 파일 반영 -->
+    
+    <!--전체 글 수를 세기 위한 연산. sum 변수에 전체 글 수 저장-->
+<!-- 전체글 -->
+
+
+
+<nav class="nav__list">
+    <input id="ac-toc" name="accordion-toc" type="checkbox"/>
+    <label for="ac-toc">토글 메뉴</label>
+    <ul class="nav__items" id="category_tag_menu">
+        <!--전체 글 수-->
+        <li>
+            📂 <span style="font-family:'Cafe24Oneprettynight';">전체 글 수</style> <span style="font-family:'Coming Soon';">165</style> <span style="font-family:'Cafe24Oneprettynight';">개</style>
+        </li>
+        <li>
+            <span class="nav__sub-title">category</span>
+            <ul>
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                        <li><a href="/categories/troubleShooting" class="">TroubleShooting(16)</a></li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+
+            <ul>
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                        <li><a href="/categories/CS" class="">CS(24)</a></li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+
+            <ul>
+                
+                    
+                
+                    
+                        <li><a href="/categories/spring" class="">Spring(33)</a></li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+
+            <ul>
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+
+            <ul>
+                
+                    
+                        <li><a href="/categories/Java" class="">Java(6)</a></li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+            <ul>
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                        <li><a href="/categories/Linux" class="">Linux(1)</a></li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+
+            <ul>
+                
+                    
+                
+                    
+                
+                    
+                        <li><a href="/categories/designPattern" class="">Design Pattern(3)</a></li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+
+            <ul>
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                        <li><a href="/categories/algorithm" class="">Algorithm(2)</a></li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+
+
+            <ul>
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                        <li><a href="/categories/aws" class="">AWS(1)</a></li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+
+            <ul>
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                        <li><a href="/categories/network" class="">Network(16)</a></li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+
+            <ul>
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                        <li><a href="/categories/data-structure" class="">Data Structure(2)</a></li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+
+            <ul>
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                        <li><a href="/categories/modernSoftware" class="">Modern Software(26)</a></li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+
+            <ul>
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                        <li><a href="/categories/softwareArchitecturePattern" class="">Software Architecture Pattern(1)</a></li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+
+            <ul>
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                        <li><a href="/categories/framework" class="">framework(1)</a></li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+
+            <ul>
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                        <li><a href="/categories/network" class="">Network(16)</a></li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+<!--
+            <span class="nav__sub-title">Language</span>
+            <ul>
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                        <li><a href="/categories/java" class="">Java(13)</a></li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+            <span class="nav__sub-title">CS</span>
+            <ul>
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+            <ul>
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+-->
+
+
+
+        </li>
+    </ul>
+</nav>
+
+    
+
+</div>
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Spring Transaction Strategy">
+    <meta itemprop="description" content="Overview">
+    <meta itemprop="datePublished" content="2024-04-17T00:00:00+00:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Spring Transaction Strategy
+</h1>
+          
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          1 분 소요
+        
+      </span>
+    
+  </p>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+        <h3 id="overview">Overview</h3>
+<hr />
+
+<p>Spring의 <code class="language-plaintext highlighter-rouge">@Transactional</code> 어노테이션은 매우 유용하지만, 기본 동작 방식에 대한 오해는 종종 데이터 정합성 문제로 이어질 수 있음. 해당 포스트에서는 핵심적인 두 가지 질문에 대해 명확히 짚으려 함</p>
+
+<h4 id="롤백rollback의-기본-규칙-unchecked-exception-vs-checked-exception">롤백(Rollback)의 기본 규칙: <code class="language-plaintext highlighter-rouge">Unchecked Exception</code> vs <code class="language-plaintext highlighter-rouge">Checked Exception</code></h4>
+
+<p>가장 흔한 오해는 “예외가 발생하면(모든) 롤백을 일으킨다.” 이는 오해</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left">예외 종류</th>
+      <th style="text-align: left">기본 동작</th>
+      <th style="text-align: left">예시</th>
+      <th style="text-align: left">Spring의 의도</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left"><strong><code class="language-plaintext highlighter-rouge">Unchecked Exception</code></strong></td>
+      <td style="text-align: left"><strong>⭕️ 롤백 (Rollback)</strong></td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">RuntimeException</code> 및 그 하위 클래스들 (<code class="language-plaintext highlighter-rouge">NullPointerException</code>, <code class="language-plaintext highlighter-rouge">IllegalArgumentException</code>, <code class="language-plaintext highlighter-rouge">FeignException</code> 등)</td>
+      <td style="text-align: left">“복구 불가능한 시스템 오류/버그”. 데이터 정합성이 깨졌을 가능성이 높으므로 즉시 롤백하여 작업을 되돌린다.</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><strong><code class="language-plaintext highlighter-rouge">Checked Exception</code></strong></td>
+      <td style="text-align: left"><strong>❌ 커밋 (Commit)</strong></td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">IOException</code>, <code class="language-plaintext highlighter-rouge">SQLException</code>, <code class="language-plaintext highlighter-rouge">JsonProcessingException</code> 등 <code class="language-plaintext highlighter-rouge">Exception</code>을 상속하지만 <code class="language-plaintext highlighter-rouge">RuntimeException</code>이 아닌 클래스들</td>
+      <td style="text-align: left">“복구 가능한 예외”. 개발자가 <code class="language-plaintext highlighter-rouge">try-catch</code>로 처리하여 비즈니스 로직을 이어갈 수 있다고 간주한다. 따라서 예외가 처리될 것을 기대하고 트랜잭션을 커밋한다.</td>
+    </tr>
+  </tbody>
+</table>
+
+<blockquote>
+  <p><strong>결론</strong>: 질문하신 내용과 달리, Spring은 기본적으로 <strong><code class="language-plaintext highlighter-rouge">Checked Exception</code>에 대해서는 롤백을 수행하지 않습니다.</strong></p>
+</blockquote>
+
+<h4 id="롤백-정책-제어하기-transactional-속성">롤백 정책 제어하기: <code class="language-plaintext highlighter-rouge">@Transactional</code> 속성</h4>
+
+<p>Spring은 개발자가 이 기본 동작을 제어할 수 있도록 강력한 옵션을 제공함</p>
+<ul>
+  <li><strong><code class="language-plaintext highlighter-rouge">rollbackFor</code></strong>: 특정 <code class="language-plaintext highlighter-rouge">Checked Exception</code>이 발생했을 때도 롤백을 강제하고 싶을 때 사용함
+    <div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// JsonProcessingException (Checked Exception)이 발생해도 롤백하도록 설정</span>
+<span class="nd">@Transactional</span><span class="o">(</span><span class="n">rollbackFor</span> <span class="o">=</span> <span class="nc">JsonProcessingException</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">processJson</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">JsonProcessingException</span> <span class="o">{</span>
+    <span class="c1">// ...</span>
+<span class="o">}</span>
+</code></pre></div>    </div>
+  </li>
+  <li><strong><code class="language-plaintext highlighter-rouge">noRollbackFor</code></strong>: 특정 <code class="language-plaintext highlighter-rouge">Unchecked Exception</code>이 발생했을 때 예외적으로 롤백을 막을 수 도 있음
+    <div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// MyBusinessAlertException (RuntimeException)이 발생해도 롤백하지 않도록 설정</span>
+<span class="nd">@Transactional</span><span class="o">(</span><span class="n">noRollbackFor</span> <span class="o">=</span> <span class="nc">MyBusinessAlertException</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">processWithAlert</span><span class="o">()</span> <span class="o">{</span>
+    <span class="c1">// ...</span>
+<span class="o">}</span>
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<h3 id="아키텍처-시나리오별-트랜잭션-전략">아키텍처 시나리오별 트랜잭션 전략</h3>
+<hr />
+
+<h4 id="시나리오-a-단일-데이터베이스-트랜잭션">시나리오 A: 단일 데이터베이스 트랜잭션</h4>
+
+<p>가장 일반적인 경우로, 하나의 비즈니스 유스케이스가 <strong>단일 데이터베이스</strong> 내의 여러 테이블을 변경하는 상황</p>
+
+<ul>
+  <li><strong>전략</strong>: 유스케이스가 시작되는 가장 바깥쪽의 <strong>애플리케이션 서비스</strong> 메소드에 <code class="language-plaintext highlighter-rouge">@Transactional</code>을 선언함</li>
+  <li><strong>예시</strong>: <code class="language-plaintext highlighter-rouge">TicketEventHandleSampleService.issue()</code></li>
+  <li><strong>동작</strong>: 이 메소드에서 시작된 트랜잭션은 내부적으로 호출되는 모든 Repository 메소드에 전파(propagation)되어, 모든 DB 작업이 하나의 원자적인 단위로 묶이며, 중간에 <code class="language-plaintext highlighter-rouge">RuntimeException</code>이 발생하면 모든 작업이 롤백됨</li>
+</ul>
+
+<!-- #### 시나리오 B: 분산 환경과 Saga 패턴 -->
+<!---->
+<!-- `ticketPreparationFeignClient.publishEvent()`처럼 **외부 시스템을 네트워크로 호출**하는 작업이 포함된 경우, 단일 DB 트랜잭션으로 묶을 수 없습니다. 이때 **Saga 패턴**이 필요합니다. -->
+<!---->
+<!-- -   **Saga 패턴이란?**: 하나의 거대한 분산 트랜잭션 대신, 여러 개의 **로컬 트랜잭션(Local Transaction)**과 **보상 트랜잭션(Compensating Transaction)**으로 이루어진 비즈니스 프로세스입니다. -->
+<!---->
+<!-- -   **`TicketEventHandleSampleService`의 흐름 (Orchestration Saga)**: -->
+<!--     1.  **[Local Transaction 1]** `ticketEventCommandComponent.generateTicketEvents()`: 이벤트들을 생성하고 DB에 저장 후 **커밋**. -->
+<!--     2.  **[외부 시스템 호출]** `ticketPreparationFeignClient.publishEvent()`: 외부 메시지 브로커로 이벤트 발행. -->
+<!--     3.  **[Local Transaction 2]** `ticketEventCommandComponent.leftSentEventHistory()`: 발행 결과를 DB에 저장 후 **커밋**. -->
+<!---->
+<!-- -   **실패 시나리오**: 만약 2번 단계(외부 호출)에서 실패하면 어떻게 될까요? 1번 단계는 이미 커밋되었으므로 되돌릴 수 없습니다. 이때 **보상 트랜잭션**이 필요합니다. -->
+<!--     -   **보상 트랜잭션**: 1번 단계의 작업을 취소하는 로직(예: `cancelTicketEvents()`)을 명시적으로 호출하여 데이터의 최종 일관성을 맞춰줍니다. -->
+<!---->
+<!-- ### 3. 문제 해결: FeignException 발생 시 롤백 회피 전략 -->
+<!---->
+<!-- 이제 현재 겪고 계신 문제에 대한 구체적인 해결책입니다. -->
+<!---->
+<!-- #### 3-1. 문제 분석 -->
+<!---->
+<!-- -   **상황**: `publishAndRecordHistory` 메소드를 호출하는 상위 서비스(`TicketEventPublisher`)에 `@Transactional`이 걸려있다고 가정해 보겠습니다. -->
+<!-- -   **흐름**: -->
+<!--     1.  트랜잭션이 시작됩니다. -->
+<!--     2.  `try` 블록에서 `FeignException` (`RuntimeException`)이 발생합니다. -->
+<!--     3.  Spring 트랜잭션 관리자는 이 트랜잭션을 **"롤백 전용(rollback-only)"**으로 표시합니다. -->
+<!--     4.  `catch` 블록이 실행됩니다. -->
+<!--     5.  `finally` 블록에서 `leftSentEventHistory`가 호출되어 DB에 히스토리를 **INSERT/UPDATE** 하려고 시도합니다. -->
+<!--     6.  메소드가 종료되는 시점에, 트랜잭션이 "롤백 전용"으로 표시되었기 때문에 **`leftSentEventHistory`가 수행한 DB 작업까지 포함하여 모든 것이 롤백됩니다.** -->
+<!---->
+<!-- 결과적으로, 히스토리 기록이 DB에 남지 않게 됩니다. -->
+<!---->
+<!-- #### 3-2. 해결책: 트랜잭션 분리 (`Propagation.REQUIRES_NEW`) -->
+<!---->
+<!-- 이 문제를 해결하려면 **"히스토리 기록"** 작업을 **기존 트랜잭션과 완전히 분리된 새로운 트랜잭션**에서 실행해야 합니다. -->
+<!---->
+<!-- -   **`@Transactional(propagation = Propagation.REQUIRES_NEW)`**: 이 옵션은 다음과 같이 동작합니다. -->
+<!--     1.  메소드가 호출되면, **기존에 진행 중이던 트랜잭션을 잠시 보류(suspend)**합니다. -->
+<!--     2.  **완전히 새로운 트랜잭션을 시작**합니다. -->
+<!--     3.  메소드 로직을 실행합니다. 성공하면 **새로운 트랜잭션만 커밋**합니다. 실패하면 롤백합니다. -->
+<!--     4.  메소드가 종료되면, 보류했던 **원래 트랜잭션을 다시 재개(resume)**합니다. -->
+<!---->
+<!-- 이를 통해, 원래 트랜잭션이 롤백되더라도, 히스토리 기록을 위한 새로운 트랜잭션은 독립적으로 커밋될 수 있습니다. -->
+<!---->
+<!-- #### 3-3. 구현 방법 -->
+<!---->
+<!-- 이 로직을 구현하려면 **반드시 별도의 Bean으로 분리**해야 합니다. Spring의 트랜잭션은 AOP 프록시를 통해 동작하므로, 같은 클래스 내의 메소드를 호출하면 트랜잭션 전파가 적용되지 않기 때문입니다. -->
+<!---->
+<!-- 1.  **히스토리 기록을 전담하는 새로운 컴포넌트 생성** -->
+<!--     ```java -->
+<!--     // TicketEventHistoryCommandComponent.java -->
+<!--     @Component -->
+<!--     @RequiredArgsConstructor -->
+<!--     public class TicketEventHistoryCommandComponent { -->
+<!--         private final TicketEventRepository ticketEventRepository; -->
+<!---->
+<!--         @Transactional(propagation = Propagation.REQUIRES_NEW) // <-- 핵심! -->
+<!--         public void recordEventHistory(String eventNo, String status, String errorMessage) { -->
+<!--             // 이 로직은 항상 새로운 트랜잭션에서 실행됩니다. -->
+<!--             ticketEventRepository.createEventRotateDetail(..., status, errorMessage); -->
+<!--         } -->
+<!--     } -->
+<!--     ``` -->
+<!---->
+<!-- 2.  **`TicketEventPublisher` 수정** -->
+<!--     ```java -->
+<!--     // TicketEventPublisher.java -->
+<!--     @Component -->
+<!--     @RequiredArgsConstructor -->
+<!--     public class TicketEventPublisher { -->
+<!--         // ... 기존 의존성 -->
+<!--         private final TicketEventHistoryCommandComponent historyCommandComponent; // 새로운 의존성 주입 -->
+<!---->
+<!--         private void publishAndRecordHistory(AsyncMessageRequest request) { -->
+<!--             // ... try-catch 로직 ... -->
+<!---->
+<!--             } catch (FeignException e) { -->
+<!--                 // ... -->
+<!--             } finally { -->
+<!--                 // 기존 트랜잭션의 성공/실패 여부와 관계없이, -->
+<!--                 // 이 메소드는 항상 독립적인 새 트랜잭션에서 실행되어 커밋됩니다. -->
+<!--                 historyCommandComponent.recordEventHistory(eventNo, status, errorMessage); -->
+<!--             } -->
+<!--         } -->
+<!--     } -->
+<!--     ``` -->
+
+<!-- ### @Transactional  -->
+<!-- 해당 애노테이션으로 DB의 트랜잭션을 이용해 <br> -->
+<!-- 타임아웃을 설정하거나 읽을수 있게만 설정 혹은 롤백을 설정 할 수 있음 <br> -->
+<!-- 추가로 Transaction을 위한 관리자 또한 설정이 가능 <br> -->
+<!---->
+<!-- #### Detail - Trasnactional  -->
+<!-- 트랜잭션의 핸들링 -->
+<!-- 바이트 코드를 조작해 행을 생성하거나, 커밋, 롤백할 때 바이트코드를 조작해 관리가 가능 함 -->
+<!---->
+<!-- <!-- 프록시 안에서는 스프링이 내부메소드에서는 호출을 무시 -->
+<p>–&gt;
+<!-- @Trasnactional 애노테이션 선언시, 스프링은 트랜잭션 관리에 해당메소드를 감싸게됨 -->
+<!---->
+<!---->
+<!-- ### Usage -->
+<!-- interface, class, method 에 선언 가능 -->
+<!-- 선언시, 스프링(?)이 우선순위를 오름차순으로 재정의 -->
+<!-- 스프링은 클래스 수준의 애노테이션을  -->
+<!-- 클래스에 애노테이션을 설정 할 경우, 스프링이 해당 클래스 내부에 public인 method들에 해당 애노테이션을 할당 -->
+<!-- 하지만, 개발자가 private 혹은 protected 레벨의 method에도 실수로 할당할지라도 스프링은 무시함 -->
+<!---->
+<!-- !인터페이스에 할당하는것은 권고되지않음 but @Repository 애노테이션이 달린 interface 에서는 예외(with spring Data) -->
+<!---->
+<!---->
+<!-- PlatformTransactionManager 인터페이스를 기븐으로 매니징을 진행.  -->
+<!-- 트랜잭션 관리 메커니즘을 지원 like JDBC, JPA ...  -->
+<!-- spring boot 에선 기본적으로 DataSrouceTransactionManager 을 통해관리를 진행 (Single DataSource 일때 기준) -->
+<!---->
+<!-- In Spring Boot, the default transaction management strategy is based on the `PlatformTransactionManager` interface, which provides support for various transaction management mechanisms such as JDBC, JPA, JTA, etc. By default, Spring Boot uses the `DataSourceTransactionManager` for managing transactions when working with a single data source. -->
+<!-- If you want to use JTA (Java Transaction API) for distributed transactions involving multiple transactional resources (such as multiple databases or JMS queues), you can configure Spring Boot to use JTA by adding the necessary dependencies and configuration. -->
+<!-- To enable JTA in Spring Boot, you typically need to do the following: -->
+<!-- 1. Add the necessary JTA dependencies to your project. For example, you can use Atomikos, Bitronix, or Narayana as JTA providers. -->
+<!-- 2. Configure the JTA transaction manager in your Spring Boot application. This involves setting up the JTA transaction manager bean and configuring it to handle distributed transactions. -->
+<!-- 3. Update your application properties or configuration to use JTA for transaction management. -->
+<!-- By default, Spring Boot does not use JTA for transaction management, but you can configure it to use JTA if your application requires distributed transactions. -->
+<!---->
+<!---->
+<!-- ### 주의사항 -->
+<!---->
+<!---->
+<!---->
+<!-- ### reference -->
+<!-- https://www.baeldung.com/spring-transactional-propagation-isolation --></p>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> 카테고리: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/categories/#spring" class="page__taxonomy-item" rel="tag">spring</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/categories/#troubleshooting" class="page__taxonomy-item" rel="tag">troubleShooting</a>
+    
+    </span>
+  </p>
+
+
+        
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> 업데이트:</strong> <time datetime="2024-04-17T00:00:00+00:00">April 17, 2024</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+  
+    <h4 class="page__share-title">공유하기</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?text=Spring+Transaction+Strategy%20https%3A%2F%2Fhrllk.github.io%2F%2Fspring%2Ftroubleshooting%2Fspring-transaction-strategy%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="공유하기 Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fhrllk.github.io%2F%2Fspring%2Ftroubleshooting%2Fspring-transaction-strategy%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="공유하기 Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fhrllk.github.io%2F%2Fspring%2Ftroubleshooting%2Fspring-transaction-strategy%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="공유하기 LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+      
+  <nav class="pagination">
+    
+      <a href="/troubleshooting/spring/message-converter/" class="pagination--pager" title="Could not write JSON JsonObject (default message converter of spring)
+">이전</a>
+    
+    
+      <a href="/java/troubleshooting/POI-issue/" class="pagination--pager" title="Could not initialize class sun.awt.X11FontManager(POI)
+">다음</a>
+    
+  </nav>
+
+    </div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">참고</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/cs/jvm/garbage-collection/jvm-old-generation/" rel="permalink">jvm old generation
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          1 분 소요
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Overview
+
+
+지난 포스트에서 JVM Heap의 Young Generation(링크처리)을 다뤘고, 이번엔 Old Generation(고인물 영역)에 대해 다룸. 
+Young 영역에서 살아남은 객체들이 어디로 가서 어떻게 관리되는지 이해하는 것이 효율적인 GC 튜닝의 핵심이다.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/cs/jvm/gc-mark-and-sweep-basics/" rel="permalink">what is mark and Sweep
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          1 분 소요
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">overview
+
+
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/cs/observability/spring-boot-prometheus-dependency/" rel="permalink">Prometheus Quick Start for Spring Boot
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          1 분 소요
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Prometheus Quick Start for Spring Boot
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/cs/observability/time-series-and-sampling-basics/" rel="permalink">시계열 데이터와 샘플링 주기 기본
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          1 분 소요
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">overview
+
+
+</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>팔로우:</strong></li>
+    
+
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+
+    <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> 피드</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2026 ... Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+
+<script src="https://unpkg.com/mermaid@8.9.3/dist/mermaid.min.js"></script>
+<script>
+    $(document).ready(function () {
+        mermaid.initialize({
+            startOnLoad:true,
+            theme: "default",
+        });
+        window.mermaid.init(undefined, document.querySelectorAll('.language-mermaid'));
+    });
+</script>
+
+
+
+
+
+  </body>
+</html>

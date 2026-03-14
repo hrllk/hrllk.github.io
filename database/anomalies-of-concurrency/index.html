@@ -1,0 +1,2007 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.21.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="ko" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>anomalies of concurrency - 알잘딱깔센</title>
+<meta name="description" content="Overview">
+
+
+  <meta name="author" content="hr_k">
+  
+  <meta property="article:author" content="hr_k">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:site_name" content="알잘딱깔센">
+<meta property="og:title" content="anomalies of concurrency">
+<meta property="og:url" content="https://hrllk.github.io//database/anomalies-of-concurrency/">
+
+
+  <meta property="og:description" content="Overview">
+
+
+
+
+
+
+
+  <meta property="article:published_time" content="2025-06-12T00:00:00+00:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="https://hrllk.github.io//database/anomalies-of-concurrency/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "..",
+      "url": "https://hrllk.github.io//"
+    
+  }
+</script>
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+<link href="/feed.xml" type="application/atom+xml" rel="alternate" title="알잘딱깔센 Feed">
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css">
+
+<!--[if IE]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+<!--<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>-->
+<!--<script>mermaid.initialize({startOnLoad:true});</script>-->
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/images/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon-16x16.png">
+<!--<link rel="manifest" href="assets/images/site.webmanifest">-->
+<link rel="mask-icon" href="assets/images/safari-pinned-tab.svg" color="#5bbad5">
+<meta name="msapplication-TileColor" content="#da532c">
+<meta name="theme-color" content="#ffffff">
+  </head>
+
+  <body class="layout--single">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/">
+          알잘딱깔센
+          
+        </a>
+        <ul class="visible-links"></ul>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">토글 메뉴</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+<div class="sidebar sticky">
+    
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="/assets/images/profile/ddange.jpg" alt="hr_k" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    
+      <h3 class="author__name" itemprop="name">hr_k</h3>
+    
+    
+      <div class="author__bio" itemprop="description">
+        
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">팔로우</button>
+    <ul class="author__urls social-icons">
+      
+
+      
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+            <li><a href="https://github.com/hrllk" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+          
+        
+          
+        
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:roovcloudy@gmail.com">
+            <meta itemprop="email" content="roovcloudy@gmail.com" />
+            <i class="fas fa-fw fa-envelope-square" aria-hidden="true"></i><span class="label">이메일</span>
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs" rel="nofollow noopener noreferrer">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+    
+
+    <!-- nav_list_main 파일 반영 -->
+    
+    <!--전체 글 수를 세기 위한 연산. sum 변수에 전체 글 수 저장-->
+<!-- 전체글 -->
+
+
+
+<nav class="nav__list">
+    <input id="ac-toc" name="accordion-toc" type="checkbox"/>
+    <label for="ac-toc">토글 메뉴</label>
+    <ul class="nav__items" id="category_tag_menu">
+        <!--전체 글 수-->
+        <li>
+            📂 <span style="font-family:'Cafe24Oneprettynight';">전체 글 수</style> <span style="font-family:'Coming Soon';">165</style> <span style="font-family:'Cafe24Oneprettynight';">개</style>
+        </li>
+        <li>
+            <span class="nav__sub-title">category</span>
+            <ul>
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                        <li><a href="/categories/troubleShooting" class="">TroubleShooting(16)</a></li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+
+            <ul>
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                        <li><a href="/categories/CS" class="">CS(24)</a></li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+
+            <ul>
+                
+                    
+                
+                    
+                        <li><a href="/categories/spring" class="">Spring(33)</a></li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+
+            <ul>
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+
+            <ul>
+                
+                    
+                        <li><a href="/categories/Java" class="">Java(6)</a></li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+            <ul>
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                        <li><a href="/categories/Linux" class="">Linux(1)</a></li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+
+            <ul>
+                
+                    
+                
+                    
+                
+                    
+                        <li><a href="/categories/designPattern" class="">Design Pattern(3)</a></li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+
+            <ul>
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                        <li><a href="/categories/algorithm" class="">Algorithm(2)</a></li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+
+
+            <ul>
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                        <li><a href="/categories/aws" class="">AWS(1)</a></li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+
+            <ul>
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                        <li><a href="/categories/network" class="">Network(16)</a></li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+
+            <ul>
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                        <li><a href="/categories/data-structure" class="">Data Structure(2)</a></li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+
+            <ul>
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                        <li><a href="/categories/modernSoftware" class="">Modern Software(26)</a></li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+
+            <ul>
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                        <li><a href="/categories/softwareArchitecturePattern" class="">Software Architecture Pattern(1)</a></li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+
+            <ul>
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                        <li><a href="/categories/framework" class="">framework(1)</a></li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+
+            <ul>
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                        <li><a href="/categories/network" class="">Network(16)</a></li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+<!--
+            <span class="nav__sub-title">Language</span>
+            <ul>
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                        <li><a href="/categories/java" class="">Java(13)</a></li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+            <span class="nav__sub-title">CS</span>
+            <ul>
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+            <ul>
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+-->
+
+
+
+        </li>
+    </ul>
+</nav>
+
+    
+
+</div>
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="anomalies of concurrency">
+    <meta itemprop="description" content="Overview">
+    <meta itemprop="datePublished" content="2025-06-12T00:00:00+00:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">anomalies of concurrency
+</h1>
+          
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          1 분 소요
+        
+      </span>
+    
+  </p>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+        <h3 id="overview">Overview</h3>
+<hr />
+
+<p>동시성 == 이상현상<br />
+데이터베이스 시스템에서 트랜잭션을 통해 데이터를 조작할 때 발생할 수 있는 이슈<br />
+데이터의 일관성을 해칠 수 있기 때문에(이상현상) 트랜잭션 격리 수준 [!] 을 통해 제어됨<br /></p>
+
+<h3 id="anomalies">Anomalies</h3>
+<hr />
+
+<ol>
+  <li><strong>Dirty Read</strong>:
+    <ul>
+      <li>설명: 하나의 트랜잭션이 아직 커밋되지 않은 다른 트랜잭션의 데이터를 읽는것</li>
+      <li>문제점: 데이터를 변경한 트랜잭션이 만약 어떤 이유로 롤백이되는경우, 이름 참조했던 트랜잭션은 무효한 데이터를 기반으로 작업을 수행하게되며 이는 데이터 불일치를 야기</li>
+      <li>예시:
+        <ol>
+          <li>트랜잭션 A: 특정 상품의 재고를 변경 100 &gt; 90</li>
+          <li>트랜잭션 B: 계산된 재고를 다른 트랜잭션에서 비즈니스에 사용</li>
+          <li>트랜잭션 A: 비즈니스 수행중 어떤 사유에대해 해당 트랜잭션이 롤백되는 경우 B트랜잭션과의 무결성이 깨짐</li>
+        </ol>
+
+        <p><!-- 1. 트랜잭션 A가 어떤 상품의 재고를 100에서 90으로 변경 (아직 커밋하지 않음) -->
+  <!-- 2. 이때 트랜잭션 B가 이 상품의 재고를 90으로 읽어 다른 계산에 사용 -->
+  <!-- 3. 만약 트랜잭션 A가 롤백되어 재고가 다시 100이 되면, 트랜잭션 B는 잘못된 90이라는 값으로 작업을 진행한 것이 됩니다. --></p>
+      </li>
+    </ul>
+  </li>
+  <li><strong>Non-Repeatable Read</strong>:
+    <ul>
+      <li>설명: 하나의 트랜잭션에서 같은 쿼리를 두번 수행한다고 했을 때, 동일한 쿼리 사이에 다른 트랜잭션이 데이터를 수정하고 커밋했다면 두 쿼리의 결과가 다르게 나타날 수 있음</li>
+      <li>문제점: 트랜잭션 도중에 데이터가 변경되어 일관된 결과를 얻지 못하게됨 (UPDATE)</li>
+      <li>예시:
+        <ol>
+          <li>트랜잭션 A: “철수” 라는 회원의 전화번호를 조회</li>
+          <li>트랜잭션 B: “철수” 회원에 대해 전화번호를 변경</li>
+          <li>트랜잭션 A: 다시 해당 회원의 정보를 조회했을 때 첫번째 조회했을 때 취득한 전화번호와 다름</li>
+        </ol>
+      </li>
+    </ul>
+  </li>
+  <li><strong>Phantom Read</strong>:
+    <ul>
+      <li>설명: 하나의 트랜잭션에서 같은 쿼리를 두번 수행한다고 했을 때, 동일한 쿼리 사이에 다른 트랜잭션에의해 데이터가 추가되거나 삭제되는 현상</li>
+      <li>문제점: 트랜잭션 도중에 데이터가 변경되어 일관된 결과를 얻지 못하게됨 (INSERT, DELETE)</li>
+      <li>예시:
+        <ol>
+          <li>트랜잭션 A: 특정 지역에 거주하는 고객의 수 조회</li>
+          <li>트랜잭션 B: 해당 지역에 새로운 고객을 추가하고 커밋</li>
+          <li>트랜잭션 A: 다시 해당 지역에 거주하는 고객수를 조회했을 때 한명 더 많은 고객이 조회됨</li>
+        </ol>
+      </li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="conclusion">Conclusion</h3>
+
+<hr />
+
+<p>데이터베이스 동시성 문제는 여러 트랜잭션이 동시에 실행될 때 데이터의 일관성을 해칠 수 있는 중요한 문제<br />
+문제를 이해하고 적절한 트랜잭션 격리 수준을 선택해 안정적이고 효율적인 데이터베이스 시스템을 구축하는데 필수적<br /></p>
+
+<!---->
+<!---->
+<!--     *   **설명**: 하나의 트랜잭션 내에서 같은 쿼리를 두 번 실행했을 때, 첫 번째 쿼리에서는 없던 '유령(Phantom)' 레코드가 두 번째 쿼리에서 나타나거나, 있던 레코드가 사라지는 현상입니다. -->
+<!--     *   **문제점**: 주로 `INSERT` 또는 `DELETE` 작업 때문에 발생합니다. 범위(range) 기반의 쿼리에서 특히 문제가 됩니다. 이로 인해 트랜잭션의 일관된 뷰가 깨질 수 있습니다. -->
+<!--     *   **예시**: 트랜잭션 A가 '서울' 지역에 사는 고객의 수를 조회합니다. 그 사이에 트랜잭션 B가 '서울'에 사는 새로운 고객을 추가하고 커밋합니다. 트랜잭션 A가 다시 '서울' 지역 고객의 수를 조회했을 때, 첫 번째 조회보다 한 명 더 많은 고객이 나타납니다. -->
+<!---->
+<!---->
+<!---->
+<!-- ### 주요 동시성 문제 (Main Concurrency Anomalies) -->
+<!---->
+<!-- 1.  **Dirty Read (더티 읽기)**: -->
+<!--     *   **설명**: 하나의 트랜잭션이 아직 커밋되지 않은 다른 트랜잭션의 데이터를 읽는 현상입니다. '오손 읽기'라고도 합니다. -->
+<!--     *   **문제점**: 만약 데이터를 변경한 트랜잭션이 어떤 이유로 인해 롤백된다면, 이 데이터를 읽었던 트랜잭션은 유효하지 않은(무효한) 데이터를 기반으로 작업을 수행하게 됩니다. 이는 데이터 불일치를 야기할 수 있습니다. -->
+<!--     *   **예시**: 트랜잭션 A가 어떤 상품의 재고를 100에서 90으로 줄였지만 아직 커밋하지 않았습니다. 이때 트랜잭션 B가 이 상품의 재고를 90으로 읽어 다른 계산에 사용합니다. 만약 트랜잭션 A가 롤백되어 재고가 다시 100이 되면, 트랜잭션 B는 잘못된 90이라는 값으로 작업을 진행한 것이 됩니다. -->
+<!---->
+<!-- 2.  **Non-Repeatable Read (반복 불가능 읽기)**: -->
+<!--     *   **설명**: 하나의 트랜잭션 내에서 같은 쿼리를 두 번 실행했을 때, 그 사이에 다른 트랜잭션이 데이터를 수정하고 커밋하여 두 쿼리의 결과가 다르게 나타나는 현상입니다. '재현 불가능 읽기'라고도 합니다. -->
+<!--     *   **문제점**: 트랜잭션 도중에 데이터가 변경되어 일관된 결과를 얻지 못하게 됩니다. 이는 트랜잭션의 예측 가능성을 떨어뜨립니다. -->
+<!--     *   **예시**: 트랜잭션 A가 회원 '철수'의 정보를 조회합니다. 그 사이에 트랜잭션 B가 '철수'의 전화번호를 변경하고 커밋합니다. 트랜잭션 A가 다시 '철수'의 정보를 조회했을 때, 첫 번째 조회와 다른 전화번호를 얻게 됩니다. -->
+<!---->
+<!-- 3.  **Phantom Read (팬텀 읽기)**: -->
+<!--     *   **설명**: 하나의 트랜잭션 내에서 같은 쿼리를 두 번 실행했을 때, 첫 번째 쿼리에서는 없던 '유령(Phantom)' 레코드가 두 번째 쿼리에서 나타나거나, 있던 레코드가 사라지는 현상입니다. -->
+<!--     *   **문제점**: 주로 `INSERT` 또는 `DELETE` 작업 때문에 발생합니다. 범위(range) 기반의 쿼리에서 특히 문제가 됩니다. 이로 인해 트랜잭션의 일관된 뷰가 깨질 수 있습니다. -->
+<!--     *   **예시**: 트랜잭션 A가 '서울' 지역에 사는 고객의 수를 조회합니다. 그 사이에 트랜잭션 B가 '서울'에 사는 새로운 고객을 추가하고 커밋합니다. 트랜잭션 A가 다시 '서울' 지역 고객의 수를 조회했을 때, 첫 번째 조회보다 한 명 더 많은 고객이 나타납니다. -->
+<!---->
+<!-- ### 동시성 문제 방지 및 격리 수준 (Preventing Concurrency Issues and Isolation Levels) -->
+<!---->
+<!-- 이러한 동시성 문제들은 데이터베이스의 트랜잭션 격리 수준을 조정함으로써 방지할 수 있습니다. 각 격리 수준은 특정 동시성 문제를 허용하거나 방지하며, 높은 격리 수준일수록 더 많은 동시성 문제를 방지하지만, 동시성 처리량은 낮아지고 성능 저하를 가져올 수 있습니다. -->
+<!---->
+<!-- *   **READ_UNCOMMITTED**: Dirty Read, Non-Repeatable Read, Phantom Read 모두 발생 가능. -->
+<!-- *   **READ_COMMITTED**: Dirty Read 방지. Non-Repeatable Read, Phantom Read 발생 가능. -->
+<!-- *   **REPEATABLE_READ**: Dirty Read, Non-Repeatable Read 방지. Phantom Read 발생 가능. -->
+<!-- *   **SERIALIZABLE**: 모든 동시성 문제(Dirty Read, Non-Repeatable Read, Phantom Read) 방지. -->
+<!---->
+<!-- ### 결론 (Conclusion) -->
+<!-- 데이터베이스 동시성 문제는 여러 트랜잭션이 동시에 실행될 때 데이터의 일관성을 해칠 수 있는 중요한 문제입니다. 이러한 문제들을 이해하고 적절한 트랜잭션 격리 수준을 선택하는 것은 안정적이고 효율적인 데이터베이스 시스템을 구축하는 데 필수적입니다. 애플리케이션의 특성과 요구되는 데이터 무결성 수준을 고려하여 최적의 격리 수준을 결정해야 합니다. -->
+
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> 카테고리: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/categories/#database" class="page__taxonomy-item" rel="tag">database</a>
+    
+    </span>
+  </p>
+
+
+        
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> 업데이트:</strong> <time datetime="2025-06-12T00:00:00+00:00">June 12, 2025</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+  
+    <h4 class="page__share-title">공유하기</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?text=anomalies+of+concurrency%20https%3A%2F%2Fhrllk.github.io%2F%2Fdatabase%2Fanomalies-of-concurrency%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="공유하기 Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fhrllk.github.io%2F%2Fdatabase%2Fanomalies-of-concurrency%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="공유하기 Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fhrllk.github.io%2F%2Fdatabase%2Fanomalies-of-concurrency%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="공유하기 LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+      
+  <nav class="pagination">
+    
+      <a href="/java/troubleshooting/READ_UNCOMMITTED/" class="pagination--pager" title="READ_UNCOMMITTED
+">이전</a>
+    
+    
+      <a href="/java/Implementations-of-Map/" class="pagination--pager" title="Implementations of Map
+">다음</a>
+    
+  </nav>
+
+    </div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">참고</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/cs/jvm/garbage-collection/jvm-old-generation/" rel="permalink">jvm old generation
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          1 분 소요
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Overview
+
+
+지난 포스트에서 JVM Heap의 Young Generation(링크처리)을 다뤘고, 이번엔 Old Generation(고인물 영역)에 대해 다룸. 
+Young 영역에서 살아남은 객체들이 어디로 가서 어떻게 관리되는지 이해하는 것이 효율적인 GC 튜닝의 핵심이다.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/cs/jvm/gc-mark-and-sweep-basics/" rel="permalink">what is mark and Sweep
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          1 분 소요
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">overview
+
+
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/cs/observability/spring-boot-prometheus-dependency/" rel="permalink">Prometheus Quick Start for Spring Boot
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          1 분 소요
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Prometheus Quick Start for Spring Boot
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/cs/observability/time-series-and-sampling-basics/" rel="permalink">시계열 데이터와 샘플링 주기 기본
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          1 분 소요
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">overview
+
+
+</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>팔로우:</strong></li>
+    
+
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+
+    <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> 피드</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2026 ... Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+
+<script src="https://unpkg.com/mermaid@8.9.3/dist/mermaid.min.js"></script>
+<script>
+    $(document).ready(function () {
+        mermaid.initialize({
+            startOnLoad:true,
+            theme: "default",
+        });
+        window.mermaid.init(undefined, document.querySelectorAll('.language-mermaid'));
+    });
+</script>
+
+
+
+
+
+  </body>
+</html>

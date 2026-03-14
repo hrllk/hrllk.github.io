@@ -1,0 +1,1326 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.4">Jekyll</generator><link href="https://hrllk.github.io//feed.xml" rel="self" type="application/atom+xml" /><link href="https://hrllk.github.io//" rel="alternate" type="text/html" /><updated>2026-03-14T20:22:08+00:00</updated><id>https://hrllk.github.io//feed.xml</id><title type="html">알잘딱깔센</title><subtitle></subtitle><author><name>hr_k</name><email>roovcloudy@gmail.com</email></author><entry><title type="html">jvm old generation</title><link href="https://hrllk.github.io//cs/jvm/garbage-collection/jvm-old-generation/" rel="alternate" type="text/html" title="jvm old generation" /><published>2026-02-23T00:00:00+00:00</published><updated>2026-02-23T00:00:00+00:00</updated><id>https://hrllk.github.io//cs/jvm/garbage-collection/jvm-old-generation</id><content type="html" xml:base="https://hrllk.github.io//cs/jvm/garbage-collection/jvm-old-generation/"><![CDATA[<h3 id="overview">Overview</h3>
+<hr />
+<p>지난 포스트에서 JVM Heap의 Young Generation(링크처리)을 다뤘고, 이번엔 <strong>Old Generation(고인물 영역)</strong>에 대해 다룸. 
+Young 영역에서 살아남은 객체들이 어디로 가서 어떻게 관리되는지 이해하는 것이 효율적인 GC 튜닝의 핵심이다.</p>
+
+<h3 id="old-영역은-무엇인가">Old 영역은 무엇인가?</h3>
+<hr />
+<p>Heap은 크게 Young과 Old 영역으로 나뉘고, 그 중 Old 영역은 <strong>Young 영역에서 여러 번의 Minor GC에도 살아남은, 즉 ‘오래 살아남을 객체’들이 모이는 곳</strong>입니다. 이곳의 객체들은 비교적 생명 주기가 길기 때문에 Young 영역처럼 자주 GC할 필요가 없다.</p>
+
+<ul>
+  <li><strong>Promotion(승격):</strong> Young 영역의 Survivor 공간을 여러 번 오가며 정해진 나이(Age Limit)에 도달한 객체들은 Old 영역으로 <strong>Promotion</strong>됩니다. 이는 “오래 살 놈들은 따로 모아서 관리하겠다”는 GC의 전략.</li>
+</ul>
+
+<h3 id="major-gc-full-gc-동작">Major GC (Full GC) 동작</h3>
+<hr />
+<p>Old 영역은 Young 영역보다 GC 주기가 훨씬 깁니다. 하지만 이곳도 언젠가는 꽉 차게 된다.
+Old 영역이 가득 차거나 or Young 영역에서 Promotion할 공간이 부족할 경우, <strong>Major GC</strong> (또는 <strong>Full GC</strong>)가 발생합니다.</p>
+
+<ul>
+  <li>
+    <p><strong>Stop-The-World:</strong> Major GC는 Young 영역의 Minor GC와는 비교할 수 없을 정도로 큰 성능 저하를 일으킵니다. 대부분의 Major GC는 GC를 수행하는 동안 <strong>애플리케이션 스레드를 모두 정지(Stop-The-World)</strong>시켜버린다. 이 시간 동안 애플리케이션은 아무런 작업도 처리하지 못하게 되며, 이는 사용자가 느끼는 서비스 지연의 주된 원인이 된다.</p>
+  </li>
+  <li>
+    <p><strong>복잡한 알고리즘:</strong> Old 영역은 크기가 크고, 살아있는 객체도 많기 때문에 Minor GC보다 훨씬 복잡한 알고리즘(예: <code class="language-plaintext highlighter-rouge">Mark-Sweep-Compact</code>)을 사용하고, 이는 GC 작업에 더 많은 시간과 CPU 자원을 소모하게 한다.</p>
+  </li>
+</ul>
+
+<h3 id="실무에서의-이슈-old-영역-편">실무에서의 이슈 (Old 영역 편)</h3>
+<hr />
+<p>Old 영역 관리에 실패하면 서버는 더욱 심각한 상황에 직면한다.</p>
+
+<ul>
+  <li><strong>잦은 Major GC:</strong> Old 영역이 너무 작게 설정되거나, Young 영역에서 너무 많은 객체가 빠르게 Promotion되면, Old 영역이 자주 가득 차게 되고 Major GC가 빈번하게 발생합니다. 이는 애플리케이션이 멈추는 시간이 길어져 서비스 가용성에 치명적인 영향을 줍니다.</li>
+  <li><strong>메모리 누수(Memory Leak):</strong> 의도치 않게 객체가 계속 Old 영역에 남아있어 메모리 사용량이 계속 증가하는 현상입니다. 결국 <code class="language-plaintext highlighter-rouge">OutOfMemoryError</code>로 이어지며 애플리케이션이 비정종료된다.</li>
+</ul>
+
+<h3 id="3줄-요약">3줄 요약</h3>
+<hr />
+<ul>
+  <li>다시 요약하면 <strong>Old 영역</strong>은 Young 영역에서 오래 살아남은 객체들의 보금자리다.</li>
+  <li>여기서 발생하는 <strong>Major GC</strong>는 애플리케이션을 멈추게 할 수 있어 성능에 치명적.</li>
+  <li>Old 영역의 크기, Promotion 밸런스, 메모리 누수 관리는 <strong>안정적인 서비스 운영의 핵심</strong>.</li>
+</ul>]]></content><author><name>hr_k</name><email>roovcloudy@gmail.com</email></author><category term="cs" /><category term="jvm" /><category term="garbage-collection" /><summary type="html"><![CDATA[Overview 지난 포스트에서 JVM Heap의 Young Generation(링크처리)을 다뤘고, 이번엔 Old Generation(고인물 영역)에 대해 다룸. Young 영역에서 살아남은 객체들이 어디로 가서 어떻게 관리되는지 이해하는 것이 효율적인 GC 튜닝의 핵심이다.]]></summary></entry><entry><title type="html">what is mark and Sweep</title><link href="https://hrllk.github.io//cs/jvm/gc-mark-and-sweep-basics/" rel="alternate" type="text/html" title="what is mark and Sweep" /><published>2026-02-19T00:00:00+00:00</published><updated>2026-02-19T00:00:00+00:00</updated><id>https://hrllk.github.io//cs/jvm/gc-mark-and-sweep-basics</id><content type="html" xml:base="https://hrllk.github.io//cs/jvm/gc-mark-and-sweep-basics/"><![CDATA[<h3 id="overview">overview</h3>
+<hr />
+
+<p>GC 어렵게 볼 필요 없음.
+핵심은 “살아있는 객체만 남기고 나머지 치운다” 이거임.</p>
+
+<h3 id="1-gc를-왜-알아야-함">1) GC를 왜 알아야 함?</h3>
+<hr />
+
+<p>웹 서비스 느려질 때
+원인 중 하나가 GC pause임.</p>
+
+<p>특히 p99 튈 때,
+쿼리만 보지 말고 GC도 같이 봐야 함.</p>
+
+<h3 id="2-mark-and-sweep-한-줄-정의">2) Mark and Sweep 한 줄 정의</h3>
+<hr />
+
+<ul>
+  <li>Mark: 살아있는 객체에 표시</li>
+  <li>Sweep: 표시 안 된 객체 메모리 회수</li>
+</ul>
+
+<p>끝.</p>
+
+<h3 id="25-gc-발동-조건-짧게">2.5) GC 발동 조건 (짧게)</h3>
+<hr />
+
+<p>GC는 고정 주기로 도는 게 아님.
+보통 아래 조건에서 발동함.</p>
+
+<ul>
+  <li>Young 영역(Eden) 가득 참</li>
+  <li>Old 영역 압박 증가</li>
+  <li>할당 속도가 회수 속도보다 빠름</li>
+  <li>JVM/GC 휴리스틱이 회수 필요하다고 판단</li>
+</ul>
+
+<p>즉, 시간 기준이 아니라 “메모리 압박 + 할당 패턴” 기준임.</p>
+
+<h3 id="3-동작-순서">3) 동작 순서</h3>
+<hr />
+
+<ol>
+  <li>GC Root부터 시작</li>
+  <li>도달 가능한 객체 전부 Mark</li>
+  <li>Mark 안 된 객체 Sweep</li>
+</ol>
+
+<p>여기서 GC Root는 보통</p>
+<ul>
+  <li>스택 지역변수 참조</li>
+  <li>static 참조</li>
+  <li>실행 중 스레드 참조</li>
+</ul>
+
+<!--
+```mermaid
+flowchart TD
+  A[GC Root
+Stack/Static/Thread] -->
+<p>B[Reachable Object]
+  B –&gt; C[Reachable Object]
+  A –&gt; D[Reachable Object]
+  E[Unreachable Object] –&gt; F[Sweep 대상]
+```
+–&gt;</p>
+
+<h3 id="4-실무에서-체감되는-순간">4) 실무에서 체감되는 순간</h3>
+<hr />
+
+<p>GC가 도는 동안 일부 구간은 멈춤(STW) 발생 가능.</p>
+
+<p>증상:</p>
+<ul>
+  <li>평균 latency는 괜찮음</li>
+  <li>p95/p99만 순간적으로 튐</li>
+  <li>요청 타임아웃 간헐 발생</li>
+</ul>
+
+<h3 id="5-자주-하는-오해-2개">5) 자주 하는 오해 2개</h3>
+<hr />
+
+<p>오해 1) GC가 알아서 다 최적화해준다</p>
+<ul>
+  <li>GC는 청소부임. 객체 생성/참조 구조가 나쁘면 한계 있음.</li>
+</ul>
+
+<p>오해 2) 메모리 넉넉하면 GC 문제 없다</p>
+<ul>
+  <li>메모리 커도 pause 패턴/할당 속도 때문에 문제 날 수 있음.</li>
+</ul>
+
+<h3 id="6-체크리스트-3개">6) 체크리스트 3개</h3>
+<hr />
+
+<ul>
+  <li>객체를 오래 잡는 static/캐시 참조 있는지</li>
+  <li>불필요한 객체 생성이 급증하는 코드 경로 있는지</li>
+  <li>GC 로그에서 pause time/p99 상승 구간 겹치는지</li>
+</ul>
+
+<h3 id="7-요약">7) 요약</h3>
+<hr />
+
+<p>Mark and Sweep 핵심은 간단함.</p>
+
+<ul>
+  <li>참조 닿으면 생존</li>
+  <li>참조 끊기면 회수</li>
+</ul>
+
+<p>실무 포인트는
+GC 이론보다 “지연 구간과 GC를 같이 보는 습관”임.</p>]]></content><author><name>hr_k</name><email>roovcloudy@gmail.com</email></author><category term="cs" /><category term="jvm" /><summary type="html"><![CDATA[overview]]></summary></entry><entry><title type="html">Prometheus Quick Start for Spring Boot</title><link href="https://hrllk.github.io//cs/observability/spring-boot-prometheus-dependency/" rel="alternate" type="text/html" title="Prometheus Quick Start for Spring Boot" /><published>2026-02-13T00:00:00+00:00</published><updated>2026-02-13T00:00:00+00:00</updated><id>https://hrllk.github.io//cs/observability/spring-boot-prometheus-dependency</id><content type="html" xml:base="https://hrllk.github.io//cs/observability/spring-boot-prometheus-dependency/"><![CDATA[<h2 id="prometheus-quick-start-for-spring-boot">Prometheus Quick Start for Spring Boot</h2>
+
+<h3 id="prerequisites">Prerequisites</h3>
+
+<ul>
+  <li><strong>Actuator</strong>
+    <ul>
+      <li>애플리케이션 상태(health, metrics)를 외부에 노출하는 기능</li>
+      <li>한 줄 요약: <em>노출</em></li>
+    </ul>
+  </li>
+  <li><strong>Prometheus</strong>
+    <ul>
+      <li>노출된 메트릭을 주기적으로 수집(scrape)하는 모니터링 시스템</li>
+      <li>한 줄 요약: <em>수집</em></li>
+    </ul>
+  </li>
+</ul>
+
+<hr />
+
+<h2 id="1-의존성-추가">1. 의존성 추가</h2>
+
+<div class="language-groovy highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">dependencies</span> <span class="o">{</span>
+  <span class="n">implementation</span> <span class="s1">'org.springframework.boot:spring-boot-starter-actuator'</span>
+  <span class="n">runtimeOnly</span> <span class="s1">'io.micrometer:micrometer-registry-prometheus'</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>의존성만 추가했다고 끝이 아니며,<br />
+자동 설정되는 부분과 직접 설정해야 할 부분을 구분해야함.</p>
+
+<hr />
+
+<h2 id="2-의존성-추가-시-자동으로-생기는-변화">2. 의존성 추가 시 자동으로 생기는 변화</h2>
+
+<h3 id="1-메트릭-수집-기반-생성">1) 메트릭 수집 기반 생성</h3>
+
+<ul>
+  <li>JVM</li>
+  <li>HTTP 요청</li>
+  <li>스레드풀</li>
+  <li>GC</li>
+</ul>
+
+<p>등의 메트릭이 수집 가능 상태가 됨.</p>
+
+<h3 id="2-actuatorprometheus-엔드포인트-생성-가능">2) <code class="language-plaintext highlighter-rouge">/actuator/prometheus</code> 엔드포인트 생성 가능</h3>
+
+<p>Prometheus 포맷으로 메트릭을 노출하는 엔드포인트가 활성화됨.</p>
+
+<hr />
+
+<h2 id="3-필수-설정">3. 필수 설정</h2>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">management</span><span class="pi">:</span>
+  <span class="na">endpoints</span><span class="pi">:</span>
+    <span class="na">web</span><span class="pi">:</span>
+      <span class="na">exposure</span><span class="pi">:</span>
+        <span class="na">include</span><span class="pi">:</span> <span class="s">health,info,prometheus</span>
+  <span class="na">endpoint</span><span class="pi">:</span>
+    <span class="na">prometheus</span><span class="pi">:</span>
+      <span class="na">access</span><span class="pi">:</span> <span class="s">unrestricted</span>
+</code></pre></div></div>
+
+<h3 id="주의사항">주의사항</h3>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">exposure.include</code>에 <code class="language-plaintext highlighter-rouge">prometheus</code>가 없으면 엔드포인트가 노출되지 않음.</li>
+  <li>운영 환경에서는 접근 제어(네트워크/인증) 설계 필요.</li>
+</ul>
+
+<hr />
+
+<h2 id="4-동작-확인-방법">4. 동작 확인 방법</h2>
+
+<h3 id="1-애플리케이션-실행">1) 애플리케이션 실행</h3>
+
+<h3 id="2-curl-확인">2) curl 확인</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl http://localhost:8080/actuator/prometheus
+</code></pre></div></div>
+
+<h3 id="3-아래-항목이-보이면-정상">3) 아래 항목이 보이면 정상</h3>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge"># HELP</code></li>
+  <li><code class="language-plaintext highlighter-rouge"># TYPE</code></li>
+  <li><code class="language-plaintext highlighter-rouge">jvm_</code></li>
+  <li><code class="language-plaintext highlighter-rouge">http_server_requests_seconds</code></li>
+</ul>
+
+<hr />
+
+<h2 id="5-prometheus-서버에서-확인">5. Prometheus 서버에서 확인</h2>
+
+<p>Spring Boot가 정상이면, 이제 Prometheus 서버가 수집 중인지 확인함.</p>
+
+<h3 id="확인할-메트릭-3가지">확인할 메트릭 3가지</h3>
+
+<pre><code class="language-promql">up{job="my-spring-app"}
+</code></pre>
+
+<ul>
+  <li>1이면 수집 성공</li>
+</ul>
+
+<pre><code class="language-promql">scrape_duration_seconds{job="my-spring-app"}
+</code></pre>
+
+<ul>
+  <li>수집 지연 확인</li>
+</ul>
+
+<pre><code class="language-promql">scrape_samples_scraped{job="my-spring-app"}
+</code></pre>
+
+<ul>
+  <li>수집된 메트릭 수 확인함</li>
+</ul>
+
+<hr />
+
+<h2 id="6-자주-겪는-문제">6. 자주 겪는 문제</h2>
+
+<h3 id="404-에러">404 에러</h3>
+
+<ul>
+  <li>원인: actuator exposure 설정 누락</li>
+</ul>
+
+<h3 id="target-down">Target DOWN</h3>
+
+<ul>
+  <li>원인: URL/포트 불일치</li>
+  <li>컨테이너 네트워크 문제</li>
+  <li>방화벽</li>
+</ul>
+
+<h3 id="값이-이상함">값이 이상함</h3>
+
+<ul>
+  <li>단위(ms ↔ s) 해석 실수</li>
+  <li>라벨 조건 과다/누락</li>
+</ul>
+
+<hr />
+
+<h2 id="7-체크리스트">7. 체크리스트</h2>
+
+<ul>
+  <li>의존성 추가 완료</li>
+  <li>actuator exposure 설정 확인</li>
+  <li><code class="language-plaintext highlighter-rouge">/actuator/prometheus</code> 응답 확인</li>
+  <li>Prometheus target <code class="language-plaintext highlighter-rouge">up=1</code></li>
+  <li>Grafana p95/p99 패널 정상 연결</li>
+</ul>
+
+<hr />
+
+<h2 id="한-줄-정리">한 줄 정리</h2>
+
+<p>Spring Boot Prometheus 연동은</p>
+
+<p><strong>의존성 추가 → Actuator 노출 → Prometheus Scrape 설정 → Target 확인</strong></p>]]></content><author><name>hr_k</name><email>roovcloudy@gmail.com</email></author><category term="cs" /><category term="observability" /><summary type="html"><![CDATA[Prometheus Quick Start for Spring Boot]]></summary></entry><entry><title type="html">cs roadmap</title><link href="https://hrllk.github.io//cs/cs-map-for-backend/" rel="alternate" type="text/html" title="cs roadmap" /><published>2026-02-12T00:00:00+00:00</published><updated>2026-02-12T00:00:00+00:00</updated><id>https://hrllk.github.io//cs/cs-map-for-backend</id><content type="html" xml:base="https://hrllk.github.io//cs/cs-map-for-backend/"><![CDATA[<h3 id="overview">overview</h3>
+<hr />
+
+<p>CS는 많이 보는 게 아니라 순서가 중요함.
+백엔드 기준 핵심 축은 4개.</p>
+
+<ol>
+  <li>운영체제</li>
+  <li>네트워크</li>
+  <li>데이터베이스</li>
+  <li>분산시스템</li>
+</ol>
+
+<p>이 4개가 성능/장애 원인을 설명하는 기본 틀.</p>
+
+<h3 id="1-운영체제">1) 운영체제</h3>
+<hr />
+
+<p>CPU, 메모리, 스레드 실행을 관리.
+스레드 과다하면 컨텍스트 스위칭 늘고 p99 튐.
+메모리 압박 오면 GC/페이지폴트로 지연 커짐.</p>
+
+<blockquote>
+  <p>운영체제 = 코드가 실제로 도는 바닥 조건.</p>
+</blockquote>
+
+<p><strong>예시</strong></p>
+<ul>
+  <li>증상: CPU 50%인데 API 느림</li>
+  <li>실제: 스레드 500개라 run queue 길어짐, 스위칭 비용으로 p99 악화됨</li>
+  <li>조치: 스레드풀 축소 + 작업 분리(CPU/I-O)</li>
+</ul>
+
+<h3 id="2-네트워크">2) 네트워크</h3>
+<hr />
+
+<p>요청은 코드만 빠르다고 끝 아님.
+DNS, TCP, TLS, HTTP 비용이 계속 붙음.
+RTT 크면 같은 로직도 체감 느림.</p>
+
+<blockquote>
+  <p>네트워크 = 요청 이동 비용.</p>
+</blockquote>
+
+<p><strong>예시</strong></p>
+<ul>
+  <li>증상: 로직 20ms인데 사용자 체감 400ms</li>
+  <li>실제: DNS 지연 + TLS 재수립 + 원거리 RTT 누적</li>
+  <li>조치: keep-alive, connection reuse, DNS 캐시 점검</li>
+</ul>
+
+<h3 id="3-데이터베이스">3) 데이터베이스</h3>
+<hr />
+
+<p>대부분 병목은 결국 DB에서 터짐.
+인덱스/실행계획/락/트랜잭션 모르면 성능 급락.
+DB 풀 설정도 처리량에 직접 영향 줌.</p>
+
+<blockquote>
+  <p>DB = 정확성과 성능의 타협점.</p>
+</blockquote>
+
+<p><strong>예시</strong></p>
+<ul>
+  <li>증상: 특정 API만 갑자기 2초대</li>
+  <li>실제: 인덱스 미스 + 풀스캔 + 락 대기</li>
+  <li>조치: 실행계획 확인, 인덱스 보강, 트랜잭션 범위 축소</li>
+</ul>
+
+<h3 id="4-분산시스템">4) 분산시스템</h3>
+<hr />
+
+<p>스케일아웃하면 처리량은 늘지만 복잡도도 같이 늘어남.
+캐시 정합성, 재시도 폭증, 장애 전파가 대표 이슈.</p>
+
+<blockquote>
+  <p>분산 = 확장성과 복잡성의 교환.</p>
+</blockquote>
+
+<p><strong>예시</strong></p>
+<ul>
+  <li>증상: 한 서비스 장애가 전체 장애로 번짐</li>
+  <li>실제: timeout 길고 retry 무제한이라 재시도 폭풍 발생</li>
+  <li>조치: timeout 단축, 지수 백오프, 서킷브레이커 적용</li>
+</ul>
+
+<h3 id="연결해서-보기">연결해서 보기</h3>
+<hr />
+
+<p>“API 느림” 하나도 보통 복합 원인.</p>
+
+<ul>
+  <li>OS: run queue 증가, 스레드 경합</li>
+  <li>Network: RTT 증가, 연결 재수립</li>
+  <li>DB: 슬로우쿼리, 락 대기</li>
+  <li>Distributed: 재시도 폭증, 캐시 스탬피드</li>
+</ul>
+
+<p>단일 원인 찾는 습관 버리고 계층별로 같이 봐야 함.</p>]]></content><author><name>hr_k</name><email>roovcloudy@gmail.com</email></author><category term="cs" /><summary type="html"><![CDATA[overview]]></summary></entry><entry><title type="html">Prometheus는 왜 Pull 모델을 쓰는가</title><link href="https://hrllk.github.io//cs/observability/prometheus-pull-vs-push/" rel="alternate" type="text/html" title="Prometheus는 왜 Pull 모델을 쓰는가" /><published>2026-02-12T00:00:00+00:00</published><updated>2026-02-12T00:00:00+00:00</updated><id>https://hrllk.github.io//cs/observability/prometheus-pull-vs-push</id><content type="html" xml:base="https://hrllk.github.io//cs/observability/prometheus-pull-vs-push/"><![CDATA[<h3 id="overview">overview</h3>
+<hr />
+
+<p>Prometheus는 기본적으로 Pull 모델이다.
+즉, Prometheus가 직접 타겟을 주기적으로 긁어온다.</p>
+
+<h3 id="push-vs-pull">Push vs Pull</h3>
+<hr />
+
+<p>핵심 질문은 이거다.</p>
+<ul>
+  <li>
+    <p>왜 Push가 아니라 Pull인가?</p>
+  </li>
+  <li>Pull: 수집 서버가 가져감</li>
+  <li>Push: 애플리케이션이 보냄</li>
+</ul>
+
+<h3 id="prometheus가-pull을-선택한-이유">Prometheus가 Pull을 선택한 이유</h3>
+<hr />
+
+<ol>
+  <li><strong>타겟 상태 확인이 쉬움</strong>
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">up</code> 지표로 수집 성공/실패 바로 확인 가능</li>
+    </ul>
+  </li>
+  <li><strong>중앙에서 수집 주기/정책 통제 가능</strong>
+    <ul>
+      <li>scrape interval, timeout, relabeling을 한 곳에서 관리</li>
+    </ul>
+  </li>
+  <li><strong>서비스 디스커버리와 궁합이 좋음</strong>
+    <ul>
+      <li>컨테이너/오토스케일 환경에서 타겟 자동 발견이 편함</li>
+    </ul>
+  </li>
+  <li><strong>신뢰성 있는 수집 경로 확보</strong>
+    <ul>
+      <li>애플리케이션 코드에 전송 로직 부담이 줄어듦</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="체크리스트">체크리스트</h3>
+<hr />
+
+<ul>
+  <li>장기 실행 서비스인가? → Pull 우선</li>
+  <li>단기/일회성 잡인가? → Pushgateway 고려</li>
+  <li><code class="language-plaintext highlighter-rouge">up</code> 모니터링이 잡혀있는가?</li>
+  <li>scrape timeout이 서비스 응답시간보다 짧지 않은가?</li>
+</ul>
+
+<h3 id="요약">요약</h3>
+<hr />
+
+<p>Prometheus의 기본은 Pull이다.</p>
+<ul>
+  <li>상태확인 쉬움</li>
+  <li>중앙관리 쉬움</li>
+  <li>자동발견과 잘 맞음</li>
+</ul>
+
+<p>단, 배치/단기 작업은 Pushgateway로 보완 가능.</p>]]></content><author><name>hr_k</name><email>roovcloudy@gmail.com</email></author><category term="cs" /><category term="observability" /><summary type="html"><![CDATA[overview]]></summary></entry><entry><title type="html">시계열 데이터와 샘플링 주기 기본</title><link href="https://hrllk.github.io//cs/observability/time-series-and-sampling-basics/" rel="alternate" type="text/html" title="시계열 데이터와 샘플링 주기 기본" /><published>2026-02-12T00:00:00+00:00</published><updated>2026-02-12T00:00:00+00:00</updated><id>https://hrllk.github.io//cs/observability/time-series-and-sampling-basics</id><content type="html" xml:base="https://hrllk.github.io//cs/observability/time-series-and-sampling-basics/"><![CDATA[<h3 id="overview">overview</h3>
+<hr />
+
+<p>Prometheus/Grafana 처음 잡을 때 제일 먼저 헷갈리는 게 시계열 데이터임.
+핵심은 시계열과 샘플링 주기이다</p>
+<ul>
+  <li>시계열(time series): 시간축을 가진 메트릭</li>
+  <li>샘플링 주기(scrape interval): 몇 초마다 수집할지</li>
+</ul>
+
+<h3 id="시계열-데이터란">시계열 데이터란?</h3>
+<hr />
+
+<p>시간순으로 찍은 데이터이며,
+같은 유형의 메트릭이 반복적으로 샘플링되는 것을 의미한다.</p>
+
+<p>예시)</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">http_server_requests_seconds_count{job="api",uri="/login"} 124</code> (18:10:00)</li>
+  <li><code class="language-plaintext highlighter-rouge">http_server_requests_seconds_count{job="api",uri="/login"} 131</code> (18:10:15)</li>
+  <li><code class="language-plaintext highlighter-rouge">http_server_requests_seconds_count{job="api",uri="/login"} 140</code> (18:10:30)</li>
+</ul>
+
+<p>로그가 시간순으로 찍히듯,
+메트릭도 시간축 기준으로 누적/변화가 기록된다.</p>
+
+<p>구성 요소:</p>
+<ul>
+  <li>metric name: 어떤 지표인지</li>
+  <li>labels: 어느 서비스/엔드포인트인지</li>
+  <li>timestamp: 언제 수집됐는지</li>
+  <li>value: 그 시점의 값</li>
+</ul>
+
+<h3 id="scrape-interval샘플링-주기">scrape interval(샘플링 주기)</h3>
+<hr />
+
+<p>Prometheus는 정해진 주기마다 endpoint를 긁어오며
+그 주기를 <code class="language-plaintext highlighter-rouge">scrape interval</code> 이라 한다.</p>
+
+<p>예시:</p>
+<ul>
+  <li>scrape interval = 15s</li>
+  <li>1분에 4개 샘플 생김</li>
+</ul>
+
+<h3 id="주기-설정-트레이드오프">주기 설정 트레이드오프</h3>
+<hr />
+
+<p>주기 설정은 정확도와 비용의 균형 문제다.</p>
+
+<ul>
+  <li>짧은 주기(예: 5s~10s)
+    <ul>
+      <li>장점: 급격한 스파이크 감지 유리</li>
+      <li>단점: 저장량 증가, Prometheus/타겟 부하 증가</li>
+    </ul>
+  </li>
+  <li>긴 주기(예: 30s~60s)
+    <ul>
+      <li>장점: 시스템 부하와 비용 절감</li>
+      <li>단점: 짧은 장애 구간이나 순간 튐을 놓칠 수 있음</li>
+    </ul>
+  </li>
+</ul>
+
+<p>처음엔 15s 또는 30s로 시작하고,
+서비스 특성(트래픽/중요도/비용)에 맞게 조정하는 게 안전하다.</p>
+
+<h3 id="잘못된-오해">잘못된 오해</h3>
+<hr />
+
+<ol>
+  <li>점 하나 보고 장애 단정
+    <ul>
+      <li>시계열은 구간/추세로 봐야 함</li>
+    </ul>
+  </li>
+  <li>그래프가 매끈하면 정상이라고 판단
+    <ul>
+      <li>샘플링이 너무 거칠면 스파이크가 뭉개져 보일 수 있음</li>
+    </ul>
+  </li>
+  <li>평균만 보고 괜찮다 판단
+    <ul>
+      <li>p95/p99 같이 봐야 실제 체감 지연 보임</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="prometheus에서-바로-확인할-것">Prometheus에서 바로 확인할 것</h3>
+<hr />
+
+<p>초보자는 아래 3개만 먼저 보면 된다.</p>
+
+<pre><code class="language-promql">up
+</code></pre>
+<ul>
+  <li>의미: 수집 성공 여부</li>
+  <li>해석: <code class="language-plaintext highlighter-rouge">1</code> = 정상, <code class="language-plaintext highlighter-rouge">0</code> = 실패</li>
+  <li>예시: <code class="language-plaintext highlighter-rouge">up{job="jgitkins-server"}=0</code> 이면 해당 타겟 스크랩 실패 상태</li>
+  <li>먼저 보는 이유: 수집이 안 되면 다른 그래프도 신뢰 불가</li>
+</ul>
+
+<pre><code class="language-promql">scrape_duration_seconds
+</code></pre>
+<ul>
+  <li>의미: Prometheus가 타겟을 긁는 데 걸린 시간</li>
+  <li>해석: 값이 갑자기 커지면 타겟 응답 지연/네트워크 문제 의심</li>
+  <li>예시: 평소 0.05s인데 0.8s로 튀면 수집 지연 신호</li>
+  <li>체크 포인트: 주기적으로 상승하는지, 특정 타겟만 높은지</li>
+</ul>
+
+<pre><code class="language-promql">scrape_samples_scraped
+</code></pre>
+<ul>
+  <li>의미: 한 번 수집할 때 가져온 샘플 개수</li>
+  <li>해석: 평소보다 급감하면 exporter 이상/설정 변경 가능성</li>
+  <li>예시: 1200 → 150으로 급감하면 메트릭 노출 누락 가능성</li>
+  <li>체크 포인트: 배포 직후 값이 갑자기 변했는지</li>
+</ul>
+
+<p>한 줄 팁:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">up</code> 확인 → <code class="language-plaintext highlighter-rouge">scrape_duration_seconds</code> 확인 → <code class="language-plaintext highlighter-rouge">scrape_samples_scraped</code> 확인
+순서로 보면 대부분의 “수집 문제”를 빠르게 좁힐 수 있다.</li>
+</ul>
+
+<h3 id="체크리스트">체크리스트</h3>
+<hr />
+
+<ul>
+  <li>scrape interval이 서비스 성격에 맞는지</li>
+  <li>타겟 up이 안정적으로 1인지</li>
+  <li>스파이크가 실제인지(주기/step 영향인지)</li>
+  <li>대시보드 단위(ms/s) 표기가 맞는지</li>
+</ul>
+
+<h3 id="요약">요약</h3>
+<hr />
+
+<p>관측성 입문은 복잡한 쿼리보다 먼저,
+<strong>시계열 + 샘플링 주기 감각</strong>부터 잡는 게 정답.</p>]]></content><author><name>hr_k</name><email>roovcloudy@gmail.com</email></author><category term="cs" /><category term="observability" /><summary type="html"><![CDATA[overview]]></summary></entry><entry><title type="html">Git Pull Event Packfile Retrieval Deep Dive</title><link href="https://hrllk.github.io//git/Git-Pull-Event-Packfile-Retrieval-Deep-Dive/" rel="alternate" type="text/html" title="Git Pull Event Packfile Retrieval Deep Dive" /><published>2025-11-18T00:00:00+00:00</published><updated>2025-11-18T00:00:00+00:00</updated><id>https://hrllk.github.io//git/Git-Pull-Event-Packfile-Retrieval-Deep-Dive</id><content type="html" xml:base="https://hrllk.github.io//git/Git-Pull-Event-Packfile-Retrieval-Deep-Dive/"><![CDATA[<h2 id="overview">Overview</h2>
+<p>본문은 <code class="language-plaintext highlighter-rouge">git pull</code> 이벤트 발생시 <code class="language-plaintext highlighter-rouge">Discovery</code>, <code class="language-plaintext highlighter-rouge">Negotiation</code> 프로세스 수행을 전제로 마지막 단계인 <code class="language-plaintext highlighter-rouge">Packfile Retrieval</code>를 설명한다. <code class="language-plaintext highlighter-rouge">refs</code> 를 통해 <code class="language-plaintext highlighter-rouge">wants/have</code> 가 도출되었다면 이제 어떻게 서버와 주고받는지를 살펴보기 위함</p>
+
+<p><br /></p>
+
+<h2 id="previous">Previous</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>참고 포스트</th>
+      <th>핵심 요약</th>
+      <th>Packfile Retrieval과의 관계</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">What Happen When Pull Event On Bare</code></td>
+      <td>pull 이벤트 전체 시퀀스</td>
+      <td>3단계(Fetch/Pack) 흐름 확장</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Git Adverties Refs Deep Dive</code></td>
+      <td><code class="language-plaintext highlighter-rouge">/info/refs</code> → refs 광고 구조</td>
+      <td>어떤 SHA들을 알아냈는지 기반 데이터</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Git Negotiation Deep Dive</code></td>
+      <td>wants/haves 산출 원리</td>
+      <td>서버가 만들 pack 대상 결정</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Git Pull Event Trace Log(client/server)</code></td>
+      <td>실제 trace 로그</td>
+      <td>POST /git-upload-pack 구간 근거</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><br /></p>
+
+<h2 id="packfile-retrieval-flow">Packfile Retrieval Flow</h2>
+
+<h3 id="1-packfile-이란">1. Packfile 이란?</h3>
+<blockquote>
+  <p>여러 Git 객체(blob, tree, commit)를 하나의 파일로 묶어 압축한 컨테이너 형식</p>
+</blockquote>
+
+<h4 id="왜-사용하는가">왜 사용하는가?</h4>
+<p>Git 객체(file(blob), dir(tree), commit)은 개별 파일로 각각 저장된다. <br />
+하지만 네트워크 전송시 아래 문제들로 각 파일을 하나의 Packfile로 묶어 전송한다.</p>
+
+<ul>
+  <li>전송할 파일수가 많은경우 느려짐</li>
+  <li>중복 객체가 많으면 비효율적</li>
+  <li>델타 압축 사용 불가</li>
+</ul>
+
+<h4 id="packfile-목적">Packfile 목적:</h4>
+<ol>
+  <li>객체를 하나의 스트림으로 전달 가능</li>
+  <li>중복 제거</li>
+  <li>Delta 압축(같은 파일의 수정본끼리의 차이만 전송함)</li>
+  <li>자연스러운 I/O 감소(네트워크 전송량 최소화)
+<br /></li>
+</ol>
+
+<h3 id="2-packfile-생성과정">2. Packfile 생성과정</h3>
+<p>이 단계에서는 전체적인 흐름만 설명하고, 세부 알고리즘은 별도 포스트로 분리 예정<br />
+핵심은 Packfile 생성은 단순히 “객체 모아서 압축” 수준이 아니라, “Git이 네트워크 얼마나 최적화하는가”가 핵심</p>
+
+<h4 id="2-1-필요-객체-계산object-selection">2-1. 필요 객체 계산(Object Selection)</h4>
+<p>Negotiation 절차 이후 클라이언트로부터 요청을 받은 서버는 이미 다음정보를 가진다.</p>
+<ul>
+  <li><strong>wants</strong>: 클라이언트가 필요한 최종커밋</li>
+  <li><strong>haves</strong>: 클라이언트가 이미 가진 커밋</li>
+</ul>
+
+<p>서버는 wants를 기준으로 필요한 객체를 계산하며, 이 과정은 <code class="language-plaintext highlighter-rouge">DFS/BFS</code> 기반 그래프 탐색으로 처리된다.</p>
+
+<!-- TODO: -->
+<p>자세한 탐색 알고리즘은 아래 분기 참고</p>
+<ul>
+  <li>Git Object Selection Deep Dive (DFS/BFS &amp; Bitmap)</li>
+</ul>
+
+<h4 id="2-2-packfile-생성-compression--optimization">2-2. Packfile 생성 (Compression &amp; Optimization)</h4>
+<p>Packfile 생성에는 다양한 최적화가 적용되지만, 본문에서는 “어떤 최적화가 있다 정도만 언급”</p>
+<ul>
+  <li>delta compression</li>
+  <li>thin-pack</li>
+  <li>ofs-delta</li>
+  <li>bitmap index</li>
+</ul>
+
+<p>본문에서 각 기술을 모두 설명하면 흐름이 복잡해지므로, 상세 내용은 분리한다.
+<!-- TODO: --></p>
+<ul>
+  <li>Git Delta Compression Deep Dive</li>
+  <li>Git Thin-Pack Explained</li>
+  <li>Git Bitmap Index Explained
+<br /></li>
+</ul>
+
+<!-- Git Packfile 생성시 가장 중요 단계이다.  -->
+<!-- 저장소가 같은파일에대해 여러버전을 많이 가질수록 효과적 -->
+
+<!-- ``` -->
+<!-- README.md (hash sha v1) -->
+<!-- README.md (hash sha v2) -->
+<!-- README.md (hash sha v3) -->
+<!-- ``` -->
+<!-- 각각을 전부 전송하는 대신 -->
+<!---->
+<!-- ``` -->
+<!-- README.md (hash sha v1) (full object) -->
+<!-- README.md (hash sha v2) (v1 -> v2) -->
+<!-- README.md (hash sha v3) (v2 -> v3) -->
+<!---->
+<!-- ``` -->
+<!---->
+<!-- 위와 같은 방식으로 파일 차이만 최소로 기록한다. <br> -->
+<!-- 위 방법으로 Packfile 크기를 많이 줄일 수 있다. -->
+<!---->
+<!-- #### 2-3. Think Pack -->
+<!-- Think-pack은 Negotiation 단계에서 얻은 `haves` 목록을 기반으로 서버가 클라이언트가 가진 객체는 Packfile에서 제외시키는 전략이다. -->
+<!---->
+<!-- - 클라이언트가 이미 가지고있는 정보 제외 -->
+<!---->
+<!-- 덕분에 서버는 전송량 자체를 줄일 수 있고, 클라이언트는 누락된 내용을 이미 보유하고있으므로 문제 없음 -->
+<!---->
+<!---->
+<!-- #### 2-4. Bitmap Index -->
+<!-- 대형 monorepo에서는 "필요한 객체 계산" 자체가 오래걸리는데, 이를 최적화하는것이 **bitmap index**. -->
+<!-- - commit -> reachable objects -->
+<!---->
+
+<h3 id="3-packfile-전달side-band-stream">3. Packfile 전달(Side-Band Stream)</h3>
+<p>Packfile 데이터, Progress, Error 메시지를
+하나의 스트림에서 multiplex 하기 위해 side-band 를 사용한다.</p>
+
+<ul>
+  <li>채널 1 = Packfile</li>
+  <li>채널 2 = 진행률(stderr)</li>
+  <li>채널 3 = 에러</li>
+</ul>
+
+<p>마찬가지로 본문에서 Packfile Retrieval가 핵심이므로 상세한 내용은 분기한다.</p>
+
+<!-- TODO:  -->
+<ul>
+  <li>Git Side-Band Protocol Explained
+<!-- Packfile이 완성되면 서버에서 클라이언트로 새로운 TCP 스트림을 만들어 아래 세가지정보를 동시에 전송한다. -->
+<!-- - Packfile 데이터 -->
+<!-- - Progress 메세지 -->
+<!-- - Error 메세지 -->
+<!-- 위 3개의 항목을 구분하기위해 Git자체적으로 `side-band`라는 다중화 구조를 사용함 -->
+<!---->
+<!-- #### 3-1) 실제 전송 예시 -->
+<!---->
+<!-- ``` text -->
+<!-- 000e 02Counting objects: 1, done. -->
+<!-- 0040 01<PACKFILE DATA...> -->
+<!-- 000f 02Compressing objects: 100% -->
+<!-- 000d 01<PACKFILE DATA...> -->
+<!-- ``` --></li>
+</ul>
+
+<p><br /></p>]]></content><author><name>hr_k</name><email>roovcloudy@gmail.com</email></author><category term="Git" /><summary type="html"><![CDATA[Overview 본문은 git pull 이벤트 발생시 Discovery, Negotiation 프로세스 수행을 전제로 마지막 단계인 Packfile Retrieval를 설명한다. refs 를 통해 wants/have 가 도출되었다면 이제 어떻게 서버와 주고받는지를 살펴보기 위함]]></summary></entry><entry><title type="html">Git Negotiation Deep Dive</title><link href="https://hrllk.github.io//git/Git-Pull-Event-Negotiation-Deep-Dive/" rel="alternate" type="text/html" title="Git Negotiation Deep Dive" /><published>2025-11-13T00:00:00+00:00</published><updated>2025-11-13T00:00:00+00:00</updated><id>https://hrllk.github.io//git/Git-Pull-Event-Negotiation-Deep-Dive</id><content type="html" xml:base="https://hrllk.github.io//git/Git-Pull-Event-Negotiation-Deep-Dive/"><![CDATA[<h2 id="overview">Overview</h2>
+
+<p>Git의 fetch/pull 과정에서 Negotiation은 “클라이언트가 서버로부터 어떤 commit을 받아와야 하는지” 결정하기 위한 핵심 프로세스이며, 본문에서는 해당 내용에 대해 기술</p>
+
+<h2 id="negotiation란">Negotiation란?</h2>
+
+<p>Negotiation이란, 클라이언트가 서버로부터 어떤 commit을 받아와야 하는지 결정하는 과정을 의미하며 이전 포스트에서 Advertise-Refs 절차를 통해받아온 refs정보를 기반으로 이미 가지고있는지, 혹은 내가 모르는커밋인지(더 받아와야하는 커밋인지)를 판별하며 이 과정이 Negotiation을 의미한다. 그리고 이를 기반으로 want, have를 산출한다.</p>
+
+<ol>
+  <li>어떤 commit이 필요한지(want)</li>
+  <li>어떤 commit을 이미 갖고 있는지(have)</li>
+</ol>
+
+<h2 id="왜">왜?</h2>
+
+<p>Negotation 을 수행하는 요인은 <strong>효율성</strong> 때문 (네트웍 IO 최소화)
+클라이언트는 서버에 내가 뭘갖고있고, 뭘 원하는지(want와 have)를 알려 서버가 딱 필요한 만큼의 데이터를 제공하도록 하기 위함이며 Negotiation은 두 정보를 만드는 과정이자 데이터 전송을 극단적으로 최적화하는 핵심 프로세스이다.</p>
+
+<h2 id="flow">Flow</h2>
+
+<p>Advertise-Refs 이후, 클라이언트는 서버가 제공한 refs 정보를 토대로 wants, have를 도출하는 프로세스를 수행한다.</p>
+
+<h3 id="0-서버로부터-refs-정보-수신">0) 서버로부터 refs 정보 수신</h3>
+
+<h3 id="1-dag-탐색">1) DAG 탐색</h3>
+<p>클라이언트는 Advertised commit이 자기가 가진 commit graph안에 포함되어 있는지를 체크.</p>
+
+<h3 id="2-want-도출">2) want 도출</h3>
+
+<ul>
+  <li>포함 → up to date → 산출X</li>
+  <li>미포함 → 새로운커밋을의미 → want 포함케이스 즉, 클라이언트가 서버로부터 더이상 받아올 수 있다라고 판된되면, have 도출, Negotation 프로세스 뿐만 아니라 Pull/Fetch 프로세스가 전부 종료됨</li>
+</ul>
+
+<h3 id="3-have-도출">3) have 도출</h3>
+
+<p>클라이언트는 내가 가진 commit중에 서버도 알고 있을 것으로 판단되는 commit들을 have 목록에 넣음</p>
+
+<h2 id="diagram">Diagram</h2>
+<pre><code class="language-mermaid">sequenceDiagram
+    autonumber
+    participant Client
+    participant Server
+
+    Client-&gt;&gt;Server: GET /info/refs?service=git-upload-pack
+    Server--&gt;&gt;Client: Advertise refs&lt;br&gt;(tip commit hashes + capabilities)
+    alt Negotiation
+    Client-&gt;&gt;Client: Compare local vs remote refs
+    end
+    Client-&gt;&gt;Server: (no further request)
+    Client-&gt;&gt;Client: "Already up to date."
+    Client-&gt;&gt;Server: POST /git-upload-pack&lt;br&gt;(wants/haves negotiation)
+</code></pre>
+
+<h2 id="summary">Summary</h2>
+<p>Negotiation은 Advertise-Refs 이후, 클라이언트가 wants/haves 목록을 만드는 절차 » 꼭 필요한 데이터만 요청하기위한 절차</p>]]></content><author><name>hr_k</name><email>roovcloudy@gmail.com</email></author><category term="Git" /><summary type="html"><![CDATA[Overview]]></summary></entry><entry><title type="html">Git Adverties Refs Deep Dive</title><link href="https://hrllk.github.io//git/Git-Pull-Event-Adverties-Refs-Deep-Dive/" rel="alternate" type="text/html" title="Git Adverties Refs Deep Dive" /><published>2025-11-11T00:00:00+00:00</published><updated>2025-11-11T00:00:00+00:00</updated><id>https://hrllk.github.io//git/Git-Pull-Event-Adverties-Refs-Deep-Dive</id><content type="html" xml:base="https://hrllk.github.io//git/Git-Pull-Event-Adverties-Refs-Deep-Dive/"><![CDATA[<h2 id="overview">Overview</h2>
+
+<p>git pull 혹은 git fetch 명령은 단순히 “서버에서 파일을 받기위한 명령이아니라, 형상정보를 제공받기전에, 양쪽 저장소의 그래프(커밋 DAG) 비교가 선행되어야 하며, 해당 단계를 Advertise-Refs라 하며, 해당포스트에서는 이에대한 내용을 설명함.</p>
+
+<h2 id="단계">단계</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>단계</th>
+      <th>역할</th>
+      <th>요청/응답</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>①</td>
+      <td>Client → Server</td>
+      <td><code class="language-plaintext highlighter-rouge">/info/refs?service=git-upload-pack</code> 요청 (GET)</td>
+    </tr>
+    <tr>
+      <td>②</td>
+      <td>Server → Client</td>
+      <td>각 브랜치의 tip SHA(최신 커밋 해시)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="1-클라이언트--서버-inforefs-요청">1. 클라이언트 → 서버: /info/refs 요청</h3>
+
+<h4 id="http-요청-예시">HTTP 요청 예시</h4>
+<div class="language-http highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">GET</span> <span class="nn">/okgit/git/CMPART/repo4.git/info/refs?service=git-upload-pack</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Host</span><span class="p">:</span> <span class="s">localhost:8084</span>
+<span class="na">User-Agent</span><span class="p">:</span> <span class="s">git/2.47.0</span>
+<span class="na">Accept</span><span class="p">:</span> <span class="s">*/*</span>
+</code></pre></div></div>
+
+<h4 id="클라이언트-내부-동작-discovery">클라이언트 내부 동작 (discovery)</h4>
+<ol>
+  <li><code class="language-plaintext highlighter-rouge">git pull</code> 명령 실행 시, 내부적으로 <code class="language-plaintext highlighter-rouge">git fetch</code> 호출</li>
+  <li>클라이언트는 <code class="language-plaintext highlighter-rouge">/info/refs</code> 엔드포인트로 <strong>GET 요청</strong></li>
+</ol>
+
+<h3 id="2-서버--클라이언트-refs-광고-응답">2. 서버 → 클라이언트: refs 광고 응답</h3>
+
+<h3 id="2-서버--클라이언트-refs-광고-응답-1">2. 서버 → 클라이언트: refs 광고 응답</h3>
+<hr />
+
+<h4 id="서버-응답-예시-http-body">서버 응답 예시 (HTTP Body)</h4>
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>001e# service=git-upload-pack
+0000
+5451d6013b97bb6728ec8aa048ea208a9dae923a HEAD\0 include-tag multi_ack_detailed multi_ack ofs-delta side-band side-band-64k thin-pack no-progress agent=JGit/7.3.0 symref=HEAD:refs/heads/main
+19f8d70c656327448e14978578f8864344584011 refs/heads/feature/login
+d7dedb6ca08292dc602c36c2dd95ab0c1373c102 refs/heads/devs
+0000
+</code></pre></div></div>
+
+<h4 id="주요-구성-요소">주요 구성 요소</h4>
+<p>| 항목 | 설명 |
+|——|——|
+| <code class="language-plaintext highlighter-rouge"># service=git-upload-pack</code> | 이 서비스는 <strong>fetch/pull용(upload-pack)</strong> 이라는 선언 |
+| <code class="language-plaintext highlighter-rouge">HEAD</code> | 현재 기본 브랜치(보통 main/master)가 가리키는 커밋 |
+| <code class="language-plaintext highlighter-rouge">refs/heads/*</code> | 각 브랜치 이름 및 tip commit SHA |
+| <code class="language-plaintext highlighter-rouge">\0</code> 이후 문자열 | 서버가 지원하는 <strong>capability 목록</strong> |
+| <code class="language-plaintext highlighter-rouge">0000</code> | flush 패킷 (advertisement 종료) |</p>
+
+<h2 id="서버-동작방식">서버 동작방식</h2>
+
+<ol>
+  <li>클라이언트로부터 요청 수신 후 fetch 서비스 준비</li>
+  <li>저장소의 참조(ref) 목록 조회<br />
+→ 브랜치와 태그 등 주요 참조 대상 확인</li>
+  <li>각 참조가 가리키는 최신 커밋 해시 수집</li>
+  <li>지원 기능(capabilities) 목록 정리</li>
+  <li>패킷 규격에 맞춘 광고 정보 전송</li>
+</ol>
+
+<ul>
+  <li>단계 목적: 클라이언트의 동기화 필요 범위 파악</li>
+  <li>전송 데이터: 참조 이름, tip 해시, 지원 기능 목록</li>
+  <li>비전송 항목: 커밋 본문, 트리, 블롭 등 객체 데이터</li>
+</ul>
+
+<h2 id="advertise-refs-로그">Advertise-Refs 로그</h2>
+<hr />
+
+<h4 id="client-trace">Client TRACE</h4>
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>16:03:05.716606 http.c:872 =&gt; Send header: GET /info/refs?service=git-upload-pack
+16:03:05.799599 pkt-line.c:86 packet: git&lt; # service=git-upload-pack
+16:03:05.799616 pkt-line.c:86 packet: git&lt; 5451d6... HEAD\0 include-tag ...
+16:03:05.799637 pkt-line.c:86 packet: git&lt; 2dd5b7... refs/heads/devs
+16:03:05.799670 pkt-line.c:86 packet: git&lt; 0000
+</code></pre></div></div>
+
+<h4 id="server-trace">Server TRACE</h4>
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[INFO] GET /okgit/git/CMPART/repo4.git/info/refs
+[INFO] AdvertiseRefsHook advertiseRefs! discovery!: client: [::1]
+[INFO] refKey: [refs/heads/devs] = d7dedb6c...
+[INFO] refKey: [refs/heads/main] = 5451d6...
+</code></pre></div></div>
+
+<h2 id="advertise-refs-단계의-핵심-요약">Advertise-Refs 단계의 핵심 요약</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>관점</th>
+      <th>설명</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>클라이언트</strong></td>
+      <td>“서버야, 네가 가진 모든 브랜치의 최신 커밋 해시를 알려줘.”</td>
+    </tr>
+    <tr>
+      <td><strong>서버</strong></td>
+      <td>“내 main은 C, devs는 D, feature는 E야.” (각 tip SHA 광고)</td>
+    </tr>
+    <tr>
+      <td><strong>데이터 전송</strong></td>
+      <td>오직 각 브랜치의 최종 커밋 해시 + capabilities</td>
+    </tr>
+    <tr>
+      <td><strong>이 단계에서 커밋 내용 전송?</strong></td>
+      <td>❌ 전혀 없음</td>
+    </tr>
+    <tr>
+      <td><strong>목적</strong></td>
+      <td>이후 <code class="language-plaintext highlighter-rouge">upload-pack</code> 단계에서 필요한 커밋을 판단하기 위한 <strong>사전 discovery 단계</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- <div align="center"><a href="/2025/09/16/bare-repository/#refs">그러면.. refs 는 어디에서 사용되는가?</a></div> -->
+
+<h2 id="diagram">Diagram</h2>
+
+<pre><code class="language-mermaid">sequenceDiagram
+    autonumber
+    participant Client
+    participant Server
+
+    alt Advertise-Refs
+    Client-&gt;&gt;Server: GET /info/refs?service=git-upload-pack
+    Server--&gt;&gt;Client: Advertise refs&lt;br&gt;(tip commit hashes + capabilities)
+    else
+    end
+    Client-&gt;&gt;Client: Compare local vs remote refs
+        Client-&gt;&gt;Server: (no further request)
+        Client-&gt;&gt;Client: "Already up to date."
+        Client-&gt;&gt;Server: POST /git-upload-pack&lt;br&gt;(wants/haves negotiation)
+</code></pre>
+
+<h3 id="summary">Summary</h3>
+<hr />
+<p><code class="language-plaintext highlighter-rouge">Adverties</code> 단계는 Git 프로토콜의 핵심토대라 할 수 있으며, 해당 요청 한번으로 어떤 브랜치가 존재하고 각 브랜치가 어느커밋을 가르키고있는지 클라이언트가 뭘해야하는지 알려주는 연계에 해당됨</p>]]></content><author><name>hr_k</name><email>roovcloudy@gmail.com</email></author><category term="Git" /><summary type="html"><![CDATA[Overview]]></summary></entry><entry><title type="html">Git Pull Event Trace Log(client/server)</title><link href="https://hrllk.github.io//git/Git-Pull-Event-Trace/" rel="alternate" type="text/html" title="Git Pull Event Trace Log(client/server)" /><published>2025-11-11T00:00:00+00:00</published><updated>2025-11-11T00:00:00+00:00</updated><id>https://hrllk.github.io//git/Git-Pull-Event-Trace</id><content type="html" xml:base="https://hrllk.github.io//git/Git-Pull-Event-Trace/"><![CDATA[<h2 id="overview">Overview</h2>
+
+<p>git pull 실행 시 클라이언트 ↔ 서버 간 연계에 대한 트레이스</p>
+
+<h2 id="endpoint">Endpoint</h2>
+
+<ul>
+  <li>1단계 Discovery: GET {prefix}/info/refs?service=git-upload-pack [Adverties, Negotitation]</li>
+  <li>2단계 Fetching Packfile: POST {prefix}/git-upload-pack</li>
+</ul>
+
+<h2 id="step">Step</h2>
+
+<h3 id="1-discovery-advertise">1) Discovery Advertise</h3>
+
+<h4 id="1-1-advertise--client--server-refs-정보-요청-advertise-refs">1-1) Advertise :: Client → Server: refs 정보 요청 (Advertise-Refs)</h4>
+
+<ul>
+  <li>의미: git pull 이벤트와 함께 refs 정보 서버로 요청</li>
+  <li>엔드포인트: GET /info/refs?service=git-upload-pack
+    <div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>16:03:05.672103 git.c:479               trace: built-in: git pull --rebase
+16:03:05.676203 run-command.c:666       trace: run_command: git merge-base --fork-point refs/remotes/origin/devs devs
+16:03:05.676219 run-command.c:758       trace: start_command: /opt/homebrew/opt/git/libexec/git-core/git merge-base --fork-point refs/remotes/origin/devs devs
+16:03:05.688176 run-command.c:666       trace: run_command: git fetch --update-head-ok
+16:03:05.688226 run-command.c:758       trace: start_command: /opt/homebrew/opt/git/libexec/git-core/git fetch --update-head-ok
+16:03:05.695026 git.c:479               trace: built-in: git fetch --update-head-ok
+16:03:05.697631 run-command.c:666       trace: run_command: GIT_DIR=.git git remote-http origin http://localhost:8084/okgit/git/CMPART/repo4.git
+16:03:05.697640 run-command.c:758       trace: start_command: /opt/homebrew/opt/git/libexec/git-core/git remote-http origin http://localhost:8084/okgit/git/CMPART/repo4.git
+16:03:05.704320 git.c:781               trace: exec: git-remote-http origin http://localhost:8084/okgit/git/CMPART/repo4.git
+16:03:05.704639 run-command.c:666       trace: run_command: git-remote-http origin http://localhost:8084/okgit/git/CMPART/repo4.git
+16:03:05.704647 run-command.c:758       trace: start_command: /opt/homebrew/opt/git/libexec/git-core/git-remote-http origin http://localhost:8084/okgit/git/CMPART/repo4.git
+16:03:05.716170 http.c:913              == Info: Couldn't find host localhost in the .netrc file; using defaults
+16:03:05.716405 http.c:913              == Info: Host localhost:8084 was resolved.
+16:03:05.716409 http.c:913              == Info: IPv6: ::1
+16:03:05.716410 http.c:913              == Info: IPv4: 127.0.0.1
+16:03:05.716429 http.c:913              == Info:   Trying [::1]:8084...
+16:03:05.716576 http.c:913              == Info: Connected to localhost (::1) port 8084
+16:03:05.716603 http.c:860              =&gt; Send header, 0000000245 bytes (0x000000f5)
+16:03:05.716606 http.c:872              =&gt; Send header: GET /okgit/git/CMPART/repo4.git/info/refs?service=git-upload-pack HTTP/1.1
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<h4 id="1-2-advertise--server--client-refs-광고-응답">1-2) Advertise :: Server → Client: refs 광고 응답</h4>
+
+<ul>
+  <li>의미: 서버가 참조(브랜치/HEAD)와 capabilities를 광고(refs 엔드포인트로 요청을 받은 서버는 refs 정보를 도출해 클라이언트로 응답.)</li>
+</ul>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>2025-11-11 15:11:02 [DEBUG] [http-nio-8084-exec-7] o.o.t.g.i.c.filter.HttpLogFilter - HTTP Method: [GET], URI: [/okgit/git/CMPART/repo4.git/info/refs], SevletPath: [/git], PathInfo: [/CMPART/repo4.git/info/refs]
+2025-11-11 15:11:02 [INFO] [http-nio-8084-exec-7] o.o.t.g.i.config.GitHttpConfig - $$$ AdvertiseRefsHook advertiseRefs! discovery!: client: [0:0:0:0:0:0:0:1], repo: [/okgit/git/CMPART/repo4.git/info/refs]
+
+2025-11-11 15:11:02 [INFO] [http-nio-8084-exec-7] o.o.t.g.i.config.GitHttpConfig - refKey: [HEAD] || refValue: [SymbolicRef[HEAD -&gt; refs/heads/main=5451d6013b97bb6728ec8aa048ea208a9dae923a(-1)]]
+2025-11-11 15:11:02 [INFO] [http-nio-8084-exec-7] o.o.t.g.i.config.GitHttpConfig - refKey: [refs/heads/branchPushTest] || refValue: [Ref[refs/heads/branchPushTest=19f8d70c656327448e14978578f8864344584011(-1)]]
+2025-11-11 15:11:02 [INFO] [http-nio-8084-exec-7] o.o.t.g.i.config.GitHttpConfig - refKey: [refs/heads/devs] || refValue: [Ref[refs/heads/devs=d7dedb6ca08292dc602c36c2dd95ab0c1373c102(-1)]]
+2025-11-11 15:11:02 [INFO] [http-nio-8084-exec-7] o.o.t.g.i.config.GitHttpConfig - refKey: [refs/heads/feature001] || refValue: [Ref[refs/heads/feature001=e6588fe025ce44f9a09930564fbb1fc239268137(-1)]]
+2025-11-11 15:11:02 [INFO] [http-nio-8084-exec-7] o.o.t.g.i.config.GitHttpConfig - refKey: [refs/heads/main] || refValue: [Ref[refs/heads/main=5451d6013b97bb6728ec8aa048ea208a9dae923a(-1)]]
+2025-11-11 15:11:02 [INFO] [http-nio-8084-exec-7] o.o.t.g.i.config.GitHttpConfig - refKey: [refs/heads/main2] || refValue: [Ref[refs/heads/main2=31e44feb657394d909d7a75631a57dbead273be9(-1)]]
+2025-11-11 15:11:02 [INFO] [http-nio-8084-exec-7] o.o.t.g.i.config.GitHttpConfig - refKey: [refs/heads/main3] || refValue: [Ref[refs/heads/main3=e399c6468707df9463a9c633355d8c9337bc2b23(-1)]]
+</code></pre></div></div>
+
+<h3 id="2-negotiation">2) Negotiation</h3>
+
+<h4 id="2-1-client-refs-기반으로-wantshaves-계산">2-1) Client: refs 기반으로 wants/haves 계산</h4>
+
+<ul>
+  <li>의미: refs 정보를 수신한 클라이언트는 로컬에있는 해시를 비교하고 로컬의 추가로딩이 필요한경우 (로컬의 해시와 서버의 해시가 다른경우) wants,  have 정보를  도출한다.
+      만약 서버로부터 받은 ID값이 현재 클라이언트가가진 ID가 동일하다면 여기서 모든 Pull에 대한 프로세스 종료</li>
+</ul>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>16:03:05.784421 http.c:913              == Info: Connection #0 to host localhost left intact
+16:03:05.784432 run-command.c:666       trace: run_command: 'git credential-store store'
+16:03:05.784434 run-command.c:758       trace: start_command: /bin/sh -c 'git credential-store store' 'git credential-store store'
+16:03:05.798090 git.c:479               trace: built-in: git credential-store store
+16:03:05.799599 pkt-line.c:86           packet:          git&lt; # service=git-upload-pack
+16:03:05.799613 pkt-line.c:86           packet:          git&lt; 0000
+16:03:05.799616 pkt-line.c:86           packet:          git&lt; 5451d6013b97bb6728ec8aa048ea208a9dae923a HEAD\0 include-tag multi_ack_detailed multi_ack ofs-delta side-band side-band-64k thin-pack no-progress shallow no-done agent=JGit/7.3.0.202506031305-r symref=HEAD:refs/heads/main
+16:03:05.799632 pkt-line.c:86           packet:          git&lt; 19f8d70c656327448e14978578f8864344584011 refs/heads/branchPushTest
+16:03:05.799637 pkt-line.c:86           packet:          git&lt; 2dd5b72b58dedba0dd808f788a98ed6a029419db refs/heads/devs
+16:03:05.799639 pkt-line.c:86           packet:          git&lt; e6588fe025ce44f9a09930564fbb1fc239268137 refs/heads/feature001
+16:03:05.799640 pkt-line.c:86           packet:          git&lt; 5451d6013b97bb6728ec8aa048ea208a9dae923a refs/heads/main
+16:03:05.799641 pkt-line.c:86           packet:          git&lt; 31e44feb657394d909d7a75631a57dbead273be9 refs/heads/main2
+16:03:05.799663 pkt-line.c:86           packet:          git&lt; e399c6468707df9463a9c633355d8c9337bc2b23 refs/heads/main3
+16:03:05.799670 pkt-line.c:86           packet:          git&lt; 0000
+16:03:05.803902 pkt-line.c:86           packet:          git&gt; 2dd5b72b58dedba0dd808f788a98ed6a029419db refs/heads/devs
+16:03:05.803908 pkt-line.c:86           packet:          git&gt; 0000
+16:03:05.803917 run-command.c:666       trace: run_command: git fetch-pack --stateless-rpc --stdin --lock-pack --include-tag --thin http://localhost:8084/okgit/git/CMPART/repo4.git/
+16:03:05.803928 run-command.c:758       trace: start_command: /opt/homebrew/opt/git/libexec/git-core/git fetch-pack --stateless-rpc --stdin --lock-pack --include-tag --thin http://localhost:8084/okgit/git/CMPART/repo4.git/
+16:03:05.811325 git.c:479               trace: built-in: git fetch-pack --stateless-rpc --stdin --lock-pack --include-tag --thin http://localhost:8084/okgit/git/CMPART/repo4.git/
+16:03:05.811668 pkt-line.c:86           packet:   fetch-pack&lt; 2dd5b72b58dedba0dd808f788a98ed6a029419db refs/heads/devs
+16:03:05.811673 pkt-line.c:86           packet:   fetch-pack&lt; 0000
+16:03:05.811676 pkt-line.c:86           packet:   fetch-pack&lt; 5451d6013b97bb6728ec8aa048ea208a9dae923a HEAD\0 include-tag multi_ack_detailed multi_ack ofs-delta side-band side-band-64k thin-pack no-progress shallow no-done agent=JGit/7.3.0.202506031305-r symref=HEAD:refs/heads/main
+16:03:05.811686 pkt-line.c:86           packet:   fetch-pack&lt; 19f8d70c656327448e14978578f8864344584011 refs/heads/branchPushTest
+16:03:05.811688 pkt-line.c:86           packet:   fetch-pack&lt; 2dd5b72b58dedba0dd808f788a98ed6a029419db refs/heads/devs
+16:03:05.811690 pkt-line.c:86           packet:   fetch-pack&lt; e6588fe025ce44f9a09930564fbb1fc239268137 refs/heads/feature001
+16:03:05.811692 pkt-line.c:86           packet:   fetch-pack&lt; 5451d6013b97bb6728ec8aa048ea208a9dae923a refs/heads/main
+16:03:05.811694 pkt-line.c:86           packet:   fetch-pack&lt; 31e44feb657394d909d7a75631a57dbead273be9 refs/heads/main2
+16:03:05.811696 pkt-line.c:86           packet:   fetch-pack&lt; e399c6468707df9463a9c633355d8c9337bc2b23 refs/heads/main3
+16:03:05.811697 pkt-line.c:86           packet:   fetch-pack&lt; 0000
+</code></pre></div></div>
+
+<h3 id="3-packfile-retrieval">3) Packfile Retrieval</h3>
+
+<h4 id="3-1-client--server-wantshaves-전송-협상-시작">3-1) Client → Server: wants/haves 전송 (협상 시작)</h4>
+
+<ul>
+  <li>엔드포인트: POST /git-upload-pack</li>
+  <li>의미: 가져올 대상(want) 과 이미 가진 것(have) 을 전송(도출된 wants (추가로 받아와야하는 내용들)가 있다면, 해당내용을 재요청</li>
+</ul>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>16:03:05.819140 pkt-line.c:86           packet:   fetch-pack&gt; want 2dd5b72b58dedba0dd808f788a98ed6a029419db multi_ack_detailed no-done side-band-64k thin-pack include-tag ofs-delta agent=git/2.47.0
+16:03:05.819146 pkt-line.c:86           packet:   fetch-pack&gt; 0000
+16:03:05.819149 pkt-line.c:86           packet:   fetch-pack&gt; have d7dedb6ca08292dc602c36c2dd95ab0c1373c102
+16:03:05.819151 pkt-line.c:86           packet:   fetch-pack&gt; have f7da6d996f1a6f9c76588b29c15d0f925a2b7bb6
+16:03:05.819152 pkt-line.c:86           packet:   fetch-pack&gt; have ef49ca3cde90496cb5a201f04346f2b0ffe9f8cd
+16:03:05.819154 pkt-line.c:86           packet:   fetch-pack&gt; have 19f8d70c656327448e14978578f8864344584011
+16:03:05.819157 pkt-line.c:86           packet:   fetch-pack&gt; have 5451d6013b97bb6728ec8aa048ea208a9dae923a
+16:03:05.819158 pkt-line.c:86           packet:   fetch-pack&gt; have e399c6468707df9463a9c633355d8c9337bc2b23
+16:03:05.819159 pkt-line.c:86           packet:   fetch-pack&gt; have 31e44feb657394d909d7a75631a57dbead273be9
+16:03:05.819161 pkt-line.c:86           packet:   fetch-pack&gt; have 4846d60a8d7ff1cd9fda6009a2814c638bb79a27
+16:03:05.819162 pkt-line.c:86           packet:   fetch-pack&gt; have e6588fe025ce44f9a09930564fbb1fc239268137
+16:03:05.819164 pkt-line.c:86           packet:   fetch-pack&gt; have 81ab494eacd9da298a4003b11cea4ea779eed303
+16:03:05.819165 pkt-line.c:86           packet:   fetch-pack&gt; done
+16:03:05.819169 pkt-line.c:86           packet:   fetch-pack&gt; 0000
+16:03:05.819189 pkt-line.c:86           packet:          git&lt; 008cwant 2dd5b72b58dedba0dd808f788a98ed6a029419db multi_ack_detailed no-done side-band-64k thin-pack include-tag ofs-delta agent=git/2.47.000000032have d7dedb6ca08292dc602c36c2dd95ab0c1373c1020032have f7da6d996f1a6f9c76588b29c15d0f925a2b7bb60032have ef49ca3cde90496cb5a201f04346f2b0ffe9f8cd0032have 19f8d70c656327448e14978578f88643445840110032have 5451d6013b97bb6728ec8aa048ea208a9dae923a0032have e399c6468707df9463a9c633355d8c9337bc2b230032have 31e44feb657394d909d7a75631a57dbead273be90032have 4846d60a8d7ff1cd9fda6009a2814c638bb79a270032have e6588fe025ce44f9a09930564fbb1fc2392681370032have 81ab494eacd9da298a4003b11cea4ea779eed3030009done
+16:03:05.819217 pkt-line.c:86           packet:          git&lt; 0000
+16:03:05.819275 http.c:913              == Info: Found bundle for host: 0x600001e80930 [serially]
+16:03:05.819277 http.c:913              == Info: Can not multiplex, even if we wanted to
+16:03:05.819285 http.c:913              == Info: Re-using existing connection with host localhost
+16:03:05.819352 http.c:913              == Info: Server auth using Basic with user 'sysadmin'
+16:03:05.819396 http.c:860              =&gt; Send header, 0000000343 bytes (0x00000157)
+16:03:05.819401 http.c:872              =&gt; Send header: POST /okgit/git/CMPART/repo4.git/git-upload-pack HTTP/1.1
+</code></pre></div></div>
+
+<h4 id="3-2-server--client-packfile-생성전송">3-2) Server → Client: packfile 생성·전송</h4>
+
+<ul>
+  <li>의미: 서버가 협상 결과에 따라 PACK 생성 후 전송(wants 요청값을 수신한 서버는 해당 내용을가지고, 클라이언트에게 packfile 을 만들어 클라이언트에 응답한다.)</li>
+</ul>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>2025-11-11 16:11:05 [DEBUG] [http-nio-8084-exec-1] o.o.t.g.i.c.filter.HttpLogFilter - HTTP Method: [POST], URI: [/okgit/git/CMPART/repo4.git/git-upload-pack], SevletPath: [/git], PathInfo: [/CMPART/repo4.git/git-upload-pack]
+2025-11-11 16:11:05 [INFO] [http-nio-8084-exec-1] o.o.t.g.i.config.GitHttpConfig - $$$ AdvertiseRefsHook advertiseRefs! clientSID: [null], repositoryPath: [/Users/hwiryungkim/tmptmp/bare/CMPART/repo4.git]
+2025-11-11 16:11:05 [INFO] [http-nio-8084-exec-1] o.o.t.g.i.config.GitHttpConfig - $$$ AdvertiseRefsHook advertiseRefs! discovery!: client: [0:0:0:0:0:0:0:1], repo: [/okgit/git/CMPART/repo4.git/git-upload-pack]
+2025-11-11 16:11:05 [INFO] [http-nio-8084-exec-1] o.o.t.g.i.config.GitHttpConfig - refKey: [HEAD] || refValue: [SymbolicRef[HEAD -&gt; refs/heads/main=5451d6013b97bb6728ec8aa048ea208a9dae923a(-1)]]
+2025-11-11 16:11:05 [INFO] [http-nio-8084-exec-1] o.o.t.g.i.config.GitHttpConfig - refKey: [refs/heads/branchPushTest] || refValue: [Ref[refs/heads/branchPushTest=19f8d70c656327448e14978578f8864344584011(-1)]]
+2025-11-11 16:11:05 [INFO] [http-nio-8084-exec-1] o.o.t.g.i.config.GitHttpConfig - refKey: [refs/heads/devs] || refValue: [Ref[refs/heads/devs=2dd5b72b58dedba0dd808f788a98ed6a029419db(-1)]]
+2025-11-11 16:11:05 [INFO] [http-nio-8084-exec-1] o.o.t.g.i.config.GitHttpConfig - refKey: [refs/heads/feature001] || refValue: [Ref[refs/heads/feature001=e6588fe025ce44f9a09930564fbb1fc239268137(-1)]]
+2025-11-11 16:11:05 [INFO] [http-nio-8084-exec-1] o.o.t.g.i.config.GitHttpConfig - refKey: [refs/heads/main] || refValue: [Ref[refs/heads/main=5451d6013b97bb6728ec8aa048ea208a9dae923a(-1)]]
+2025-11-11 16:11:05 [INFO] [http-nio-8084-exec-1] o.o.t.g.i.config.GitHttpConfig - refKey: [refs/heads/main2] || refValue: [Ref[refs/heads/main2=31e44feb657394d909d7a75631a57dbead273be9(-1)]]
+2025-11-11 16:11:05 [INFO] [http-nio-8084-exec-1] o.o.t.g.i.config.GitHttpConfig - refKey: [refs/heads/main3] || refValue: [Ref[refs/heads/main3=e399c6468707df9463a9c633355d8c9337bc2b23(-1)]]
+2025-11-11 16:11:05 [INFO] [http-nio-8084-exec-1] o.o.t.g.i.config.GitHttpConfig - [v0/v1] $$$ PreUploadHook.onBeginNegotiateRound(): round, wants=1, havesSeen=10
+2025-11-11 16:11:05 [INFO] [http-nio-8084-exec-1] o.o.t.g.i.config.GitHttpConfig - Client's Wants List:
+2025-11-11 16:11:05 [INFO] [http-nio-8084-exec-1] o.o.t.g.i.config.GitHttpConfig - wants: [2dd5b72b58dedba0dd808f788a98ed6a029419db]
+2025-11-11 16:11:05 [INFO] [http-nio-8084-exec-1] o.o.t.g.i.config.GitHttpConfig - [v0/v1] $$$ PreUploadHook.onEndNegotiateRound(): wants: [commit 2dd5b72b58dedba0dd808f788a98ed6a029419db 1762844577 -----sp]
+2025-11-11 16:11:05 [INFO] [http-nio-8084-exec-1] o.o.t.g.i.config.GitHttpConfig - [v0/v1] $$$ PreUploadHook.onSendPack(): wants: [[commit 2dd5b72b58dedba0dd808f788a98ed6a029419db 1762844577 -----sp]], haves: [[commit 5451d6013b97bb6728ec8aa048ea208a9dae923a 1759213017 ------p, commit 81ab494eacd9da298a4003b11cea4ea779eed303 1758513914 ------p, commit e399c6468707df9463a9c633355d8c9337bc2b23 1759212898 ------p, commit 19f8d70c656327448e14978578f8864344584011 1762315581 ------p, commit e6588fe025ce44f9a09930564fbb1fc239268137 1758522632 ------p, commit 31e44feb657394d909d7a75631a57dbead273be9 1759211658 ------p, commit ef49ca3cde90496cb5a201f04346f2b0ffe9f8cd 1762316999 ------p, commit d7dedb6ca08292dc602c36c2dd95ab0c1373c102 1762320649 -----sp]]
+2025-11-11 16:11:05 [INFO] [http-nio-8084-exec-1] o.o.t.g.i.config.GitHttpConfig - [v0/v1] sendPack(types on wants): commit=[1], tree=[0], blob=[0], tag=[0], others=[0]
+</code></pre></div></div>
+
+<h2 id="diagram">Diagram</h2>
+
+<pre><code class="language-mermaid">sequenceDiagram
+  autonumber
+  participant C as Client
+  participant S as Server (JGit)
+
+  alt Discovery Advertise
+      C-&gt;&gt;S: GET /info/refs?service=git-upload-pack
+      S--&gt;&gt;C: refs + capabilities (Advertise-Refs)
+  end
+  alt Negotiation
+      C-&gt;&gt;C: compute wants/haves
+  end
+  alt Fetching PackFile
+  C-&gt;&gt;S: POST /git-upload-pack (wants, haves, done)
+  S--&gt;&gt;C: PACK (side-band, thin-pack)
+  C-&gt;&gt;C: update remote-tracking branch, merge/rebase
+  end 
+
+</code></pre>
+
+<!-- ### Overview -->
+<!-- --- -->
+<!-- `git pull` 실행 시 클라이언트 ↔ 서버 트레이스 정리 -->
+<!---->
+<!-- - **전송 방향**: git> / fetch-pack> = 클라이언트 → 서버, git< / fetch-pack< = 서버 → 클라이언트 -->
+<!---->
+<!-- - **엔드포인트** -->
+<!--     - 1단계(Advertise-Refs): GET {prefix}/info/refs?service=git-upload-pack -->
+<!--     - 2단계(Upload-Pack): POST {prefix}/git-upload-pack -->
+<!--     - prefix = /okgit/git/CMPART/repo4.git -->
+<!---->
+<!-- #### 1) Client → Server: refs 정보 요청 (Advertise-Refs) -->
+<!-- - 의미: `git pull` 이벤트와 함께 `refs` 정보 서버로 요청 -->
+<!-- - 엔드포인트: GET `/info/refs?service=git-upload-pack` -->
+<!-- ``` text  -->
+<!-- 16:03:05.672103 git.c:479               trace: built-in: git pull --rebase -->
+<!-- 16:03:05.676203 run-command.c:666       trace: run_command: git merge-base --fork-point refs/remotes/origin/devs devs -->
+<!-- 16:03:05.676219 run-command.c:758       trace: start_command: /opt/homebrew/opt/git/libexec/git-core/git merge-base --fork-point refs/remotes/origin/devs devs -->
+<!-- 16:03:05.688176 run-command.c:666       trace: run_command: git fetch --update-head-ok -->
+<!-- 16:03:05.688226 run-command.c:758       trace: start_command: /opt/homebrew/opt/git/libexec/git-core/git fetch --update-head-ok -->
+<!-- 16:03:05.695026 git.c:479               trace: built-in: git fetch --update-head-ok -->
+<!-- 16:03:05.697631 run-command.c:666       trace: run_command: GIT_DIR=.git git remote-http origin http://localhost:8084/okgit/git/CMPART/repo4.git -->
+<!-- 16:03:05.697640 run-command.c:758       trace: start_command: /opt/homebrew/opt/git/libexec/git-core/git remote-http origin http://localhost:8084/okgit/git/CMPART/repo4.git -->
+<!-- 16:03:05.704320 git.c:781               trace: exec: git-remote-http origin http://localhost:8084/okgit/git/CMPART/repo4.git -->
+<!-- 16:03:05.704639 run-command.c:666       trace: run_command: git-remote-http origin http://localhost:8084/okgit/git/CMPART/repo4.git -->
+<!-- 16:03:05.704647 run-command.c:758       trace: start_command: /opt/homebrew/opt/git/libexec/git-core/git-remote-http origin http://localhost:8084/okgit/git/CMPART/repo4.git -->
+<!-- 16:03:05.716170 http.c:913              == Info: Couldn't find host localhost in the .netrc file; using defaults -->
+<!-- 16:03:05.716405 http.c:913              == Info: Host localhost:8084 was resolved. -->
+<!-- 16:03:05.716409 http.c:913              == Info: IPv6: ::1 -->
+<!-- 16:03:05.716410 http.c:913              == Info: IPv4: 127.0.0.1 -->
+<!-- 16:03:05.716429 http.c:913              == Info:   Trying [::1]:8084... -->
+<!-- 16:03:05.716576 http.c:913              == Info: Connected to localhost (::1) port 8084 -->
+<!-- 16:03:05.716603 http.c:860              => Send header, 0000000245 bytes (0x000000f5) -->
+<!-- 16:03:05.716606 http.c:872              => Send header: GET /okgit/git/CMPART/repo4.git/info/refs?service=git-upload-pack HTTP/1.1 -->
+<!-- ``` -->
+<!---->
+<!-- #### 2) Server → Client: refs 광고 응답 -->
+<!-- - 의미: 서버가 참조(브랜치/HEAD)와 capabilities를 광고(`refs` 엔드포인트로 요청을 받은 서버는 `refs` 정보를 도출해 클라이언트로 응답.) -->
+<!---->
+<!-- ``` text  -->
+<!-- 2025-11-11 15:11:02 [DEBUG] [http-nio-8084-exec-7] o.o.t.g.i.c.filter.HttpLogFilter - HTTP Method: [GET], URI: [/okgit/git/CMPART/repo4.git/info/refs], SevletPath: [/git], PathInfo: [/CMPART/repo4.git/info/refs] -->
+<!-- 2025-11-11 15:11:02 [INFO] [http-nio-8084-exec-7] o.o.t.g.i.config.GitHttpConfig - $$$ AdvertiseRefsHook advertiseRefs! discovery!: client: [0:0:0:0:0:0:0:1], repo: [/okgit/git/CMPART/repo4.git/info/refs] -->
+<!---->
+<!-- 2025-11-11 15:11:02 [INFO] [http-nio-8084-exec-7] o.o.t.g.i.config.GitHttpConfig - refKey: [HEAD] || refValue: [SymbolicRef[HEAD -> refs/heads/main=5451d6013b97bb6728ec8aa048ea208a9dae923a(-1)]] -->
+<!-- 2025-11-11 15:11:02 [INFO] [http-nio-8084-exec-7] o.o.t.g.i.config.GitHttpConfig - refKey: [refs/heads/branchPushTest] || refValue: [Ref[refs/heads/branchPushTest=19f8d70c656327448e14978578f8864344584011(-1)]] -->
+<!-- 2025-11-11 15:11:02 [INFO] [http-nio-8084-exec-7] o.o.t.g.i.config.GitHttpConfig - refKey: [refs/heads/devs] || refValue: [Ref[refs/heads/devs=d7dedb6ca08292dc602c36c2dd95ab0c1373c102(-1)]] -->
+<!-- 2025-11-11 15:11:02 [INFO] [http-nio-8084-exec-7] o.o.t.g.i.config.GitHttpConfig - refKey: [refs/heads/feature001] || refValue: [Ref[refs/heads/feature001=e6588fe025ce44f9a09930564fbb1fc239268137(-1)]] -->
+<!-- 2025-11-11 15:11:02 [INFO] [http-nio-8084-exec-7] o.o.t.g.i.config.GitHttpConfig - refKey: [refs/heads/main] || refValue: [Ref[refs/heads/main=5451d6013b97bb6728ec8aa048ea208a9dae923a(-1)]] -->
+<!-- 2025-11-11 15:11:02 [INFO] [http-nio-8084-exec-7] o.o.t.g.i.config.GitHttpConfig - refKey: [refs/heads/main2] || refValue: [Ref[refs/heads/main2=31e44feb657394d909d7a75631a57dbead273be9(-1)]] -->
+<!-- 2025-11-11 15:11:02 [INFO] [http-nio-8084-exec-7] o.o.t.g.i.config.GitHttpConfig - refKey: [refs/heads/main3] || refValue: [Ref[refs/heads/main3=e399c6468707df9463a9c633355d8c9337bc2b23(-1)]] -->
+<!-- ``` -->
+<!---->
+<!---->
+<!-- #### 3) Client: refs 기반으로 wants/haves 계산 시작 -->
+<!-- - 의미: 수신한 refs와 로컬 보유 OID 비교 → 부족한 커밋을 want로 선정 -->
+<!-- - e부 단계에서 fetch-pack가 기동됨(무상태 RPC) -->
+<!-- 3. `refs` 정보를 수신한 클라이언트는 로컬에있는 해시를 비교하고 로컬의 추가로딩이 필요한경우 (로컬의 해시와 서버의 해시가 다른경우) `wants` 정보를 파싱한다. -->
+<!-- ``` text -->
+<!---->
+<!-- 16:03:05.784421 http.c:913              == Info: Connection #0 to host localhost left intact -->
+<!-- 16:03:05.784432 run-command.c:666       trace: run_command: 'git credential-store store' -->
+<!-- 16:03:05.784434 run-command.c:758       trace: start_command: /bin/sh -c 'git credential-store store' 'git credential-store store' -->
+<!-- 16:03:05.798090 git.c:479               trace: built-in: git credential-store store -->
+<!-- 16:03:05.799599 pkt-line.c:86           packet:          git< # service=git-upload-pack -->
+<!-- 16:03:05.799613 pkt-line.c:86           packet:          git< 0000 -->
+<!-- 16:03:05.799616 pkt-line.c:86           packet:          git< 5451d6013b97bb6728ec8aa048ea208a9dae923a HEAD\0 include-tag multi_ack_detailed multi_ack ofs-delta side-band side-band-64k thin-pack no-progress shallow no-done agent=JGit/7.3.0.202506031305-r symref=HEAD:refs/heads/main -->
+<!-- 16:03:05.799632 pkt-line.c:86           packet:          git< 19f8d70c656327448e14978578f8864344584011 refs/heads/branchPushTest -->
+<!-- 16:03:05.799637 pkt-line.c:86           packet:          git< 2dd5b72b58dedba0dd808f788a98ed6a029419db refs/heads/devs -->
+<!-- 16:03:05.799639 pkt-line.c:86           packet:          git< e6588fe025ce44f9a09930564fbb1fc239268137 refs/heads/feature001 -->
+<!-- 16:03:05.799640 pkt-line.c:86           packet:          git< 5451d6013b97bb6728ec8aa048ea208a9dae923a refs/heads/main -->
+<!-- 16:03:05.799641 pkt-line.c:86           packet:          git< 31e44feb657394d909d7a75631a57dbead273be9 refs/heads/main2 -->
+<!-- 16:03:05.799663 pkt-line.c:86           packet:          git< e399c6468707df9463a9c633355d8c9337bc2b23 refs/heads/main3 -->
+<!-- 16:03:05.799670 pkt-line.c:86           packet:          git< 0000 -->
+<!-- 16:03:05.803902 pkt-line.c:86           packet:          git> 2dd5b72b58dedba0dd808f788a98ed6a029419db refs/heads/devs -->
+<!-- 16:03:05.803908 pkt-line.c:86           packet:          git> 0000 -->
+<!-- 16:03:05.803917 run-command.c:666       trace: run_command: git fetch-pack --stateless-rpc --stdin --lock-pack --include-tag --thin http://localhost:8084/okgit/git/CMPART/repo4.git/ -->
+<!-- 16:03:05.803928 run-command.c:758       trace: start_command: /opt/homebrew/opt/git/libexec/git-core/git fetch-pack --stateless-rpc --stdin --lock-pack --include-tag --thin http://localhost:8084/okgit/git/CMPART/repo4.git/ -->
+<!-- 16:03:05.811325 git.c:479               trace: built-in: git fetch-pack --stateless-rpc --stdin --lock-pack --include-tag --thin http://localhost:8084/okgit/git/CMPART/repo4.git/ -->
+<!-- 16:03:05.811668 pkt-line.c:86           packet:   fetch-pack< 2dd5b72b58dedba0dd808f788a98ed6a029419db refs/heads/devs -->
+<!-- 16:03:05.811673 pkt-line.c:86           packet:   fetch-pack< 0000 -->
+<!-- 16:03:05.811676 pkt-line.c:86           packet:   fetch-pack< 5451d6013b97bb6728ec8aa048ea208a9dae923a HEAD\0 include-tag multi_ack_detailed multi_ack ofs-delta side-band side-band-64k thin-pack no-progress shallow no-done agent=JGit/7.3.0.202506031305-r symref=HEAD:refs/heads/main -->
+<!-- 16:03:05.811686 pkt-line.c:86           packet:   fetch-pack< 19f8d70c656327448e14978578f8864344584011 refs/heads/branchPushTest -->
+<!-- 16:03:05.811688 pkt-line.c:86           packet:   fetch-pack< 2dd5b72b58dedba0dd808f788a98ed6a029419db refs/heads/devs -->
+<!-- 16:03:05.811690 pkt-line.c:86           packet:   fetch-pack< e6588fe025ce44f9a09930564fbb1fc239268137 refs/heads/feature001 -->
+<!-- 16:03:05.811692 pkt-line.c:86           packet:   fetch-pack< 5451d6013b97bb6728ec8aa048ea208a9dae923a refs/heads/main -->
+<!-- 16:03:05.811694 pkt-line.c:86           packet:   fetch-pack< 31e44feb657394d909d7a75631a57dbead273be9 refs/heads/main2 -->
+<!-- 16:03:05.811696 pkt-line.c:86           packet:   fetch-pack< e399c6468707df9463a9c633355d8c9337bc2b23 refs/heads/main3 -->
+<!-- 16:03:05.811697 pkt-line.c:86           packet:   fetch-pack< 0000 -->
+<!-- ``` -->
+<!---->
+<!-- #### 4) Client → Server: wants/haves 전송 (협상 시작) -->
+<!-- - 엔드포인트: POST `/git-upload-pack` -->
+<!-- - 의미: 가져올 대상(want) 과 이미 가진 것(have) 을 전송(도출된 `wants` (추가로 받아와야하는 내용들)가 있다면, 해당내용을 재요청하고, 없다면 이벤트가 여기서 종료된다.(서버와 로컬의 히스토리가 같은경우)) -->
+<!---->
+<!-- ``` text -->
+<!-- 16:03:05.819140 pkt-line.c:86           packet:   fetch-pack> want 2dd5b72b58dedba0dd808f788a98ed6a029419db multi_ack_detailed no-done side-band-64k thin-pack include-tag ofs-delta agent=git/2.47.0 -->
+<!-- 16:03:05.819146 pkt-line.c:86           packet:   fetch-pack> 0000 -->
+<!-- 16:03:05.819149 pkt-line.c:86           packet:   fetch-pack> have d7dedb6ca08292dc602c36c2dd95ab0c1373c102 -->
+<!-- 16:03:05.819151 pkt-line.c:86           packet:   fetch-pack> have f7da6d996f1a6f9c76588b29c15d0f925a2b7bb6 -->
+<!-- 16:03:05.819152 pkt-line.c:86           packet:   fetch-pack> have ef49ca3cde90496cb5a201f04346f2b0ffe9f8cd -->
+<!-- 16:03:05.819154 pkt-line.c:86           packet:   fetch-pack> have 19f8d70c656327448e14978578f8864344584011 -->
+<!-- 16:03:05.819157 pkt-line.c:86           packet:   fetch-pack> have 5451d6013b97bb6728ec8aa048ea208a9dae923a -->
+<!-- 16:03:05.819158 pkt-line.c:86           packet:   fetch-pack> have e399c6468707df9463a9c633355d8c9337bc2b23 -->
+<!-- 16:03:05.819159 pkt-line.c:86           packet:   fetch-pack> have 31e44feb657394d909d7a75631a57dbead273be9 -->
+<!-- 16:03:05.819161 pkt-line.c:86           packet:   fetch-pack> have 4846d60a8d7ff1cd9fda6009a2814c638bb79a27 -->
+<!-- 16:03:05.819162 pkt-line.c:86           packet:   fetch-pack> have e6588fe025ce44f9a09930564fbb1fc239268137 -->
+<!-- 16:03:05.819164 pkt-line.c:86           packet:   fetch-pack> have 81ab494eacd9da298a4003b11cea4ea779eed303 -->
+<!-- 16:03:05.819165 pkt-line.c:86           packet:   fetch-pack> done -->
+<!-- 16:03:05.819169 pkt-line.c:86           packet:   fetch-pack> 0000 -->
+<!-- 16:03:05.819189 pkt-line.c:86           packet:          git< 008cwant 2dd5b72b58dedba0dd808f788a98ed6a029419db multi_ack_detailed no-done side-band-64k thin-pack include-tag ofs-delta agent=git/2.47.000000032have d7dedb6ca08292dc602c36c2dd95ab0c1373c1020032have f7da6d996f1a6f9c76588b29c15d0f925a2b7bb60032have ef49ca3cde90496cb5a201f04346f2b0ffe9f8cd0032have 19f8d70c656327448e14978578f88643445840110032have 5451d6013b97bb6728ec8aa048ea208a9dae923a0032have e399c6468707df9463a9c633355d8c9337bc2b230032have 31e44feb657394d909d7a75631a57dbead273be90032have 4846d60a8d7ff1cd9fda6009a2814c638bb79a270032have e6588fe025ce44f9a09930564fbb1fc2392681370032have 81ab494eacd9da298a4003b11cea4ea779eed3030009done -->
+<!-- 16:03:05.819217 pkt-line.c:86           packet:          git< 0000 -->
+<!-- 16:03:05.819275 http.c:913              == Info: Found bundle for host: 0x600001e80930 [serially] -->
+<!-- 16:03:05.819277 http.c:913              == Info: Can not multiplex, even if we wanted to -->
+<!-- 16:03:05.819285 http.c:913              == Info: Re-using existing connection with host localhost -->
+<!-- 16:03:05.819352 http.c:913              == Info: Server auth using Basic with user 'sysadmin' -->
+<!-- 16:03:05.819396 http.c:860              => Send header, 0000000343 bytes (0x00000157) -->
+<!-- 16:03:05.819401 http.c:872              => Send header: POST /okgit/git/CMPART/repo4.git/git-upload-pack HTTP/1.1 -->
+<!-- ``` -->
+<!---->
+<!-- #### 5) Server → Client: packfile 생성·전송 -->
+<!-- - 의미: 서버가 협상 결과에 따라 PACK 생성 후 전송(`wants` 요청값을 수신한 서버는 해당 내용을가지고, 클라이언트에게 `packfile` 을 만들어 클라이언트에 응답한다.) -->
+<!-- ``` text -->
+<!-- 2025-11-11 16:11:05 [DEBUG] [http-nio-8084-exec-1] o.o.t.g.i.c.filter.HttpLogFilter - HTTP Method: [POST], URI: [/okgit/git/CMPART/repo4.git/git-upload-pack], SevletPath: [/git], PathInfo: [/CMPART/repo4.git/git-upload-pack] -->
+<!-- 2025-11-11 16:11:05 [INFO] [http-nio-8084-exec-1] o.o.t.g.i.config.GitHttpConfig - $$$ AdvertiseRefsHook advertiseRefs! clientSID: [null], repositoryPath: [/Users/hwiryungkim/tmptmp/bare/CMPART/repo4.git] -->
+<!-- 2025-11-11 16:11:05 [INFO] [http-nio-8084-exec-1] o.o.t.g.i.config.GitHttpConfig - $$$ AdvertiseRefsHook advertiseRefs! discovery!: client: [0:0:0:0:0:0:0:1], repo: [/okgit/git/CMPART/repo4.git/git-upload-pack] -->
+<!-- 2025-11-11 16:11:05 [INFO] [http-nio-8084-exec-1] o.o.t.g.i.config.GitHttpConfig - refKey: [HEAD] || refValue: [SymbolicRef[HEAD -> refs/heads/main=5451d6013b97bb6728ec8aa048ea208a9dae923a(-1)]] -->
+<!-- 2025-11-11 16:11:05 [INFO] [http-nio-8084-exec-1] o.o.t.g.i.config.GitHttpConfig - refKey: [refs/heads/branchPushTest] || refValue: [Ref[refs/heads/branchPushTest=19f8d70c656327448e14978578f8864344584011(-1)]] -->
+<!-- 2025-11-11 16:11:05 [INFO] [http-nio-8084-exec-1] o.o.t.g.i.config.GitHttpConfig - refKey: [refs/heads/devs] || refValue: [Ref[refs/heads/devs=2dd5b72b58dedba0dd808f788a98ed6a029419db(-1)]] -->
+<!-- 2025-11-11 16:11:05 [INFO] [http-nio-8084-exec-1] o.o.t.g.i.config.GitHttpConfig - refKey: [refs/heads/feature001] || refValue: [Ref[refs/heads/feature001=e6588fe025ce44f9a09930564fbb1fc239268137(-1)]] -->
+<!-- 2025-11-11 16:11:05 [INFO] [http-nio-8084-exec-1] o.o.t.g.i.config.GitHttpConfig - refKey: [refs/heads/main] || refValue: [Ref[refs/heads/main=5451d6013b97bb6728ec8aa048ea208a9dae923a(-1)]] -->
+<!-- 2025-11-11 16:11:05 [INFO] [http-nio-8084-exec-1] o.o.t.g.i.config.GitHttpConfig - refKey: [refs/heads/main2] || refValue: [Ref[refs/heads/main2=31e44feb657394d909d7a75631a57dbead273be9(-1)]] -->
+<!-- 2025-11-11 16:11:05 [INFO] [http-nio-8084-exec-1] o.o.t.g.i.config.GitHttpConfig - refKey: [refs/heads/main3] || refValue: [Ref[refs/heads/main3=e399c6468707df9463a9c633355d8c9337bc2b23(-1)]] -->
+<!-- 2025-11-11 16:11:05 [INFO] [http-nio-8084-exec-1] o.o.t.g.i.config.GitHttpConfig - [v0/v1] $$$ PreUploadHook.onBeginNegotiateRound(): round, wants=1, havesSeen=10 -->
+<!-- 2025-11-11 16:11:05 [INFO] [http-nio-8084-exec-1] o.o.t.g.i.config.GitHttpConfig - Client's Wants List: -->
+<!-- 2025-11-11 16:11:05 [INFO] [http-nio-8084-exec-1] o.o.t.g.i.config.GitHttpConfig - wants: [2dd5b72b58dedba0dd808f788a98ed6a029419db] -->
+<!-- 2025-11-11 16:11:05 [INFO] [http-nio-8084-exec-1] o.o.t.g.i.config.GitHttpConfig - [v0/v1] $$$ PreUploadHook.onEndNegotiateRound(): wants: [commit 2dd5b72b58dedba0dd808f788a98ed6a029419db 1762844577 -----sp] -->
+<!-- 2025-11-11 16:11:05 [INFO] [http-nio-8084-exec-1] o.o.t.g.i.config.GitHttpConfig - [v0/v1] $$$ PreUploadHook.onSendPack(): wants: [[commit 2dd5b72b58dedba0dd808f788a98ed6a029419db 1762844577 -----sp]], haves: [[commit 5451d6013b97bb6728ec8aa048ea208a9dae923a 1759213017 ------p, commit 81ab494eacd9da298a4003b11cea4ea779eed303 1758513914 ------p, commit e399c6468707df9463a9c633355d8c9337bc2b23 1759212898 ------p, commit 19f8d70c656327448e14978578f8864344584011 1762315581 ------p, commit e6588fe025ce44f9a09930564fbb1fc239268137 1758522632 ------p, commit 31e44feb657394d909d7a75631a57dbead273be9 1759211658 ------p, commit ef49ca3cde90496cb5a201f04346f2b0ffe9f8cd 1762316999 ------p, commit d7dedb6ca08292dc602c36c2dd95ab0c1373c102 1762320649 -----sp]] -->
+<!-- 2025-11-11 16:11:05 [INFO] [http-nio-8084-exec-1] o.o.t.g.i.config.GitHttpConfig - [v0/v1] sendPack(types on wants): commit=[1], tree=[0], blob=[0], tag=[0], others=[0] -->
+<!-- ``` -->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->]]></content><author><name>hr_k</name><email>roovcloudy@gmail.com</email></author><category term="Git" /><summary type="html"><![CDATA[Overview]]></summary></entry></feed>
