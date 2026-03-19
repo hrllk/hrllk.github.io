@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>DDNS: 유동 IP 환경에서 고정 주소 사용하기</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="DDNS: 유동 IP 환경에서 고정 주소 사용하기" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="1. 유동 IP의 한계점" />
+<meta property="og:description" content="1. 유동 IP의 한계점" />
+<link rel="canonical" href="https://hrllk.github.io/ddns.html" />
+<meta property="og:url" content="https://hrllk.github.io/ddns.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2025-02-15T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="DDNS: 유동 IP 환경에서 고정 주소 사용하기" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2025-02-15T00:00:00+00:00","datePublished":"2025-02-15T00:00:00+00:00","description":"1. 유동 IP의 한계점","headline":"DDNS: 유동 IP 환경에서 고정 주소 사용하기","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/ddns.html"},"url":"https://hrllk.github.io/ddns.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2025-02-15 00:00:00 +0000">2025-02-15</time>
+  </p>
+  
+  <h1>DDNS: 유동 IP 환경에서 고정 주소 사용하기</h1>
+
+  <h2 id="1-유동-ip의-한계점">1. 유동 IP의 한계점</h2>
+
+<p>가정용 인터넷은 대부분 고정된 IP가 아닌, 접속할 때마다 주소가 바뀌는 <strong>유동 IP</strong> 방식을 사용합니다. 이 때문에 외부에서 내 집의 서버나 NAS에 접속하려고 할 때 매번 바뀐 IP를 확인해야 하는 불편함이 있습니다.</p>
+
+<h2 id="2-ddns-dynamic-dns란">2. DDNS (Dynamic DNS)란?</h2>
+
+<p><strong>DDNS</strong>는 호스트의 IP 주소가 변경될 때마다 DNS 레코드를 실시간으로 자동 갱신해 주는 서비스입니다. 덕분에 IP 주소가 아무리 바뀌어도 우리는 <code class="language-plaintext highlighter-rouge">myhome.ddns.net</code>과 같이 고정된 도메인 네임으로 내 서버에 접속할 수 있습니다.</p>
+
+<h2 id="3-작동-원리-flow">3. 작동 원리 (Flow)</h2>
+
+<ol>
+  <li><strong>변경 감지:</strong> 공유기(Router)의 DDNS 클라이언트가 자신의 공인 IP가 바뀐 것을 감지합니다.</li>
+  <li><strong>갱신 요청:</strong> 새로운 IP를 DDNS 서버로 전송하여 업데이트를 요청합니다.</li>
+  <li><strong>레코드 업데이트:</strong> DDNS 서버가 도메인 주소에 연결된 IP를 새로운 주소로 갈아 끼웁니다.</li>
+  <li><strong>전파 (Propagation):</strong> 업데이트된 정보가 전 세계 DNS 서버로 전파되어 어디서든 도메인을 통해 새로운 IP로 도달할 수 있게 됩니다.</li>
+</ol>
+
+<hr data-content="정리" />
+
+<p>DDNS는 <strong>“내 주소를 항상 최신 상태로 알려주는 자동 내비게이션”</strong>과 같습니다. 개인 서버 운영의 필수 요소입니다.</p>
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>

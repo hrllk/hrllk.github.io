@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>GenericResponse를 활용한 일관된 API 응답 설계</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="GenericResponse를 활용한 일관된 API 응답 설계" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="GenericResponse란?" />
+<meta property="og:description" content="GenericResponse란?" />
+<link rel="canonical" href="https://hrllk.github.io/generic-response.html" />
+<meta property="og:url" content="https://hrllk.github.io/generic-response.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2024-03-22T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="GenericResponse를 활용한 일관된 API 응답 설계" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2024-03-22T00:00:00+00:00","datePublished":"2024-03-22T00:00:00+00:00","description":"GenericResponse란?","headline":"GenericResponse를 활용한 일관된 API 응답 설계","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/generic-response.html"},"url":"https://hrllk.github.io/generic-response.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2024-03-22 00:00:00 +0000">2024-03-22</time>
+  </p>
+  
+  <h1>GenericResponse를 활용한 일관된 API 응답 설계</h1>
+
+  <h2 id="genericresponse란">GenericResponse란?</h2>
+
+<p><strong>GenericResponse</strong>는 모든 API 응답을 하나의 통일된 구조로 감싸서 반환하기 위한 <strong>공통 응답 클래스</strong>를 의미합니다.</p>
+
+<h2 id="왜-필료한가-공통-구조의-이점">왜 필료한가? (공통 구조의 이점)</h2>
+
+<p>서버에서 응답을 줄 때 매번 다른 포맷으로 데이터를 던진다면, 이를 사용하는 클라이언트(프론트엔드 등)는 각 API마다 서로 다른 처리 로직을 짜야 합니다.</p>
+
+<p>GenericResponse를 도입하면 성공 정보, 에러 메시지, 실제 데이터, 페이징 정보 등을 <strong>항상 동일한 포맷</strong>에 담아 응답할 수 있습니다.</p>
+
+<h3 id="주요-장점">주요 장점</h3>
+<ol>
+  <li><strong>일관성 유지:</strong> 수많은 Endpoint가 존재하더라도 응답의 껍데기는 항상 같습니다.</li>
+  <li><strong>클라이언트 개발 편의성:</strong> 클라이언트는 서버가 던지는 공통 필드(예: <code class="language-plaintext highlighter-rouge">success</code>, <code class="language-plaintext highlighter-rouge">message</code>, <code class="language-plaintext highlighter-rouge">data</code>)만 확인하면 되므로 응답 핸들링 로직이 매우 단순해집니다.</li>
+  <li><strong>유연한 데이터 대응:</strong> 제네릭(Generic) 타입을 사용하면 어떤 형태의 데이터 객체라도 안전하게 담아서 보낼 수 있습니다.</li>
+</ol>
+
+<h2 id="예시-구조-json">예시 구조 (JSON)</h2>
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"success"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"사용자 조회가 완료되었습니다."</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"data"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"홍길동"</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"timestamp"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2024-03-22T10:00:00"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<hr data-content="정리" />
+
+<p>공통 응답 포맷은 서버와 클라이언트 사이의 <strong>“표준 약속”</strong>이며, 견고한 API 서비스를 만들기 위한 가장 기초적인 설계 단계 중 하나입니다.</p>
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>

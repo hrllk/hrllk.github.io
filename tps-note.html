@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>CS 요약: 네트워크 보안과 시스템 관리의 기초</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="CS 요약: 네트워크 보안과 시스템 관리의 기초" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="1. 보안 취약점 관리 시스템" />
+<meta property="og:description" content="1. 보안 취약점 관리 시스템" />
+<link rel="canonical" href="https://hrllk.github.io/tps-note.html" />
+<meta property="og:url" content="https://hrllk.github.io/tps-note.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2024-10-15T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="CS 요약: 네트워크 보안과 시스템 관리의 기초" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2024-10-15T00:00:00+00:00","datePublished":"2024-10-15T00:00:00+00:00","description":"1. 보안 취약점 관리 시스템","headline":"CS 요약: 네트워크 보안과 시스템 관리의 기초","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/tps-note.html"},"url":"https://hrllk.github.io/tps-note.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2024-10-15 00:00:00 +0000">2024-10-15</time>
+  </p>
+  
+  <h1>CS 요약: 네트워크 보안과 시스템 관리의 기초</h1>
+
+  <h2 id="1-보안-취약점-관리-시스템">1. 보안 취약점 관리 시스템</h2>
+
+<ul>
+  <li><strong>CWE (Common Weakness Enumeration):</strong> 소프트웨어의 근본적인 <strong>설계적 약점</strong>이나 오동작 가능한 결함을 분류한 목록입니다. (예: SQL Injection, XSS의 일반적 분류)</li>
+  <li><strong>CVE (Common Vulnerabilities and Exposures):</strong> 실제 특정 소프트웨어 제품군에서 발견되어 식별 번호가 부여된 <strong>구체적인 취약점</strong> 데이터베이스입니다.</li>
+</ul>
+
+<h2 id="2-배포-전략-비교">2. 배포 전략 비교</h2>
+
+<ul>
+  <li><strong>Canary:</strong> 일부 트래픽만 신규 버전으로 보내 안정성을 먼저 테스트하는 방식입니다. (위험 분산)</li>
+  <li><strong>Blue-Green:</strong> 동일한 규모의 신/구 서버 두 대를 띄워놓고 스위치를 전환하듯 통째로 바꾸는 방식입니다. (비용 증가, 빠른 롤백)</li>
+  <li><strong>Rolling Update:</strong> 순차적으로 하나씩 서버를 교체해 나가는 방식입니다. (인스턴스 개수 유지)</li>
+</ul>
+
+<h2 id="3-데이터-처리-기법">3. 데이터 처리 기법</h2>
+
+<ul>
+  <li><strong>OLTP:</strong> 대량의 실시간 <strong>트랜잭션(Insert/Update)</strong>을 빠르게 처리하는 시스템입니다. (예: 은행 송금)</li>
+  <li><strong>OLAP:</strong> 축적된 데이터를 다각도에서 <strong>분석하고 집계(Select)</strong>하는 시스템입니다. (예: 매출 통계 분석)</li>
+</ul>
+
+<hr data-content="팁" />
+
+<p>보안 점검 시 <strong>CWE</strong>는 “우리가 이런 실수를 하면 안 된다”라는 가이드로, <strong>CVE</strong>는 “내가 쓰는 라이브러리에 이런 구멍이 뚫렸는지 찾아보자”라는 용도로 활용됩니다.</p>
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>

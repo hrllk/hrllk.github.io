@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Troubleshooting: FeignClient에서 PATCH 메소드 사용하기</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Troubleshooting: FeignClient에서 PATCH 메소드 사용하기" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="1. 발생 에러 메세지" />
+<meta property="og:description" content="1. 발생 에러 메세지" />
+<link rel="canonical" href="https://hrllk.github.io/how-to-use-patch-in-feign.html" />
+<meta property="og:url" content="https://hrllk.github.io/how-to-use-patch-in-feign.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2025-05-30T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Troubleshooting: FeignClient에서 PATCH 메소드 사용하기" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2025-05-30T00:00:00+00:00","datePublished":"2025-05-30T00:00:00+00:00","description":"1. 발생 에러 메세지","headline":"Troubleshooting: FeignClient에서 PATCH 메소드 사용하기","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/how-to-use-patch-in-feign.html"},"url":"https://hrllk.github.io/how-to-use-patch-in-feign.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2025-05-30 00:00:00 +0000">2025-05-30</time>
+  </p>
+  
+  <h1>Troubleshooting: FeignClient에서 PATCH 메소드 사용하기</h1>
+
+  <h2 id="1-발생-에러-메세지">1. 발생 에러 메세지</h2>
+
+<p>OpenFeign을 사용하여 외부 서비스를 호출할 때 <code class="language-plaintext highlighter-rouge">PATCH</code> 메소드를 사용하면 다음과 같은 예외가 발생할 수 있습니다.</p>
+
+<pre><code class="language-log">feign.RetryableException: Invalid HTTP method: PATCH executing PATCH http://...
+</code></pre>
+
+<h2 id="2-원인-분석">2. 원인 분석</h2>
+
+<p>FeignClient가 내부적으로 기본 사용하는 <code class="language-plaintext highlighter-rouge">HttpURLConnection</code>은 꽤 오래전에 설계된 클래스로, 비교적 최신 사양인 <code class="language-plaintext highlighter-rouge">PATCH</code> 메소드를 표준으로 지원하지 않기 때문입니다.</p>
+
+<h2 id="3-해결-방법-okhttpclient-연동">3. 해결 방법: OkHttpClient 연동</h2>
+
+<p>이 문제를 해결하려면 <code class="language-plaintext highlighter-rouge">PATCH</code>를 공식적으로 지원하는 <code class="language-plaintext highlighter-rouge">OkHttpClient</code>나 <code class="language-plaintext highlighter-rouge">Apache HttpClient</code>를 Feign의 물리적인 통신 클라이언트로 교체해 주어야 합니다.</p>
+
+<h3 id="단계별-적용-방법">단계별 적용 방법</h3>
+<ol>
+  <li><strong>의존성 추가:</strong> <code class="language-plaintext highlighter-rouge">feign-okhttp</code> 라이브러리를 추가합니다.
+    <div class="language-groovy highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">implementation</span> <span class="s1">'io.github.openfeign:feign-okhttp'</span>
+</code></pre></div>    </div>
+  </li>
+  <li><strong>Bean 설정:</strong> 스프링 빈으로 <code class="language-plaintext highlighter-rouge">OkHttpClient</code>를 등록하면 Feign이 이를 자동으로 감지하여 사용합니다.
+    <div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Configuration</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">FeignConfig</span> <span class="o">{</span>
+    <span class="nd">@Bean</span>
+    <span class="kd">public</span> <span class="nc">OkHttpClient</span> <span class="nf">okHttpClient</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nf">OkHttpClient</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>    </div>
+  </li>
+</ol>
+
+<hr data-content="팁" />
+
+<p>최근의 MSA 환경에서는 <code class="language-plaintext highlighter-rouge">PATCH</code>를 통한 부분 업데이트가 빈번하므로, Feign 사용 시 초기부터 <strong>OkHttpClient</strong> 연동 설정을 미리 해두는 것을 권장합니다.</p>
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>

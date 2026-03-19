@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>팩토리 패턴(Factory Pattern): 객체 생성의 책임 분리</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="팩토리 패턴(Factory Pattern): 객체 생성의 책임 분리" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="1. 팩토리 패턴이란?" />
+<meta property="og:description" content="1. 팩토리 패턴이란?" />
+<link rel="canonical" href="https://hrllk.github.io/factory-pattern.html" />
+<meta property="og:url" content="https://hrllk.github.io/factory-pattern.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2023-02-21T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="팩토리 패턴(Factory Pattern): 객체 생성의 책임 분리" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2023-02-21T00:00:00+00:00","datePublished":"2023-02-21T00:00:00+00:00","description":"1. 팩토리 패턴이란?","headline":"팩토리 패턴(Factory Pattern): 객체 생성의 책임 분리","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/factory-pattern.html"},"url":"https://hrllk.github.io/factory-pattern.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2023-02-21 00:00:00 +0000">2023-02-21</time>
+  </p>
+  
+  <h1>팩토리 패턴(Factory Pattern): 객체 생성의 책임 분리</h1>
+
+  <h2 id="1-팩토리-패턴이란">1. 팩토리 패턴이란?</h2>
+
+<p><strong>팩토리 패턴(Factory Pattern)</strong>은 객체 지향 프로그래밍에서 객체 생성 처리를 서브 클래스나 별도의 팩토리 클래스에 위임하는 디자인 패턴입니다.</p>
+
+<blockquote>
+  <p>“생성될 객체의 정확한 클래스를 클라이언트 코드(사용자)가 직접 지정하지 않고, 팩토리 인터페이스를 통해 객체를 생성하는 방법입니다.”</p>
+</blockquote>
+
+<h2 id="2-왜-사용하는가-도입-배경">2. 왜 사용하는가? (도입 배경)</h2>
+
+<p>애플리케이션 코드 곳곳에서 <code class="language-plaintext highlighter-rouge">new</code> 키워드를 사용해 직접 객체를 생성하면, 해당 코드는 특정 클래스와 강력하게 <strong>결합(Coupled)</strong>됩니다.</p>
+
+<ul>
+  <li><strong>결합도 문제:</strong> 클래스 이름이 바뀌거나 생성 방식이 변경되면 애플리케이션의 수많은 곳을 일일이 수정해야 합니다.</li>
+  <li><strong>캡슐화 미흡:</strong> 클라이언트 코드가 객체 생성의 복잡한 세부 사항까지 알 필요가 없는데, <code class="language-plaintext highlighter-rouge">new</code>를 남발하면 내부 구조를 노출하게 됩니다.</li>
+</ul>
+
+<p>팩토리 패턴은 <strong>생성 로직을 별도의 클래스로 캡슐화</strong>하여, 클라이언트 코드가 구체적인 클래스 이름 대신 인터페이스나 추상 클래스만 바라보고 작업할 수 있게 해줍니다.</p>
+
+<h2 id="3-주요-이점">3. 주요 이점</h2>
+
+<ol>
+  <li><strong>느슨한 결합 (Loose Coupling):</strong> 애플리케이션 코드와 실제 객체 간의 의존성이 낮아집니다.</li>
+  <li><strong>확장성:</strong> 기존의 클라이언트 코드를 건드리지 않고도 새로운 타입의 객체(구현체)를 팩토리에 추가하여 확장할 수 있습니다.</li>
+</ol>
+
+<h2 id="4-실무-예제-코드-java">4. 실무 예제 코드 (Java)</h2>
+
+<p>다양한 파트너사에게 메시지를 전송하는 기능을 팩토리 패턴으로 구현해 보겠습니다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 1. 공통 인터페이스 정의</span>
+<span class="kd">public</span> <span class="kd">interface</span> <span class="nc">MessageService</span> <span class="o">{</span>
+    <span class="kt">void</span> <span class="nf">send</span><span class="o">();</span>
+<span class="o">}</span>
+
+<span class="c1">// 2. 각 파트너사별 구현체</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ShinhanMessage</span> <span class="kd">implements</span> <span class="nc">MessageService</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">send</span><span class="o">()</span> <span class="o">{</span> <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"신한은행으로 전송"</span><span class="o">);</span> <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">NHMessage</span> <span class="kd">implements</span> <span class="nc">MessageService</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">send</span><span class="o">()</span> <span class="o">{</span> <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"농협은행으로 전송"</span><span class="o">);</span> <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="c1">// 3. 객체 생성을 전담하는 팩토리 클래스</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">MessageFactory</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="nc">MessageService</span> <span class="nf">getService</span><span class="o">(</span><span class="nc">String</span> <span class="n">partner</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">switch</span> <span class="o">(</span><span class="n">partner</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">case</span> <span class="s">"신한"</span><span class="o">:</span> <span class="k">return</span> <span class="k">new</span> <span class="nc">ShinhanMessage</span><span class="o">();</span>
+            <span class="k">case</span> <span class="s">"농협"</span><span class="o">:</span> <span class="k">return</span> <span class="k">new</span> <span class="nc">NHMessage</span><span class="o">();</span>
+            <span class="k">default</span><span class="o">:</span> <span class="k">throw</span> <span class="k">new</span> <span class="nc">IllegalArgumentException</span><span class="o">(</span><span class="s">"지원하지 않는 파트너입니다."</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="c1">// 4. 클라이언트 코드 (new를 사용하지 않음)</span>
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">sendMessage</span><span class="o">(</span><span class="nc">String</span> <span class="n">partnerName</span><span class="o">)</span> <span class="o">{</span>
+    <span class="c1">// 팩토리를 통해 인터페이스 형식으로 객체를 받음</span>
+    <span class="nc">MessageService</span> <span class="n">service</span> <span class="o">=</span> <span class="nc">MessageFactory</span><span class="o">.</span><span class="na">getService</span><span class="o">(</span><span class="n">partnerName</span><span class="o">);</span>
+    <span class="n">service</span><span class="o">.</span><span class="na">send</span><span class="o">();</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<hr data-content="한 줄 요약" />
+
+<p>팩토리 패턴은 <strong>“어떤 객체를 만들지는 팩토리가 고민할 테니, 너는 그저 사용하기만 해”</strong>라고 역할을 분담하는 스마트한 설계 방식입니다.</p>
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>

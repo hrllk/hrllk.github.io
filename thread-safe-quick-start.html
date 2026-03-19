@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Thread-Safe와 동시성 제어: 비관적 락(Pessimistic Lock)</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Thread-Safe와 동시성 제어: 비관적 락(Pessimistic Lock)" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="1. 멀티스레드 환경의 도전 과제" />
+<meta property="og:description" content="1. 멀티스레드 환경의 도전 과제" />
+<link rel="canonical" href="https://hrllk.github.io/thread-safe-quick-start.html" />
+<meta property="og:url" content="https://hrllk.github.io/thread-safe-quick-start.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2025-02-22T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Thread-Safe와 동시성 제어: 비관적 락(Pessimistic Lock)" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2025-02-22T00:00:00+00:00","datePublished":"2025-02-22T00:00:00+00:00","description":"1. 멀티스레드 환경의 도전 과제","headline":"Thread-Safe와 동시성 제어: 비관적 락(Pessimistic Lock)","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/thread-safe-quick-start.html"},"url":"https://hrllk.github.io/thread-safe-quick-start.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2025-02-22 00:00:00 +0000">2025-02-22</time>
+  </p>
+  
+  <h1>Thread-Safe와 동시성 제어: 비관적 락(Pessimistic Lock)</h1>
+
+  <h2 id="1-멀티스레드-환경의-도전-과제">1. 멀티스레드 환경의 도전 과제</h2>
+
+<p>다중 스레드가 동시에 같은 데이터(Shared Resource)를 수정하려고 할 때, 데이터의 정합성이 깨지는 문제가 발생할 수 있습니다. 이를 해결하기 위해 자바의 <code class="language-plaintext highlighter-rouge">synchronized</code>를 사용할 수 있지만, 이는 단일 서버 내에서만 유효하며 분산 환경(여러 대의 서버)에서는 한계가 있습니다.</p>
+
+<h2 id="2-데이터베이스-수준의-해결책-비관적-락">2. 데이터베이스 수준의 해결책: 비관적 락</h2>
+
+<p><strong>비관적 락(Pessimistic Lock)</strong>은 “데이터에 동시성 이슈가 반드시 발생할 것이다”라고 가정하고, 데이터를 읽는 시점부터 미리 락을 걸어버리는 방식입니다.</p>
+
+<ul>
+  <li><strong>작동 방식:</strong> 트랜잭션이 시작될 때 특정 레코드에 대해 락을 획득합니다. 해당 트랜잭션이 끝나기 전까지 다른 트랜잭션은 해당 데이터를 수정하거나 삭제할 수 없습니다.</li>
+  <li><strong>장점:</strong> 데이터 정합성을 가장 확실하게 보장할 수 있습니다.</li>
+  <li><strong>단점:</strong> 대기 시간이 길어질 수 있고 성능 저하를 초래할 수 있으므로 신중히 사용해야 합니다.</li>
+</ul>
+
+<hr data-content="참고" />
+
+<p>애플리케이션 계층에서의 제어와 DB 계층에서의 제어를 서비스의 특성에 맞게 적절히 혼합하여 사용하는 것이 중요합니다.</p>
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>

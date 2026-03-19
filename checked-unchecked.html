@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>자바 예외 처리: Checked vs Unchecked Exception 차이점</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="자바 예외 처리: Checked vs Unchecked Exception 차이점" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="1. Checked Exception (Exception)" />
+<meta property="og:description" content="1. Checked Exception (Exception)" />
+<link rel="canonical" href="https://hrllk.github.io/checked-unchecked.html" />
+<meta property="og:url" content="https://hrllk.github.io/checked-unchecked.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2025-01-11T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="자바 예외 처리: Checked vs Unchecked Exception 차이점" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2025-01-11T00:00:00+00:00","datePublished":"2025-01-11T00:00:00+00:00","description":"1. Checked Exception (Exception)","headline":"자바 예외 처리: Checked vs Unchecked Exception 차이점","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/checked-unchecked.html"},"url":"https://hrllk.github.io/checked-unchecked.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2025-01-11 00:00:00 +0000">2025-01-11</time>
+  </p>
+  
+  <h1>자바 예외 처리: Checked vs Unchecked Exception 차이점</h1>
+
+  <h2 id="1-checked-exception-exception">1. Checked Exception (Exception)</h2>
+
+<p><strong>Checked Exception</strong>은 이름 그대로 컴파일러가 컴파일 시점에 예외 처리 여부를 체크하는 예외입니다.</p>
+
+<ul>
+  <li><strong>강제성:</strong> 개발자는 이 예외를 반드시 명시적으로 처리해야 합니다. (<code class="language-plaintext highlighter-rouge">try-catch</code>로 감싸거나, 메소드 선언부에 <code class="language-plaintext highlighter-rouge">throws</code> 키워드를 사용)</li>
+  <li><strong>발생 원인:</strong> 주로 애플리케이션의 제어 밖인 ‘외부 환경’과의 상호작용에서 발생합니다.</li>
+</ul>
+
+<p><strong>주요 사례:</strong></p>
+<ul>
+  <li>사용자가 잘못된 파일 경로를 입력한 경우 (<code class="language-plaintext highlighter-rouge">FileNotFoundException</code>)</li>
+  <li>네트워크 문제나 DB 연결 실패 (<code class="language-plaintext highlighter-rouge">IOException</code>, <code class="language-plaintext highlighter-rouge">SQLException</code>)</li>
+</ul>
+
+<h2 id="2-unchecked-exception-runtimeexception">2. Unchecked Exception (RuntimeException)</h2>
+
+<p><strong>Unchecked Exception</strong>은 런타임 시점에 발생하는 예외로, 컴파일러가 예외 처리를 강제하지 않습니다.</p>
+
+<ul>
+  <li><strong>강제성:</strong> 예외 처리는 선택 사항입니다. (<code class="language-plaintext highlighter-rouge">try-catch</code>를 써도 되고 안 써도 컴파일은 됩니다.)</li>
+  <li><strong>발생 원인:</strong> 주로 개발자의 실수로 인한 <strong>로그 오류</strong>나 <strong>검증 누락</strong> 등 코드 내부적인 문제에서 발생합니다.</li>
+</ul>
+
+<p><strong>주요 사례:</strong></p>
+<ul>
+  <li>객체가 null인데 접근한 경우 (<code class="language-plaintext highlighter-rouge">NullPointerException</code>)</li>
+  <li>숫자를 0으로 나누려는 경우 (<code class="language-plaintext highlighter-rouge">ArithmeticException</code>)</li>
+  <li>배열의 인덱스 범위를 벗어난 경우 (<code class="language-plaintext highlighter-rouge">ArrayIndexOutOfBoundsException</code>)</li>
+</ul>
+
+<h2 id="한눈에-비교하기">한눈에 비교하기</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left">구분</th>
+      <th style="text-align: left">Checked Exception</th>
+      <th style="text-align: left">Unchecked Exception</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left"><strong>검출 시점</strong></td>
+      <td style="text-align: left">컴파일 시점</td>
+      <td style="text-align: left">런타임 시점</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><strong>처리 강제 여부</strong></td>
+      <td style="text-align: left">필수 (Y)</td>
+      <td style="text-align: left">선택 (N)</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><strong>상속 계층</strong></td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">Exception</code> 상속</td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">RuntimeException</code> 상속</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><strong>대응 방법</strong></td>
+      <td style="text-align: left">외부 환경 예외 (파일, DB 등)</td>
+      <td style="text-align: left">프로그래밍 논리 오류 (NPE 등)</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr data-content="결론" />
+
+<p><strong>Checked Exception</strong>은 “내가 조절할 수 없는 상황에 대한 대비책”이고, <strong>Unchecked Exception</strong>은 “내 코드의 빈틈을 메우는 과정”이라고 이해하면 명확합니다.</p>
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>

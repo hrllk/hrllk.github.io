@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>synchronized: 자바 임계 영역 제어하기</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="synchronized: 자바 임계 영역 제어하기" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="1. synchronized란?" />
+<meta property="og:description" content="1. synchronized란?" />
+<link rel="canonical" href="https://hrllk.github.io/synchronized.html" />
+<meta property="og:url" content="https://hrllk.github.io/synchronized.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2023-04-29T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="synchronized: 자바 임계 영역 제어하기" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2023-04-29T00:00:00+00:00","datePublished":"2023-04-29T00:00:00+00:00","description":"1. synchronized란?","headline":"synchronized: 자바 임계 영역 제어하기","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/synchronized.html"},"url":"https://hrllk.github.io/synchronized.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2023-04-29 00:00:00 +0000">2023-04-29</time>
+  </p>
+  
+  <h1>synchronized: 자바 임계 영역 제어하기</h1>
+
+  <h2 id="1-synchronized란">1. synchronized란?</h2>
+
+<p>자바에서 멀티스레드 환경을 다룰 때, 여러 스레드가 하나의 공유 자원에 동시에 접근하여 데이터가 꼬이는 것을 방지하기 위해 사용하는 키워드입니다. 이를 통해 <strong>Thread-Safe</strong>한 코드를 작성할 수 있습니다.</p>
+
+<h2 id="2-동작-원리-락lock-메커니즘">2. 동작 원리: 락(Lock) 메커니즘</h2>
+
+<ol>
+  <li><strong>상호 배제:</strong> 어떤 스레드가 <code class="language-plaintext highlighter-rouge">synchronized</code>가 붙은 메소드나 블록에 먼저 진입하면, 해당 객체에 대한 <strong>잠금(Lock)</strong>을 획득합니다.</li>
+  <li><strong>대기:</strong> 락을 획득한 스레드가 작업을 마칠 때까지 다른 스레드들은 문밖에서 기다려야 합니다.</li>
+  <li><strong>해제:</strong> 작업이 끝나면 락을 반납(Unlock)하고, 기다리던 다음 스레드 중 하나가 락을 얻어 진입합니다.</li>
+</ol>
+
+<h2 id="3-주요-사용법">3. 주요 사용법</h2>
+
+<h3 id="메소드-전체에-적용">메소드 전체에 적용</h3>
+<p>메소드 선언부에 키워드를 추가합니다. 메소드 전체가 임계 영역(Critical Section)이 됩니다.</p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">synchronized</span> <span class="kt">void</span> <span class="nf">increase</span><span class="o">()</span> <span class="o">{</span>
+    <span class="n">count</span><span class="o">++;</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="특정-블록에만-적용">특정 블록에만 적용</h3>
+<p>메소드 내에서 동기화가 꼭 필요한 코드 조각만 감싸서 효율을 높입니다.</p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kt">void</span> <span class="nf">increase</span><span class="o">()</span> <span class="o">{</span>
+    <span class="c1">// 공통 로직...</span>
+    <span class="kd">synchronized</span><span class="o">(</span><span class="k">this</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">count</span><span class="o">++;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<hr data-content="주의" />
+
+<p><code class="language-plaintext highlighter-rouge">synchronized</code>는 데이터 안정성을 보장하지만, 너무 남발하면 병목 현상이 발생하여 <strong>성능이 저하</strong>될 수 있습니다. 꼭 필요한 구간에만 최소한으로 적용하는 것이 실력입니다.</p>
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>

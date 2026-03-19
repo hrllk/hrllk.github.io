@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>도커(Docker) 실무 명령어 핵심 정리</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="도커(Docker) 실무 명령어 핵심 정리" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="이미지 빌드 (Docker Build)" />
+<meta property="og:description" content="이미지 빌드 (Docker Build)" />
+<link rel="canonical" href="https://hrllk.github.io/docker-command.html" />
+<meta property="og:url" content="https://hrllk.github.io/docker-command.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2023-06-27T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="도커(Docker) 실무 명령어 핵심 정리" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2023-06-27T00:00:00+00:00","datePublished":"2023-06-27T00:00:00+00:00","description":"이미지 빌드 (Docker Build)","headline":"도커(Docker) 실무 명령어 핵심 정리","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/docker-command.html"},"url":"https://hrllk.github.io/docker-command.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2023-06-27 00:00:00 +0000">2023-06-27</time>
+  </p>
+  
+  <h1>도커(Docker) 실무 명령어 핵심 정리</h1>
+
+  <h2 id="이미지-빌드-docker-build">이미지 빌드 (Docker Build)</h2>
+
+<h3 id="1-buildx-설치-및-설정">1. Buildx 설치 및 설정</h3>
+<p>최근 도커 환경에서는 기존의 빌더 대신 <code class="language-plaintext highlighter-rouge">BuildKit</code>을 사용하는 <code class="language-plaintext highlighter-rouge">Buildx</code>가 권장됩니다. 기존 방식 시 “The legacy builder is deprecated” 메시지가 뜰 경우 다음 과정을 진행합니다.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># macOS 기준 buildx 설치</span>
+brew <span class="nb">install </span>docker-buildx
+</code></pre></div></div>
+
+<h3 id="2-이미지-빌드-실행">2. 이미지 빌드 실행</h3>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># -f: Dockerfile 지정, -t: 태그 설정</span>
+docker build <span class="nt">-f</span> Dockerfile <span class="nt">-t</span> mini-web <span class="nb">.</span>
+</code></pre></div></div>
+
+<h2 id="이미지-관리-명령어">이미지 관리 명령어</h2>
+
+<h3 id="1-이미지-목록-확인">1. 이미지 목록 확인</h3>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker images
+</code></pre></div></div>
+
+<h3 id="2-이미지-파일로-내보내기가져오기-tar">2. 이미지 파일로 내보내기/가져오기 (.tar)</h3>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 내보내기 (Export)</span>
+docker save <span class="nt">-o</span> mini-web.tar mini-web
+
+<span class="c"># 가져오기 (Import)</span>
+docker load <span class="nt">-i</span> mini-web.tar
+</code></pre></div></div>
+
+<h3 id="3-컨테이너-실행-run">3. 컨테이너 실행 (Run)</h3>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># -d: 백그라운드 실행, -p: 포트 바인딩 (로컬:컨테이너)</span>
+docker run <span class="nt">-d</span> <span class="nt">-p</span> 8080:80 mini-web
+</code></pre></div></div>
+
+<h2 id="컨테이너-상태-체크-및-로그">컨테이너 상태 체크 및 로그</h2>
+
+<h3 id="1-실행-중인-컨테이너-확인">1. 실행 중인 컨테이너 확인</h3>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker ps
+</code></pre></div></div>
+
+<h3 id="2-로그-확인">2. 로그 확인</h3>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 특정 컨테이너의 로그 실시간 확인</span>
+docker logs <span class="nt">-f</span> <span class="o">{</span>container-id<span class="o">}</span>
+</code></pre></div></div>
+
+<hr data-content="Tip" />
+
+<p>명령어를 사용할 때 <code class="language-plaintext highlighter-rouge">{container-id}</code>는 전체 ID를 다 적지 않고 앞의 3~4자리만 입력해도 유니크하다면 도커가 인식합니다.</p>
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>

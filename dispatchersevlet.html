@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>DispatcherServlet: Spring MVC의 핵심 엔진</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="DispatcherServlet: Spring MVC의 핵심 엔진" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="1. DispatcherServlet이란?" />
+<meta property="og:description" content="1. DispatcherServlet이란?" />
+<link rel="canonical" href="https://hrllk.github.io/dispatchersevlet.html" />
+<meta property="og:url" content="https://hrllk.github.io/dispatchersevlet.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2022-07-18T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="DispatcherServlet: Spring MVC의 핵심 엔진" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2022-07-18T00:00:00+00:00","datePublished":"2022-07-18T00:00:00+00:00","description":"1. DispatcherServlet이란?","headline":"DispatcherServlet: Spring MVC의 핵심 엔진","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/dispatchersevlet.html"},"url":"https://hrllk.github.io/dispatchersevlet.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2022-07-18 00:00:00 +0000">2022-07-18</time>
+  </p>
+  
+  <h1>DispatcherServlet: Spring MVC의 핵심 엔진</h1>
+
+  <h2 id="1-dispatcherservlet이란">1. DispatcherServlet이란?</h2>
+
+<p><strong>DispatcherServlet</strong>은 Spring MVC 프레임워크의 중심이 되는 서블릿입니다. HTTP 요청이 들어오면 가장 앞단에서 이를 낚아채어 적절한 컨트롤러에게 전달하는 <strong>Front Controller</strong> 역할을 수행합니다.</p>
+
+<h2 id="2-핵심-구성-개념">2. 핵심 구성 개념</h2>
+
+<h3 id="front-controller-패턴">Front Controller 패턴</h3>
+<p>모든 요청을 단 하나의 입구(DispatcherServlet)에서 통합 관리하는 디자인 패턴입니다. 공통 처리 로직을 한곳에서 처리할 수 있어 중복 코드를 줄이고 구조를 단순화합니다.</p>
+
+<h3 id="requestdispatcher의-역할">RequestDispatcher의 역할</h3>
+<p>사용자의 요청이 여러 클래스를 거치는 동안 원래의 <code class="language-plaintext highlighter-rouge">request</code>와 <code class="language-plaintext highlighter-rouge">response</code> 정보를 유실하지 않고 그대로 유지하며 전달해 주는 기법입니다. 이를 통해 다른 페이지로 이동하거나 데이터를 전달할 때 정보를 안전하게 보존할 수 있습니다.</p>
+
+<h2 id="3-작동-프로세스-요약">3. 작동 프로세스 요약</h2>
+
+<ol>
+  <li><strong>요청 수신:</strong> 모든 요청은 DispatcherServlet으로 모입니다.</li>
+  <li><strong>핸들러 매핑:</strong> 어느 컨트롤러가 이 요청을 처리할지 찾아냅니다.</li>
+  <li><strong>핸들러 어댑터:</strong> 찾아낸 컨트롤러를 실제로 실행합니다.</li>
+  <li><strong>뷰 리졸버:</strong> 컨트롤러가 반환한 결과를 바탕으로 어떤 화면을 보여줄지 결정하여 응답을 완성합니다.</li>
+</ol>
+
+<hr data-content="결론" />
+
+<p>DispatcherServlet은 개발자가 복잡한 Servlet 설정을 일일이 하지 않아도 객체 지향적인 웹 애플리케이션을 개발할 수 있게 해주는 <strong>“스프링 웹 기술의 집약체”</strong>라고 할 수 있습니다.</p>
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>

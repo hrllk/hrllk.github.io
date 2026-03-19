@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Troubleshooting: String.valueOf()가 'null' 문자열을 반환할 때</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Troubleshooting: String.valueOf()가 ‘null’ 문자열을 반환할 때" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="1. 문제 상황" />
+<meta property="og:description" content="1. 문제 상황" />
+<link rel="canonical" href="https://hrllk.github.io/string-valueof.html" />
+<meta property="og:url" content="https://hrllk.github.io/string-valueof.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-12-21T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Troubleshooting: String.valueOf()가 ‘null’ 문자열을 반환할 때" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2021-12-21T00:00:00+00:00","datePublished":"2021-12-21T00:00:00+00:00","description":"1. 문제 상황","headline":"Troubleshooting: String.valueOf()가 ‘null’ 문자열을 반환할 때","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/string-valueof.html"},"url":"https://hrllk.github.io/string-valueof.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2021-12-21 00:00:00 +0000">2021-12-21</time>
+  </p>
+  
+  <h1>Troubleshooting: String.valueOf()가 'null' 문자열을 반환할 때</h1>
+
+  <h2 id="1-문제-상황">1. 문제 상황</h2>
+
+<p>데이터 Map에서 값을 꺼내 Null 체크를 하는 조건문을 작성했음에도 불구하고, 값이 없는 경우에 자꾸만 조건문을 통과하여 로그가 찍히는 기현상이 발생했습니다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">String</span> <span class="n">value</span> <span class="o">=</span> <span class="nc">String</span><span class="o">.</span><span class="na">valueOf</span><span class="o">(</span><span class="n">row</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">"DATA"</span><span class="o">));</span>
+<span class="k">if</span> <span class="o">(</span><span class="n">value</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+    <span class="c1">// value가 "null" 문자열인 경우 이 안으로 들어옴</span>
+    <span class="n">logger</span><span class="o">.</span><span class="na">debug</span><span class="o">(</span><span class="s">"Value is: [{}]"</span><span class="o">,</span> <span class="n">value</span><span class="o">);</span>
+<span class="o">}</span>
+<span class="c1">// 결과: DEBUG : Value is: [null]</span>
+</code></pre></div></div>
+
+<h2 id="2-원인-분석">2. 원인 분석</h2>
+
+<p><code class="language-plaintext highlighter-rouge">String.valueOf()</code> 메서드의 내부 구현을 살펴보면 원인을 알 수 있습니다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">static</span> <span class="nc">String</span> <span class="nf">valueOf</span><span class="o">(</span><span class="nc">Object</span> <span class="n">obj</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="o">(</span><span class="n">obj</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">?</span> <span class="s">"null"</span> <span class="o">:</span> <span class="n">obj</span><span class="o">.</span><span class="na">toString</span><span class="o">();</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>인자로 받은 객체가 <code class="language-plaintext highlighter-rouge">null</code>일 경우, literal <code class="language-plaintext highlighter-rouge">null</code>이 아닌 <strong>문자열 <code class="language-plaintext highlighter-rouge">"null"</code></strong>을 반환합니다. 이 때문에 <code class="language-plaintext highlighter-rouge">value != null</code> 체크는 무용지물이 됩니다.</p>
+
+<h2 id="3-해결-방법">3. 해결 방법</h2>
+
+<ul>
+  <li><strong>직접 비교:</strong> 문자열 <code class="language-plaintext highlighter-rouge">"null"</code>과 비교하거나, 원본 객체의 null 여부를 먼저 확인합니다.</li>
+  <li><strong>안전한 변환:</strong> <code class="language-plaintext highlighter-rouge">Objects.toString(obj, null)</code>과 같이 기본값을 지정할 수 있는 라이브러리 메서드를 사용하거나, 단순히 <code class="language-plaintext highlighter-rouge">(String) obj</code> 캐스팅을 활용합니다.</li>
+</ul>
+
+<hr data-content="교훈" />
+
+<p>“Null인데 Null이 아닌” 상황을 피하려면 사용하는 라이브러리 메서드의 내부 동작 방식을 정확히 이해하는 것이 중요합니다.</p>
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>

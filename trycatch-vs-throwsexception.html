@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Java 예외 처리: Checked vs Unchecked Exception 완벽 정리</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Java 예외 처리: Checked vs Unchecked Exception 완벽 정리" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="1. 에러(Error) vs 예외(Exception)" />
+<meta property="og:description" content="1. 에러(Error) vs 예외(Exception)" />
+<link rel="canonical" href="https://hrllk.github.io/trycatch-vs-throwsexception.html" />
+<meta property="og:url" content="https://hrllk.github.io/trycatch-vs-throwsexception.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2022-01-12T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Java 예외 처리: Checked vs Unchecked Exception 완벽 정리" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2022-01-12T00:00:00+00:00","datePublished":"2022-01-12T00:00:00+00:00","description":"1. 에러(Error) vs 예외(Exception)","headline":"Java 예외 처리: Checked vs Unchecked Exception 완벽 정리","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/trycatch-vs-throwsexception.html"},"url":"https://hrllk.github.io/trycatch-vs-throwsexception.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2022-01-12 00:00:00 +0000">2022-01-12</time>
+  </p>
+  
+  <h1>Java 예외 처리: Checked vs Unchecked Exception 완벽 정리</h1>
+
+  <h2 id="1-에러error-vs-예외exception">1. 에러(Error) vs 예외(Exception)</h2>
+
+<ul>
+  <li><strong>에러(Error):</strong> 메모리 부족(OOM)이나 시스템 중단처럼 개발자가 코드로 제어할 수 없는 심각한 상황입니다.</li>
+  <li><strong>예외(Exception):</strong> 개발자가 짠 로직에서 발생하는 문제로, 적절한 처리(<code class="language-plaintext highlighter-rouge">try-catch</code>)를 통해 수습이 가능합니다.</li>
+</ul>
+
+<h2 id="2-예외의-두-갈래-checked-vs-unchecked">2. 예외의 두 갈래: Checked vs Unchecked</h2>
+
+<h3 id="checked-exception-예외-처리-필수">Checked Exception (예외 처리 필수)</h3>
+<ul>
+  <li><strong>기준:</strong> <code class="language-plaintext highlighter-rouge">RuntimeException</code>을 상속받지 않은 클래스들입니다.</li>
+  <li><strong>특징:</strong> 컴파일 시점에 체크되므로 무조건 <code class="language-plaintext highlighter-rouge">try-catch</code>로 감싸거나 부모 메소드로 던져야(<code class="language-plaintext highlighter-rouge">throws</code>) 합니다.</li>
+  <li><strong>대표 예시:</strong> <code class="language-plaintext highlighter-rouge">IOException</code>, <code class="language-plaintext highlighter-rouge">SQLException</code></li>
+</ul>
+
+<h3 id="unchecked-exception-선택적-처리">Unchecked Exception (선택적 처리)</h3>
+<ul>
+  <li><strong>기준:</strong> <code class="language-plaintext highlighter-rouge">RuntimeException</code> 및 그 자손 클래스들입니다.</li>
+  <li><strong>특징:</strong> 실행 시점(Runtime)에 발견되며, 명시적인 처리를 강제하지 않습니다. 주로 개발자의 부주의로 발생하는 로직 오류가 많습니다.</li>
+  <li><strong>대표 예시:</strong> <code class="language-plaintext highlighter-rouge">NullPointerException</code>, <code class="language-plaintext highlighter-rouge">IndexOutOfBoundsException</code></li>
+</ul>
+
+<h2 id="3-스프링-트랜잭션과-롤백-전략">3. 스프링 트랜잭션과 롤백 전략</h2>
+
+<p>가장 중요한 차이 중 하나는 <strong>트랜잭션 롤백</strong> 기준입니다.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left">구분</th>
+      <th style="text-align: left">Checked Exception</th>
+      <th style="text-align: left">Unchecked Exception</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left"><strong>자동 롤백 여부</strong></td>
+      <td style="text-align: left"><strong>롤백되지 않음</strong> (데이터 보존)</td>
+      <td style="text-align: left"><strong>자동 롤백됨</strong> (취소)</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><strong>의미</strong></td>
+      <td style="text-align: left">복구 가능한 상황으로 판단</td>
+      <td style="text-align: left">복구 불가능한 시스템 장애로 판단</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr data-content="팁" />
+
+<p>스프링의 <code class="language-plaintext highlighter-rouge">@Transactional</code> 어노테이션에서 <code class="language-plaintext highlighter-rouge">rollbackFor</code> 옵션을 사용하면, 기본 동작과 달리 특정 Checked Exception이 발생했을 때도 롤백이 일어나도록 설정할 수 있습니다.</p>
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>
