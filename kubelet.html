@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>kubelet: 쿠버네티스 노드의 핵심 관리 에이전트</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="kubelet: 쿠버네티스 노드의 핵심 관리 에이전트" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="1. kubelet이란?" />
+<meta property="og:description" content="1. kubelet이란?" />
+<link rel="canonical" href="https://hrllk.github.io/kubelet.html" />
+<meta property="og:url" content="https://hrllk.github.io/kubelet.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2023-06-26T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="kubelet: 쿠버네티스 노드의 핵심 관리 에이전트" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2023-06-26T00:00:00+00:00","datePublished":"2023-06-26T00:00:00+00:00","description":"1. kubelet이란?","headline":"kubelet: 쿠버네티스 노드의 핵심 관리 에이전트","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/kubelet.html"},"url":"https://hrllk.github.io/kubelet.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2023-06-26 00:00:00 +0000">2023-06-26</time>
+  </p>
+  
+  <h1>kubelet: 쿠버네티스 노드의 핵심 관리 에이전트</h1>
+
+  <h2 id="1-kubelet이란">1. kubelet이란?</h2>
+
+<p><strong>kubelet</strong>은 쿠버네티스 클러스터의 각 <strong>노드(Node)</strong>마다 실행되는 에이전트로, 해당 노드에서 컨테이너들이 Pod 스펙에 정의된 대로 정확하게 실행되고 있는지 관리하는 역할을 담당합니다.</p>
+
+<h2 id="2-주요-기능-및-역할">2. 주요 기능 및 역할</h2>
+
+<ol>
+  <li><strong>Pod 실행 및 관리:</strong> 마스터 노드의 스케줄러로부터 할당받은 Pod 명세를 읽어 <code class="language-plaintext highlighter-rouge">containerd</code>와 같은 컨테이너 런타임을 통해 컨테이너를 구동합니다.</li>
+  <li><strong>상태 모니터링:</strong> 노드 내 컨테이너들의 상태를 주기적으로 확인하며, 만약 컨테이너가 예기치 않게 종료되면 이를 재시작하거나 상태를 업데이트하여 클러스터에 알립니다.</li>
+  <li><strong>리소스 관리:</strong> 노드의 CPU, 메모리가 Pod에 할당된 제한치 내에서 올바르게 사용되는지 감시합니다.</li>
+  <li><strong>볼륨 및 네트워크 관리:</strong> Pod가 필요로 하는 스토리지 볼륨을 마운트하고, 네트워크 환경이 올바르게 구성되도록 지원합니다.</li>
+</ol>
+
+<hr data-content="정리" />
+
+<p>kubelet은 마스터 노드의 명령을 받아 현장에서 발로 뛰는 <strong>“노드 현장 관리소장”</strong>과 같은 존재입니다.</p>
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>

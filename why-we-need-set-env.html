@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Tomcat: 왜 환경변수는 setenv.sh에 설정해야 하는가?</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Tomcat: 왜 환경변수는 setenv.sh에 설정해야 하는가?" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="1. 환경변수의 필요성" />
+<meta property="og:description" content="1. 환경변수의 필요성" />
+<link rel="canonical" href="https://hrllk.github.io/why-we-need-set-env.html" />
+<meta property="og:url" content="https://hrllk.github.io/why-we-need-set-env.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-02-03T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Tomcat: 왜 환경변수는 setenv.sh에 설정해야 하는가?" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2021-02-03T00:00:00+00:00","datePublished":"2021-02-03T00:00:00+00:00","description":"1. 환경변수의 필요성","headline":"Tomcat: 왜 환경변수는 setenv.sh에 설정해야 하는가?","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/why-we-need-set-env.html"},"url":"https://hrllk.github.io/why-we-need-set-env.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2021-02-03 00:00:00 +0000">2021-02-03</time>
+  </p>
+  
+  <h1>Tomcat: 왜 환경변수는 setenv.sh에 설정해야 하는가?</h1>
+
+  <h2 id="1-환경변수의-필요성">1. 환경변수의 필요성</h2>
+
+<p>애플리케이션이 구동되는 환경(개발, 스테이징, 운영)에 따라 다른 설정값(API 키, 로그 레벨 등)을 적용하기 위해 환경변수를 자주 사용합니다. 톰캣 환경에서는 이를 전역적으로 관리할 필요가 있습니다.</p>
+
+<h2 id="2-setenvsh를-권장하는-이유">2. setenv.sh를 권장하는 이유</h2>
+
+<p>톰캣 가이드 문서에서는 환경변수 설정을 <code class="language-plaintext highlighter-rouge">setenv.sh</code> 파일에 작성할 것을 명시하고 있습니다.</p>
+
+<ul>
+  <li><strong>분리 및 독립성:</strong> 톰캣의 핵심 실행 파일인 <code class="language-plaintext highlighter-rouge">startup.sh</code>나 <code class="language-plaintext highlighter-rouge">catalina.sh</code>를 수정하지 않고 설정값만 따로 떼어 관리할 수 있습니다.</li>
+  <li><strong>안정성:</strong> 실행 스크립트 파일을 직접 수정하다 발생할 수 있는 오타나 설정 파손 위험을 방지합니다.</li>
+  <li><strong>유지보수:</strong> 톰캣 버전 업그레이드 시 실행 스크립트는 교체되더라도 <code class="language-plaintext highlighter-rouge">setenv.sh</code>만 복사해두면 설정을 쉽게 유지할 수 있습니다.</li>
+</ul>
+
+<h2 id="3-주의사항">3. 주의사항</h2>
+
+<p><code class="language-plaintext highlighter-rouge">setenv.sh</code> 파일은 톰캣 설치 시 기본으로 제공되지 않는 경우가 많습니다. 사용자가 직접 생성하여 <code class="language-plaintext highlighter-rouge">bin/</code> 디렉토리에 위치시켜야 하며, <code class="language-plaintext highlighter-rouge">catalina.sh</code>가 구동될 때 이 파일이 존재하면 자동으로 호출하여 설정을 읽어들입니다.</p>
+
+<hr data-content="팁" />
+
+<p><code class="language-plaintext highlighter-rouge">startup.sh</code> -&gt; <code class="language-plaintext highlighter-rouge">catalina.sh</code> -&gt; <code class="language-plaintext highlighter-rouge">setenv.sh</code> 순서로 호출되는 흐름을 이해하면 트러블슈팅 시 큰 도움이 됩니다.</p>
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>

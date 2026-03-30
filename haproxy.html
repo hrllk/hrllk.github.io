@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>HAProxy: 고성능 L7 로드밸런서와 프록시 서버</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="HAProxy: 고성능 L7 로드밸런서와 프록시 서버" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="1. HAProxy란 무엇인가?" />
+<meta property="og:description" content="1. HAProxy란 무엇인가?" />
+<link rel="canonical" href="https://hrllk.github.io/haproxy.html" />
+<meta property="og:url" content="https://hrllk.github.io/haproxy.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2023-06-22T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="HAProxy: 고성능 L7 로드밸런서와 프록시 서버" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2023-06-22T00:00:00+00:00","datePublished":"2023-06-22T00:00:00+00:00","description":"1. HAProxy란 무엇인가?","headline":"HAProxy: 고성능 L7 로드밸런서와 프록시 서버","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/haproxy.html"},"url":"https://hrllk.github.io/haproxy.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2023-06-22 00:00:00 +0000">2023-06-22</time>
+  </p>
+  
+  <h1>HAProxy: 고성능 L7 로드밸런서와 프록시 서버</h1>
+
+  <h2 id="1-haproxy란-무엇인가">1. HAProxy란 무엇인가?</h2>
+
+<p><strong>HAProxy (High Availability Proxy)</strong>는 여러 서버에 네트워크 트래픽을 분산시켜 애플리케이션의 가용성, 확장성 및 신뢰성을 보장하는 강력한 오픈소스 로드밸런싱 및 프록시 솔루션입니다.</p>
+
+<h2 id="2-주요-특징-및-용도">2. 주요 특징 및 용도</h2>
+
+<ul>
+  <li><strong>L7 계층 특화:</strong> OSI 모델의 애플리케이션 계층(Layer 7)에서 동작하며, HTTP 헤더나 쿠키 값을 기반으로 한 정교한 라우팅이 가능합니다.</li>
+  <li><strong>SSL/TLS 종료:</strong> 서버 대신 SSL 인증서 처리를 수행하여 백엔드 서버의 부하를 줄여줍니다.</li>
+  <li><strong>상태 확인 (Health Check):</strong> 연결된 서버들이 정상인지 실시간으로 감시하고, 장애가 발생한 서버는 트래픽 할당 대상에서 즉시 제외합니다.</li>
+  <li><strong>콘텐츠 스위칭:</strong> 요청된 URL 경로에 따라 서로 다른 서버 그룹으로 트래픽을 배정할 수 있습니다.</li>
+</ul>
+
+<hr data-content="결론" />
+
+<p>HAProxy는 매우 가볍고 빠르며 안정적이기 때문에, 대규모 트래픽을 처리해야 하는 웹 서비스 인프라에서 엔진엑스(Nginx)와 함께 가장 많이 선택되는 솔루션 중 하나입니다.</p>
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>

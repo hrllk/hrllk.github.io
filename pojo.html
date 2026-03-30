@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>POJO(Plain Old Java Object): 객체지향의 본질로 돌아가기</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="POJO(Plain Old Java Object): 객체지향의 본질로 돌아가기" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="POJO란 무엇인가?" />
+<meta property="og:description" content="POJO란 무엇인가?" />
+<link rel="canonical" href="https://hrllk.github.io/pojo.html" />
+<meta property="og:url" content="https://hrllk.github.io/pojo.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2023-02-07T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="POJO(Plain Old Java Object): 객체지향의 본질로 돌아가기" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2023-02-07T00:00:00+00:00","datePublished":"2023-02-07T00:00:00+00:00","description":"POJO란 무엇인가?","headline":"POJO(Plain Old Java Object): 객체지향의 본질로 돌아가기","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/pojo.html"},"url":"https://hrllk.github.io/pojo.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2023-02-07 00:00:00 +0000">2023-02-07</time>
+  </p>
+  
+  <h1>POJO(Plain Old Java Object): 객체지향의 본질로 돌아가기</h1>
+
+  <h2 id="pojo란-무엇인가">POJO란 무엇인가?</h2>
+
+<p><strong>POJO (Plain Old Java Object)</strong>는 말 그대로 “오래된 방식의 단순한 자바 객체”를 의미합니다. 어떤 특정한 자바 모델이나 프레임워크, 인터페이스를 따르지 않는 아주 평범한 자바 클래스입니다.</p>
+
+<h2 id="왜-이런-용어가-생겼을까-탄생-배경">왜 이런 용어가 생겼을까? (탄생 배경)</h2>
+
+<p>스프링이 등장하기 전, 자바 생태계를 장악했던 <strong>EJB(Enterprise JavaBeans)</strong>는 개발자들에게 지옥과 같은 복잡함을 선사했습니다.</p>
+
+<ul>
+  <li><strong>강한 종속성:</strong> 프레임워크가 제공하는 특정 클래스를 반드시 상속(<code class="language-plaintext highlighter-rouge">extends</code>)받거나 인터페이스를 구현(<code class="language-plaintext highlighter-rouge">implements</code>)해야만 동작했습니다.</li>
+  <li><strong>객체지향의 상실:</strong> 비즈니스 로직을 짜는 것보다 프레임워크의 규칙을 맞추는 데 더 많은 에너지를 쏟아야 했고, 이 과정에서 다형성이나 상속 같은 객체지향의 본질적인 장점들이 퇴색되었습니다.</li>
+</ul>
+
+<p>이에 마틴 파울러(Martin Fowler)와 같은 거장들이 <strong>“우리는 그저 평범한 자바 객체를 원한다”</strong>며 제안한 개념이 바로 POJO입니다.</p>
+
+<h2 id="pojo의-진정한-가치">POJO의 진정한 가치</h2>
+
+<ol>
+  <li><strong>가독성과 유지보수성:</strong> 군더더기 없는 순수 코드로 작성되므로 가독성이 높고 관리가 쉽습니다.</li>
+  <li><strong>테스트 용이성:</strong> 특정 환경(서버, 프레임워크)이 없어도 단위 테스트(Unit Test)를 손쉽게 수행할 수 있습니다.</li>
+  <li><strong>유연성:</strong> 특정 라이브러리에 묶이지 않으므로, 나중에 기술 스택이 바뀌더라도 비즈니스 로직만큼은 재사용할 수 있습니다.</li>
+</ol>
+
+<hr data-content="결론" />
+
+<p>POJO는 단순한 용어가 아닌, <strong>“기술에 종속되지 않고 비즈니스 가치(Logic)를 가장 소중히 여기겠다”</strong>는 개발자의 태도이자 철학입니다.</p>
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>

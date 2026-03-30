@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>[DB] 관계형 데이터베이스 정규화(Normalization) 단계별 정리</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="[DB] 관계형 데이터베이스 정규화(Normalization) 단계별 정리" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="데이터베이스 정규화란?" />
+<meta property="og:description" content="데이터베이스 정규화란?" />
+<link rel="canonical" href="https://hrllk.github.io/cs-note2.html" />
+<meta property="og:url" content="https://hrllk.github.io/cs-note2.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2024-02-13T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="[DB] 관계형 데이터베이스 정규화(Normalization) 단계별 정리" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2024-02-13T00:00:00+00:00","datePublished":"2024-02-13T00:00:00+00:00","description":"데이터베이스 정규화란?","headline":"[DB] 관계형 데이터베이스 정규화(Normalization) 단계별 정리","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/cs-note2.html"},"url":"https://hrllk.github.io/cs-note2.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2024-02-13 00:00:00 +0000">2024-02-13</time>
+  </p>
+  
+  <h1>[DB] 관계형 데이터베이스 정규화(Normalization) 단계별 정리</h1>
+
+  <h2 id="데이터베이스-정규화란">데이터베이스 정규화란?</h2>
+
+<p>데이터의 중복을 최소화하고 무결성을 향상시키기 위해 테이블을 논리적으로 분해하는 과정입니다.</p>
+
+<h2 id="주요-정규화-단계">주요 정규화 단계</h2>
+
+<h3 id="1-제1정규형-1nf">1. 제1정규형 (1NF)</h3>
+<p><strong>“모든 컬럼이 원자값(Atomic Value)을 가져야 합니다.”</strong></p>
+<ul>
+  <li>하나의 칸에는 하나의 값만 들어있어야 하며, 중복되는 그룹이 없어야 합니다.</li>
+</ul>
+
+<h3 id="2-제2정규형-2nf">2. 제2정규형 (2NF)</h3>
+<p><strong>“제1정규형을 만족하고, 부분 함수 종속성을 제거해야 합니다.”</strong></p>
+<ul>
+  <li>기본키가 복합키(두 개 이상의 컬럼 조합)일 때, 어떤 필드가 기본키 전체가 아닌 일부분에만 종속되어 있다면 이를 분리합니다.</li>
+</ul>
+
+<h3 id="3-제3정규형-3nf">3. 제3정규형 (3NF)</h3>
+<p><strong>“제2정규형을 만족하고, 이행적 함수 종속성을 제거해야 합니다.”</strong></p>
+<ul>
+  <li>기본키 이외의 속성들끼리 서로 종속 관계가 있는 경우(A-&gt;B-&gt;C)를 분리합니다.</li>
+</ul>
+
+<h3 id="4-bcnf-boyce-codd-normal-form">4. BCNF (Boyce-Codd Normal Form)</h3>
+<p><strong>“제3정규형을 만족하고, 모든 결정자가 후보키여야 합니다.”</strong></p>
+<ul>
+  <li>일반 필드가 후보키의 일부를 결정짓는 아주 복잡한 의존성까지 찾아내어 제거합니다.</li>
+</ul>
+
+<h2 id="해싱hashing-기법들">해싱(Hashing) 기법들</h2>
+
+<p>데이터를 빠르게 찾기 위해 사용하는 해시 함수들의 종류입니다.</p>
+<ul>
+  <li><strong>제산법 (Division):</strong> 키 값을 특정 숫자로 나눈 나머지를 주소로 사용</li>
+  <li><strong>제곱법 (Mid-Square):</strong> 키 값을 제곱한 후 중간 부분의 비트를 추출</li>
+  <li><strong>숫자 분석법 (Digit Analysis):</strong> 키 값의 각 자릿수 분포를 분석하여 편중되지 않은 부분 사용</li>
+</ul>
+
+<hr data-content="정리" />
+
+<p>정규화는 데이터 일관성을 지키는 수단이지만, 지나친 정규화는 쿼리 성능(Join 비용)을 떨어뜨릴 수 있습니다. 필요시 적절한 <strong>반정규화(Denormalization)</strong> 전략도 중요합니다.</p>
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>

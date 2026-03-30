@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>멀티스레드(Multi-Thread) 개념과 효율적인 작업 분배</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="멀티스레드(Multi-Thread) 개념과 효율적인 작업 분배" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="멀티스레드란?" />
+<meta property="og:description" content="멀티스레드란?" />
+<link rel="canonical" href="https://hrllk.github.io/multithread.html" />
+<meta property="og:url" content="https://hrllk.github.io/multithread.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2023-04-13T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="멀티스레드(Multi-Thread) 개념과 효율적인 작업 분배" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2023-04-13T00:00:00+00:00","datePublished":"2023-04-13T00:00:00+00:00","description":"멀티스레드란?","headline":"멀티스레드(Multi-Thread) 개념과 효율적인 작업 분배","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/multithread.html"},"url":"https://hrllk.github.io/multithread.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2023-04-13 00:00:00 +0000">2023-04-13</time>
+  </p>
+  
+  <h1>멀티스레드(Multi-Thread) 개념과 효율적인 작업 분배</h1>
+
+  <h2 id="멀티스레드란">멀티스레드란?</h2>
+
+<p><strong>멀티스레딩(Multi-threading)</strong>은 하나의 프로세스 내에서 둘 이상의 스레드가 <strong>동시에 실행</strong>되는 기법을 의미합니다. 일반적으로 하나의 프로그램은 하나의 줄기(Single Thread)로 동작하지만, 더 효율적인 처리를 위해 여러 줄기로 나누어 작업을 수행하는 것이 멀티스레드입니다.</p>
+
+<h2 id="주요-특징">주요 특징</h2>
+
+<h3 id="리소스-및-메모리-공유">리소스 및 메모리 공유</h3>
+<p>프로세스가 실행될 때 운영체제로부터 할당받은 메모리 자원을 여러 스레드가 <strong>공통으로 공유</strong>하여 작업합니다.</p>
+<ul>
+  <li><strong>효율성:</strong> 각각의 독립된 프로세스를 여러 개 띄우는 것보다 메모리 낭비가 훨씬 적습니다.</li>
+  <li><strong>주의점:</strong> 같은 메모리를 여러 명이 동시에 건드리기 때문에 데이터 동기화 이슈(Thread-safe)에 주의가 필요합니다.</li>
+</ul>
+
+<h2 id="왜-멀티스레드를-사용하는가">왜 멀티스레드를 사용하는가?</h2>
+
+<p>병렬 처리를 통해 시스템의 응답 속도를 높이고 대기 시간을 줄이기 위함입니다.</p>
+
+<h3 id="실생활-비유">실생활 비유</h3>
+<p>은행 창구에서 계좌를 개설하려는 고객이 50명인데, 행원(Thread)이 단 1명뿐이라면 마지막 고객은 엄청난 시간을 대기해야 합니다.
+이때 행원을 10명으로 늘린다면(<strong>Multi-thread</strong>), 행원 한 명당 감당해야 할 고객은 5명으로 줄어들고 전체적인 업무 처리 속도는 비약적으로 빨라집니다.</p>
+
+<hr data-content="정리" />
+
+<p>멀티스레드는 한정된 자원을 공유하며 <strong>“동시다발적인 작업”</strong>을 수행하여 사용자가 느끼는 지연 시간을 최소화하는 고도의 프로그래밍 기술입니다.</p>
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>

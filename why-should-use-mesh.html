@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>mesh series: why do we use a service mesh?</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="mesh series: why do we use a service mesh?" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Overview 이전 글에서 이번 시리즈의 출발점을 정리했다. 요구사항은 명확하다." />
+<meta property="og:description" content="Overview 이전 글에서 이번 시리즈의 출발점을 정리했다. 요구사항은 명확하다." />
+<link rel="canonical" href="https://hrllk.github.io/why-should-use-mesh.html" />
+<meta property="og:url" content="https://hrllk.github.io/why-should-use-mesh.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-03-06T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="mesh series: why do we use a service mesh?" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2026-03-06T00:00:00+00:00","datePublished":"2026-03-06T00:00:00+00:00","description":"Overview 이전 글에서 이번 시리즈의 출발점을 정리했다. 요구사항은 명확하다.","headline":"mesh series: why do we use a service mesh?","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/why-should-use-mesh.html"},"url":"https://hrllk.github.io/why-should-use-mesh.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2026-03-06 00:00:00 +0000">2026-03-06</time>
+  </p>
+  
+  <h1>mesh series: why do we use a service mesh?</h1>
+
+  <h3 id="overview">Overview</h3>
+<hr />
+<p>이전 글에서 이번 시리즈의 출발점을 정리했다.<br />
+요구사항은 명확하다.</p>
+
+<p><strong>“외부 인입뿐 아니라, 클러스터 내부 서비스 간 통신도 443 기반으로 보호해야 한다.”</strong></p>
+
+<p>가장 먼저 떠오르는 방법은 각 애플리케이션이 직접 HTTPS 서버가 되는 방식이다.<br />
+하지만 마이크로서비스 환경에서는 이 접근이 빠르게 한계에 부딪힌다. 이번 글에서는 왜 내부 통신 보안을 애플리케이션이 아니라 <strong>Service Mesh</strong>가 담당해야 하는지 정리한다.</p>
+
+<h3 id="가장-단순한-접근-애플리케이션이-직접-tls를-처리한다">가장 단순한 접근: 애플리케이션이 직접 TLS를 처리한다</h3>
+<hr />
+<p>직접 구현 방식은 아래와 같다.</p>
+
+<ul>
+  <li>각 서비스가 HTTPS 서버로 동작</li>
+  <li>서비스별 인증서 발급 및 배포</li>
+  <li>클라이언트도 HTTPS로 호출</li>
+  <li>통신 시 인증서 검증 로직 수행</li>
+</ul>
+
+<p>겉으로는 단순하지만, 서비스 수가 늘어나는 순간 운영 복잡도가 급격히 커진다.</p>
+
+<!-- (실제로 요구사항이 떨어졌을때 모든 애플리케이션간에 인증서설정을 진행하고 테스트했었다.  -->
+
+<h3 id="왜-애플리케이션이-직접-처리하면-어려운가">왜 애플리케이션이 직접 처리하면 어려운가</h3>
+<hr />
+<p>첫 번째 문제는 <strong>인증서 관리 비용</strong>이다.</p>
+
+<ul>
+  <li>서비스마다 인증서 필요</li>
+  <li>만료 주기 관리 필요</li>
+  <li>배포 시점마다 키와 인증서 동기화 필요</li>
+  <li>키 유출 리스크 증가</li>
+</ul>
+
+<p>서비스가 많아질수록 발급, 교체, 배포, 만료 대응이 모두 운영 부담으로 바뀐다.</p>
+
+<p>두 번째 문제는 <strong>개발자 책임의 확장</strong>이다.</p>
+
+<p>TLS는 단순히 스위치를 켜는 일이 아니다.</p>
+<ul>
+  <li>인증서 검증 로직</li>
+  <li>Hostname Validation</li>
+  <li>Cipher Suite 설정</li>
+  <li>TLS 버전 관리</li>
+</ul>
+
+<p>이 책임을 각 애플리케이션이 직접 가지면, 개발자는 비즈니스 로직 외에 통신 보안 설정까지 떠안게 된다.</p>
+
+<p>세 번째 문제는 <strong>기술 스택별 편차</strong>다.</p>
+<ul>
+  <li>Java 서비스와 Node.js 서비스의 TLS 설정 방식은 다르다.</li>
+  <li>프레임워크마다 기본값과 보안 옵션도 다르다.</li>
+  <li>결국 조직 전체 보안 수준은 가장 약한 서비스에 맞춰질 가능성이 높다.</li>
+</ul>
+
+<p>네 번째 문제는 <strong>가시성 부족</strong>이다.<br />
+애플리케이션 내부에서 TLS를 처리하면 다음을 바로 확인하기 어렵다.</p>
+
+<ul>
+  <li>실제로 암호화가 되고 있는지 확인하기 어려움</li>
+  <li>어느 구간이 TLS로 보호되는지</li>
+  <li>장애가 발생한 지점이 애플리케이션인지 네트워크인지</li>
+  <li>정책이 전체 서비스에 일관되게 적용되었는지</li>
+</ul>
+
+<p>즉, 보안은 들어갔지만 <strong>운영과 검증이 어려운 구조</strong>가 된다.</p>
+
+<h3 id="관점의-전환-보안을-네트워크-계층으로-내리면">관점의 전환: 보안을 네트워크 계층으로 내리면?</h3>
+<hr />
+<p>이 지점에서 질문이 바뀐다.</p>
+
+<p><strong>“TLS를 애플리케이션이 아니라 네트워크 계층이 대신 처리하면 안 될까?”</strong></p>
+
+<p>이 발상에서 출발하는 것이 Service Mesh다. Istio 환경에서는 각 Pod 옆의 Sidecar Proxy(Envoy)가 애플리케이션을 대신해 통신 보안을 담당한다.</p>
+
+<p>즉, 흐름은 아래처럼 바뀐다.</p>
+
+<p><code class="language-plaintext highlighter-rouge">App A → Sidecar A → mTLS → Sidecar B → App B</code></p>
+
+<p>애플리케이션은 기존처럼 HTTP 요청을 보내고, 실제 네트워크 구간은 Sidecar가 mTLS로 처리한다.</p>
+
+<h3 id="왜-service-mesh가-더-적합한가">왜 Service Mesh가 더 적합한가</h3>
+<hr />
+<p>Service Mesh가 적합한 이유는 명확하다.</p>
+
+<p>첫 번째는 <strong>인증서 관리 자동화</strong>다.</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">Istiod</code>가 인증 기관(CA) 역할을 수행</li>
+  <li>Sidecar에 인증서를 자동 발급</li>
+  <li>짧은 주기의 인증서를 자동 갱신</li>
+</ul>
+
+<p>개발자가 인증서를 직접 다루지 않아도 된다.</p>
+
+<p>두 번째는 <strong>코드 변경 최소화</strong>다.</p>
+
+<ul>
+  <li>기존 애플리케이션 호출 구조 유지</li>
+  <li>서비스 코드 수정 없이 보안 정책 반영 가능</li>
+</ul>
+
+<p>보안 요구사항이 들어와도 비즈니스 코드에 연쇄 수정이 퍼지지 않는다.</p>
+
+<p>세 번째는 <strong>정책의 일관성</strong>이다.</p>
+
+<ul>
+  <li>언어와 프레임워크가 달라도 동일한 보안 정책 적용 가능</li>
+  <li>서비스별 편차가 아니라 플랫폼 수준에서 통제 가능</li>
+</ul>
+
+<p>조직 전체 보안 수준을 일정하게 유지할 수 있다.</p>
+
+<p>네 번째는 <strong>관측 가능성</strong>이다.</p>
+
+<ul>
+  <li>어느 트래픽이 암호화되었는지 확인 가능</li>
+  <li>메트릭, 로그, 트레이싱 연계 가능</li>
+  <li>장애 원인 추적이 쉬워짐</li>
+</ul>
+
+<p>즉, 보안이 단순한 설정값이 아니라 관찰 가능한 동작으로 바뀐다.</p>
+
+<h3 id="핵심-비교">핵심 비교</h3>
+<hr />
+<ul>
+  <li><strong>TLS 적용 위치:</strong> 애플리케이션 직접 TLS는 앱이 처리하고, Service Mesh는 Sidecar Proxy가 처리한다.</li>
+  <li><strong>인증서 관리:</strong> 애플리케이션 직접 TLS는 수동 관리가 필요하고, Service Mesh는 자동화할 수 있다.</li>
+  <li><strong>코드 수정:</strong> 애플리케이션 직접 TLS는 코드 변경이 필요하지만, Service Mesh는 거의 필요 없다.</li>
+  <li><strong>보안 정책 일관성:</strong> 애플리케이션 직접 TLS는 서비스별 편차가 생기기 쉽고, Service Mesh는 일관되게 적용할 수 있다.</li>
+  <li><strong>운영 난이도:</strong> 애플리케이션 직접 TLS는 높고, Service Mesh는 상대적으로 낮다.</li>
+  <li><strong>관측 가능성:</strong> 애플리케이션 직접 TLS는 낮고, Service Mesh는 높다.</li>
+</ul>
+
+<h3 id="conclusion">Conclusion</h3>
+<hr />
+<p>이번 요구사항의 핵심은 단순히 “HTTPS를 적용하자”가 아니다.<br />
+정확히는 <strong>“내부 통신 보안을 개발자 코드가 아니라 플랫폼 레이어에서 일관되게 처리하자”</strong>에 가깝다.</p>
+
+<ul>
+  <li>개발자는 기존 애플리케이션 흐름에 집중한다.</li>
+  <li>Sidecar는 통신 구간의 보안을 책임진다.</li>
+  <li>운영자는 중앙에서 정책을 통제하고 검증할 수 있다.</li>
+</ul>
+
+<p>그래서 내부 443 요구사항 앞에서 중요한 선택은 “TLS를 넣을까 말까”가 아니라, <strong>“누가 그 책임을 질 것인가”</strong>다. 그 답이 바로 Mesh다.</p>
+
+<h3 id="next-step">Next Step</h3>
+<hr />
+<p>다음 포스트에서는 <strong><a href="/envoy-how-to-intercept.html">Envoy는 어떻게 내 트래픽을 가로채는가: Sidecar와 Transparent Proxy의 실제 구조</a></strong>를 다룬다.
+왜 Service Mesh가 더 적합한지 이해했다면, 이제 다음 질문은 자연스럽다.<br />
+애플리케이션은 평소처럼 요청했을 뿐인데, 실제 네트워크에서는 Envoy가 어떻게 그 흐름을 대신 통제할 수 있는지 구체적으로 살펴본다.</p>
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>

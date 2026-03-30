@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Troubleshooting: JAR 실행 환경에서 getFile() 예외 해결</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Troubleshooting: JAR 실행 환경에서 getFile() 예외 해결" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="1. 문제 상황" />
+<meta property="og:description" content="1. 문제 상황" />
+<link rel="canonical" href="https://hrllk.github.io/filenotfoundexception.html" />
+<meta property="og:url" content="https://hrllk.github.io/filenotfoundexception.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-12-19T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Troubleshooting: JAR 실행 환경에서 getFile() 예외 해결" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2021-12-19T00:00:00+00:00","datePublished":"2021-12-19T00:00:00+00:00","description":"1. 문제 상황","headline":"Troubleshooting: JAR 실행 환경에서 getFile() 예외 해결","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/filenotfoundexception.html"},"url":"https://hrllk.github.io/filenotfoundexception.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2021-12-19 00:00:00 +0000">2021-12-19</time>
+  </p>
+  
+  <h1>Troubleshooting: JAR 실행 환경에서 getFile() 예외 해결</h1>
+
+  <h2 id="1-문제-상황">1. 문제 상황</h2>
+
+<p>로컬 IDE 환경에서는 정상적으로 동작하던 리소스 파일 읽기 코드가, <code class="language-plaintext highlighter-rouge">executable jar</code>로 빌드하여 배포한 환경에서 <code class="language-plaintext highlighter-rouge">FileNotFoundException</code>을 일으키며 실패하는 현상이 발생했습니다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 문제가 된 코드</span>
+<span class="nc">File</span> <span class="n">file</span> <span class="o">=</span> <span class="n">resource</span><span class="o">.</span><span class="na">getFile</span><span class="o">();</span> <span class="c1">// JAR 환경에서 예외 발생</span>
+</code></pre></div></div>
+
+<h2 id="2-원인-분석">2. 원인 분석</h2>
+
+<ul>
+  <li><strong>IDE 환경:</strong> 리소스가 실제 파일 시스템(<code class="language-plaintext highlighter-rouge">file://</code> 프로토콜)에 존재하므로 <code class="language-plaintext highlighter-rouge">File</code> 객체로 직접 접근이 가능합니다.</li>
+  <li><strong>JAR 환경:</strong> 리소스가 JAR 파일 내부에 패키징되어 있으며, 그 경로는 <code class="language-plaintext highlighter-rouge">jar://</code> 프로토콜로 시작합니다. Java의 <code class="language-plaintext highlighter-rouge">File</code> 객체는 실제 파일 시스템의 경로만을 처리할 수 있으므로, JAR 내부의 가상 경로를 인식하지 못해 예외가 발생합니다.</li>
+</ul>
+
+<h2 id="3-해결-방법-getinputstream-활용">3. 해결 방법: getInputStream() 활용</h2>
+
+<p>파일 시스템의 직접적인 경로 대신, 클래스로더(ClassLoader)에게 리소스 읽기를 위임하는 스트림 방식을 사용해야 합니다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 해결된 코드</span>
+<span class="nc">InputStream</span> <span class="n">is</span> <span class="o">=</span> <span class="n">resource</span><span class="o">.</span><span class="na">getInputStream</span><span class="o">();</span>
+<span class="c1">// 이후 스트림을 통해 데이터 처리 (예: Jackson ObjectMapper, BufferedReader 등)</span>
+</code></pre></div></div>
+
+<hr data-content="결론" />
+
+<p>Spring 환경에서 리소스를 다룰 때는 배포 환경의 차이를 고려하여 항상 <strong><code class="language-plaintext highlighter-rouge">getInputStream()</code></strong>을 사용하는 습관을 들이는 것이 좋습니다.</p>
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>

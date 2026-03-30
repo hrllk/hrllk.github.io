@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>RAID: 데이터 가용성과 성능을 위한 디스크 가상화</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="RAID: 데이터 가용성과 성능을 위한 디스크 가상화" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="1. RAID란 무엇인가?" />
+<meta property="og:description" content="1. RAID란 무엇인가?" />
+<link rel="canonical" href="https://hrllk.github.io/raid.html" />
+<meta property="og:url" content="https://hrllk.github.io/raid.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2025-03-19T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="RAID: 데이터 가용성과 성능을 위한 디스크 가상화" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2025-03-19T00:00:00+00:00","datePublished":"2025-03-19T00:00:00+00:00","description":"1. RAID란 무엇인가?","headline":"RAID: 데이터 가용성과 성능을 위한 디스크 가상화","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/raid.html"},"url":"https://hrllk.github.io/raid.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2025-03-19 00:00:00 +0000">2025-03-19</time>
+  </p>
+  
+  <h1>RAID: 데이터 가용성과 성능을 위한 디스크 가상화</h1>
+
+  <h2 id="1-raid란-무엇인가">1. RAID란 무엇인가?</h2>
+
+<p><strong>RAID (Redundant Array of Independent Disks)</strong>는 여러 개의 물리적인 하드 디스크 드라이브를 하나의 논리적인 유닛으로 결합하여 사용하는 데이터 스토리지 가상화 기술입니다.</p>
+
+<h2 id="2-왜-사용하는가">2. 왜 사용하는가?</h2>
+
+<ul>
+  <li><strong>데이터 신뢰성 (Redundancy):</strong> 디스크 하나가 고장 나도 데이터를 잃지 않도록 복제본을 유지하거나 복구 데이터를 저장합니다.</li>
+  <li><strong>I/O 성능 향상:</strong> 데이터를 여러 디스크에 분산시켜 읽기/쓰기 속도를 비약적으로 높입니다.</li>
+</ul>
+
+<h2 id="3-주요-raid-레벨level-요약">3. 주요 RAID 레벨(Level) 요약</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left">레벨</th>
+      <th style="text-align: left">핵심 방식</th>
+      <th style="text-align: left">특징</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left"><strong>RAID 0</strong></td>
+      <td style="text-align: left">스트라이핑</td>
+      <td style="text-align: left">성능은 최강이나, 디스크 하나만 고장 나도 모든 데이터 손실 (중복성 없음)</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><strong>RAID 1</strong></td>
+      <td style="text-align: left">미러링</td>
+      <td style="text-align: left">데이터를 그대로 복제. 디스크 효율은 낮지만 안정성이 매우 높음</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><strong>RAID 5</strong></td>
+      <td style="text-align: left">스트라이핑 + 패리티</td>
+      <td style="text-align: left">데이터와 복구용 패리티 정보를 분산 저장. 성능과 안정성의 균형 (최소 3개 필요)</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><strong>RAID 6</strong></td>
+      <td style="text-align: left">스트라이핑 + 이중 패리티</td>
+      <td style="text-align: left">패리티를 두 군데 저장하여 디스크 2개가 동시에 고장 나도 복구 가능 (최소 4개 필요)</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><strong>RAID 10</strong></td>
+      <td style="text-align: left">1+0 조합</td>
+      <td style="text-align: left">미러링(RAID 1)으로 안정성을 잡고 스트라이핑(RAID 0)으로 성능을 잡은 방식</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr data-content="결론" />
+
+<p>중요한 서버 데이터는 <strong>RAID 1</strong>이나 <strong>RAID 5/6</strong>를 통해 안전하게 보호하고, 단순 작업용 워크스테이션은 <strong>RAID 0</strong>을 통해 속도를 챙기는 것이 일반적인 전략입니다.</p>
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>

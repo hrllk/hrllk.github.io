@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>JVM Old Generation (고인물 영역) 이해하기</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="JVM Old Generation (고인물 영역) 이해하기" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Overview" />
+<meta property="og:description" content="Overview" />
+<link rel="canonical" href="https://hrllk.github.io/jvm-old-generation.html" />
+<meta property="og:url" content="https://hrllk.github.io/jvm-old-generation.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-02-23T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="JVM Old Generation (고인물 영역) 이해하기" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2026-02-23T00:00:00+00:00","datePublished":"2026-02-23T00:00:00+00:00","description":"Overview","headline":"JVM Old Generation (고인물 영역) 이해하기","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/jvm-old-generation.html"},"url":"https://hrllk.github.io/jvm-old-generation.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2026-02-23 00:00:00 +0000">2026-02-23</time>
+  </p>
+  
+  <h1>JVM Old Generation (고인물 영역) 이해하기</h1>
+
+  <h2 id="overview">Overview</h2>
+
+<p>지난 포스트에서 JVM Heap의 Young Generation을 다뤘고, 이번엔 <strong>Old Generation(고인물 영역)</strong>에 대해 다룹니다. Young 영역에서 살아남은 객체들이 어디로 가서 어떻게 관리되는지 이해하는 것이 효율적인 GC 튜닝의 핵심입니다.</p>
+
+<h2 id="old-영역은-무엇인가">Old 영역은 무엇인가?</h2>
+
+<p>Heap은 크게 Young과 Old 영역으로 남뉘고, 그 중 Old 영역은 <strong>Young 영역에서 여러 번의 Minor GC에도 살아남은, 즉 ‘오래 살아남을 객체’들이 모이는 곳</strong>입니다. 이곳의 객체들은 비교적 생명 주기가 길기 때문에 Young 영역처럼 자주 GC할 필요가 없습니다.</p>
+
+<ul>
+  <li><strong>Promotion(승격):</strong> Young 영역의 Survivor 공간을 여러 번 오가며 정해진 나이(Age Limit)에 도달한 객체들은 Old 영역으로 <strong>Promotion</strong>됩니다. 이는 “오래 살 놈들은 따로 모아서 관리하겠다”는 GC의 전략입니다.</li>
+</ul>
+
+<h2 id="major-gc-full-gc-동작">Major GC (Full GC) 동작</h2>
+
+<p>Old 영역은 Young 영역보다 GC 주기가 훨씬 깁니다. 하지만 이곳도 언젠가는 꽉 차게 됩니다.
+Old 영역이 가득 차거나 또는 Young 영역에서 Promotion할 공간이 부족할 경우, <strong>Major GC</strong> (또는 <strong>Full GC</strong>)가 발생합니다.</p>
+
+<ul>
+  <li>
+    <p><strong>Stop-The-World:</strong> Major GC는 Young 영역의 Minor GC와는 비교할 수 없을 정도로 큰 성능 저하를 일으킵니다. 대부분의 Major GC는 GC를 수행하는 동안 <strong>애플리케이션 스레드를 모두 정지(Stop-The-World)</strong>시켜버립니다. 이 시간 동안 애플리케이션은 아무런 작업도 처리하지 못하게 되며, 이는 사용자가 느끼는 서비스 지연의 주된 원인이 됩니다.</p>
+  </li>
+  <li>
+    <p><strong>복잡한 알고리즘:</strong> Old 영역은 크기가 크고, 살아있는 객체도 많기 때문에 Minor GC보다 훨씬 복잡한 알고리즘(예: <code class="language-plaintext highlighter-rouge">Mark-Sweep-Compact</code>)을 사용하며, 이는 GC 작업에 더 많은 시간과 CPU 자원을 소모하게 합니다.</p>
+  </li>
+</ul>
+
+<h2 id="실무에서의-이슈-old-영역-편">실무에서의 이슈 (Old 영역 편)</h2>
+
+<p>Old 영역 관리에 실패하면 서버는 더욱 심각한 상황에 직면하게 됩니다.</p>
+
+<ul>
+  <li><strong>잦은 Major GC:</strong> Old 영역이 너무 작게 설정되거나, Young 영역에서 너무 많은 객체가 빠르게 Promotion되면, Old 영역이 자주 가득 차게 되고 Major GC가 빈번하게 발생합니다. 이는 애플리케이션이 멈추는 시간이 길어져 서비스 가용성에 치명적인 영향을 줍니다.</li>
+  <li><strong>메모리 누수(Memory Leak):</strong> 의도치 않게 객체가 계속 Old 영역에 남아있어 메모리 사용량이 계속 증가하는 현상입니다. 결국 <code class="language-plaintext highlighter-rouge">OutOfMemoryError</code>로 이어지며 애플리케이션이 비정상 종료됩니다.</li>
+</ul>
+
+<hr data-content="3줄 요약" />
+
+<ul>
+  <li><strong>Old 영역</strong>은 Young 영역에서 오래 살아남은 객체들의 보금자리입니다.</li>
+  <li>여기서 발생하는 <strong>Major GC</strong>는 애플리케이션을 멈추게 할 수 있어 성능에 치명적입니다.</li>
+  <li>Old 영역의 크기, Promotion 밸런스, 메모리 누수 관리는 <strong>안정적인 서비스 운영의 핵심</strong>입니다.</li>
+</ul>
+
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>

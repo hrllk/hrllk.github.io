@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>[CS 요약] 네트워크 보안 및 네트워크 계층 프로토콜</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="[CS 요약] 네트워크 보안 및 네트워크 계층 프로토콜" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="1. 네트워크 보안 공격 기법" />
+<meta property="og:description" content="1. 네트워크 보안 공격 기법" />
+<link rel="canonical" href="https://hrllk.github.io/cs-note.html" />
+<meta property="og:url" content="https://hrllk.github.io/cs-note.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2025-07-09T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="[CS 요약] 네트워크 보안 및 네트워크 계층 프로토콜" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2025-07-09T00:00:00+00:00","datePublished":"2025-07-09T00:00:00+00:00","description":"1. 네트워크 보안 공격 기법","headline":"[CS 요약] 네트워크 보안 및 네트워크 계층 프로토콜","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/cs-note.html"},"url":"https://hrllk.github.io/cs-note.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2025-07-09 00:00:00 +0000">2025-07-09</time>
+  </p>
+  
+  <h1>[CS 요약] 네트워크 보안 및 네트워크 계층 프로토콜</h1>
+
+  <h2 id="1-네트워크-보안-공격-기법">1. 네트워크 보안 공격 기법</h2>
+
+<ul>
+  <li><strong>랜드 어택 (Land Attack):</strong> 패킷의 출발지 IP와 목적지 IP를 공격 대상의 IP로 동일하게 위조하여 전송함으로써, 시스템이 자기 자신에게 응답하게 하여 마비시키는 공격입니다.</li>
+  <li><strong>세션 하이재킹 (Session Hijacking):</strong> 이미 인증이 완료된 사용자의 세션을 가로채서 정상적인 권한을 도용하는 행위입니다.</li>
+  <li><strong>스머프 공격 (Smurf Attack):</strong> 엄청난 양의 ICMP Echo 패킷을 네트워크 전체(Broadcast)에 뿌려 타겟 서버가 응답 패킷의 쓰나미를 맞게 하는 분산 서비스 거부(DDoS) 공격의 일종입니다.</li>
+</ul>
+
+<h2 id="2-네트워크-프로토콜-및-기술">2. 네트워크 프로토콜 및 기술</h2>
+
+<h3 id="라우팅-프로토콜">라우팅 프로토콜</h3>
+<p>라우터끼리 최적의 경로를 찾기 위한 규칙입니다.</p>
+<ul>
+  <li><strong>RIP (Routing Information Protocol):</strong> 거리 벡터(Distance Vector) 알고리즘을 사용하며, 목적지까지 거치는 라우터 수(Hop Count)를 기준으로 경로를 결정합니다.</li>
+  <li><strong>OSPF (Open Shortest Path First):</strong> 링크 상태(Link State) 알고리즘인 다익스트라(Dijkstra)를 사용하며, 네트워크 변화에 빠르게 대응하고 최단 경로를 계산합니다.</li>
+</ul>
+
+<h3 id="주요-보안-기술">주요 보안 기술</h3>
+<ul>
+  <li><strong>IPSec:</strong> 네트워크 계층(L3)에서 데이터 암호화, 인증, 무결성을 보장하는 보안 표준입니다. 주로 VPN 구축에 필수적으로 사용됩니다.</li>
+  <li><strong>NAT (Network Address Translation):</strong> 사설 IP 주소와 공인 IP 주소를 상호 변환해주는 기술로, 부족한 IPv4 주소를 효율적으로 사용하고 보안성을 높여줍니다.</li>
+</ul>
+
+<h2 id="3-트랜잭션의-4대-속성-acid">3. 트랜잭션의 4대 속성 (ACID)</h2>
+
+<p>데이터베이스의 무결성을 보장하기 위한 트랜잭션의 핵심 성질입니다.</p>
+<ol>
+  <li><strong>원자성 (Atomicity):</strong> 전부 실행되거나, 아예 실행되지 않아야 함 (All or Nothing).</li>
+  <li><strong>일관성 (Consistency):</strong> 성공 후에는 데이터베이스가 모순되지 않는 상태여야 함.</li>
+  <li><strong>독립성 (Isolation):</strong> 실행 중일 때 다른 트랜잭션이 간섭하거나 끼어들 수 없음.</li>
+  <li><strong>지속성 (Durability):</strong> 성공한 결과는 시스템 장애가 나더라도 영구적으로 보존되어야 함.</li>
+</ol>
+
+<hr data-content="참고" />
+
+<p>네트워크와 보안은 뗄 수 없는 관계입니다. OSI 7계층의 각 물리적, 논리적 길목에서 데이터가 어떻게 이동하고 어떻게 보호되는지 이해하는 것이 인프라 지식의 핵심입니다.</p>
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>
