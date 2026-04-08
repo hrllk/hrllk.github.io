@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>[DB] 트랜잭션 격리 수준(Isolation Level) 이해하기</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="[DB] 트랜잭션 격리 수준(Isolation Level) 이해하기" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="1. 트랜잭션 격리 수준이란?" />
+<meta property="og:description" content="1. 트랜잭션 격리 수준이란?" />
+<link rel="canonical" href="https://hrllk.github.io/transaction-isolation-levels.html" />
+<meta property="og:url" content="https://hrllk.github.io/transaction-isolation-levels.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2025-06-12T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="[DB] 트랜잭션 격리 수준(Isolation Level) 이해하기" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2025-06-12T00:00:00+00:00","datePublished":"2025-06-12T00:00:00+00:00","description":"1. 트랜잭션 격리 수준이란?","headline":"[DB] 트랜잭션 격리 수준(Isolation Level) 이해하기","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/transaction-isolation-levels.html"},"url":"https://hrllk.github.io/transaction-isolation-levels.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2025-06-12 00:00:00 +0000">2025-06-12</time>
+  </p>
+  
+  <h1>[DB] 트랜잭션 격리 수준(Isolation Level) 이해하기</h1>
+
+  <h2 id="1-트랜잭션-격리-수준이란">1. 트랜잭션 격리 수준이란?</h2>
+
+<p><strong>트랜잭션 격리 수준(Isolation Level)</strong>은 여러 트랜잭션이 동시에 실행될 때, 한 트랜잭션이 다른 트랜잭션의 변경 사항을 어느 정도까지 볼 수 있도록 허용할지 정의하는 기준입니다.</p>
+
+<h2 id="2-왜-필요한가-동시성-문제">2. 왜 필요한가? (동시성 문제)</h2>
+
+<p>격리 수준이 낮을수록 성능은 좋아지지만, 다음과 같은 <strong>데이터 부정합(Anomaly)</strong> 현상이 발생할 수 있습니다.</p>
+
+<ul>
+  <li><strong>Dirty Read:</strong> 커밋되지 않은 다른 트랜잭션의 데이터를 읽음. (나중에 롤백되면 엉뚱한 데이터를 본 셈)</li>
+  <li><strong>Non-Repeatable Read:</strong> 한 트랜잭션 내에서 같은 조회를 두 번 했는데, 중간에 다른 트랜잭션이 값을 수정해버려 결과가 달라짐.</li>
+  <li><strong>Phantom Read:</strong> 한 트랜잭션 내에서 같은 범위 조회를 두 번 했는데, 중간에 다른 트랜잭션이 데이터를 삽입/삭제하여 결과의 ‘개수’가 달라짐.</li>
+</ul>
+
+<h2 id="3-격리-수준의-4단계">3. 격리 수준의 4단계</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left">격리 수준</th>
+      <th style="text-align: center">Dirty Read 방지</th>
+      <th style="text-align: center">Non-Repeatable Read 방지</th>
+      <th style="text-align: center">Phantom Read 방지</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left"><strong>READ UNCOMMITTED</strong></td>
+      <td style="text-align: center">X</td>
+      <td style="text-align: center">X</td>
+      <td style="text-align: center">X</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><strong>READ COMMITTED</strong></td>
+      <td style="text-align: center">O</td>
+      <td style="text-align: center">X</td>
+      <td style="text-align: center">X</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><strong>REPEATABLE READ</strong></td>
+      <td style="text-align: center">O</td>
+      <td style="text-align: center">O</td>
+      <td style="text-align: center">X</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><strong>SERIALIZABLE</strong></td>
+      <td style="text-align: center">O</td>
+      <td style="text-align: center">O</td>
+      <td style="text-align: center">O</td>
+    </tr>
+  </tbody>
+</table>
+
+<ol>
+  <li><strong>READ UNCOMMITTED:</strong> 가장 낮은 단계. 커밋되지 않은 데이터도 읽음. 권장하지 않음.</li>
+  <li><strong>READ COMMITTED:</strong> 커밋된 데이터만 읽음. 오라클 등 많은 DB의 기본 설정.</li>
+  <li><strong>REPEATABLE READ:</strong> 자신의 트랜잭션이 시작된 시점의 데이터를 보장함. MySQL InnoDB의 기본 설정.</li>
+  <li><strong>SERIALIZABLE:</strong> 가장 엄격한 단계. 트랜잭션을 순차적으로 실행하는 듯한 효과를 주어 모든 부정합을 방지하지만 성능이 매우 떨어짐.</li>
+</ol>
+
+<hr data-content="결론" />
+
+<p>일반적인 서비스라면 <strong>READ COMMITTED</strong>나 <strong>REPEATABLE READ</strong> 수준에서 타협하는 것이 성능과 정합성 사이의 최적의 선택입니다.</p>
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>

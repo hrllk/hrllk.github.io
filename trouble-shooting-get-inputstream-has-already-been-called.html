@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Troubleshooting: getReader() has already been called 에러 해결</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Troubleshooting: getReader() has already been called 에러 해결" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="1. 발생 에러 메세지" />
+<meta property="og:description" content="1. 발생 에러 메세지" />
+<link rel="canonical" href="https://hrllk.github.io/trouble-shooting-get-inputstream-has-already-been-called.html" />
+<meta property="og:url" content="https://hrllk.github.io/trouble-shooting-get-inputstream-has-already-been-called.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2024-03-04T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Troubleshooting: getReader() has already been called 에러 해결" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2024-03-04T00:00:00+00:00","datePublished":"2024-03-04T00:00:00+00:00","description":"1. 발생 에러 메세지","headline":"Troubleshooting: getReader() has already been called 에러 해결","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/trouble-shooting-get-inputstream-has-already-been-called.html"},"url":"https://hrllk.github.io/trouble-shooting-get-inputstream-has-already-been-called.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2024-03-04 00:00:00 +0000">2024-03-04</time>
+  </p>
+  
+  <h1>Troubleshooting: getReader() has already been called 에러 해결</h1>
+
+  <h2 id="1-발생-에러-메세지">1. 발생 에러 메세지</h2>
+
+<p>서블릿 필터(Filter)나 인터셉터에서 요청 본문(Payload)을 로깅하려고 할 때 다음과 같은 예외가 발생할 수 있습니다.</p>
+
+<pre><code class="language-log">java.lang.IllegalStateException: getReader() has already been called for this request
+# 또는
+java.lang.IllegalStateException: getInputStream() has already been called for this request
+</code></pre>
+
+<h2 id="2-원인-분석">2. 원인 분석</h2>
+
+<p>HTTP 요청의 <code class="language-plaintext highlighter-rouge">InputStream</code>은 <strong>단 한 번만 읽을 수 있는 스트림(Stream)</strong> 구조입니다. 스프링의 <code class="language-plaintext highlighter-rouge">@RequestBody</code>가 동작하여 객체로 변환하려면 스트림을 읽어야 하는데, 그 전 단계인 필터나 인터셉터에서 이미 로깅을 위해 스트림을 다 읽어버렸기(Consume) 때문에 정작 컨트롤러에 도달했을 때는 읽을 수 있는 데이터가 없어 발생하는 오류입니다.</p>
+
+<h2 id="3-해결-방법-httpservletrequestwrapper-활용">3. 해결 방법: HttpServletRequestWrapper 활용</h2>
+
+<p>요청 데이터를 별도의 메모리(<code class="language-plaintext highlighter-rouge">cachedPayload</code>)에 복사해두고, 여러 번 읽을 수 있도록 <code class="language-plaintext highlighter-rouge">HttpServletRequestWrapper</code>를 상속받은 커스텀 클래스를 구현하여 해결합니다.</p>
+
+<h3 id="해결-전략">해결 전략</h3>
+<ol>
+  <li><strong>CustomServletRequestWrapper 구현:</strong> 생성자에서 <code class="language-plaintext highlighter-rouge">InputStream</code>의 내용을 읽어 바이트 배열에 캐싱합니다.</li>
+  <li><strong>getInputStream() 재정의:</strong> 호출될 때마다 캐싱된 바이트 배열을 기반으로 새로운 <code class="language-plaintext highlighter-rouge">ServletInputStream</code>을 생성하여 반환합니다.</li>
+  <li><strong>Filter에서 적용:</strong> <code class="language-plaintext highlighter-rouge">FilterChain</code>을 통해 요청을 넘길 때 원본 대신 커스텀 래퍼 객체를 전달합니다.</li>
+</ol>
+
+<hr data-content="결론" />
+
+<p>이 방식을 적용하면 필터에서 요청 로그를 마음껏 남기면서도, 컨트롤러의 <code class="language-plaintext highlighter-rouge">@RequestBody</code>가 정상적으로 데이터를 바인딩할 수 있게 됩니다.</p>
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>

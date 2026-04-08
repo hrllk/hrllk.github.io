@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Troubleshooting: No space left on device (S3 업로드와 임시 파일)</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Troubleshooting: No space left on device (S3 업로드와 임시 파일)" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="1. 문제 상황" />
+<meta property="og:description" content="1. 문제 상황" />
+<link rel="canonical" href="https://hrllk.github.io/no-space-left-on-device.html" />
+<meta property="og:url" content="https://hrllk.github.io/no-space-left-on-device.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2022-05-02T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Troubleshooting: No space left on device (S3 업로드와 임시 파일)" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2022-05-02T00:00:00+00:00","datePublished":"2022-05-02T00:00:00+00:00","description":"1. 문제 상황","headline":"Troubleshooting: No space left on device (S3 업로드와 임시 파일)","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/no-space-left-on-device.html"},"url":"https://hrllk.github.io/no-space-left-on-device.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2022-05-02 00:00:00 +0000">2022-05-02</time>
+  </p>
+  
+  <h1>Troubleshooting: No space left on device (S3 업로드와 임시 파일)</h1>
+
+  <h2 id="1-문제-상황">1. 문제 상황</h2>
+
+<p>사내 수집 서버에서 대용량 파일을 처리하던 중 <code class="language-plaintext highlighter-rouge">java.io.IOException: No space left on device</code> 예외가 발생하며 서비스가 중단되는 사고가 발생했습니다.</p>
+
+<h2 id="2-원인-분석">2. 원인 분석</h2>
+
+<p>기존에는 네트워크 파일 시스템(EFS)을 사용하여 로컬 파일 다루듯 데이터를 적재했으나, 비용 절감을 위해 AWS S3로 스토리지 서비스를 변경한 것이 계기였습니다.</p>
+
+<ul>
+  <li><strong>기존 방식:</strong> 파일 시스템에 적재 (용량 관리 미비)</li>
+  <li><strong>변경 방식:</strong> 로컬 임시 디렉토리에 파일을 생성한 뒤 S3 라이브러리를 통해 업로드.</li>
+  <li><strong>문제점:</strong> S3 업로드가 끝난 후 로컬에 남은 <strong>임시 파일을 삭제(Cleanup)하는 로직</strong>을 누락하여, 시간이 지남에 따라 디스크 용량이 꽉 차게 된 것이었습니다.</li>
+</ul>
+
+<h2 id="3-해결-방법">3. 해결 방법</h2>
+
+<p>파일 업로드 로직이 완료된 시점에 명시적으로 임시 파일을 삭제하도록 코드를 수정했습니다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">File</span> <span class="n">tempFile</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="n">localPath</span><span class="o">);</span>
+<span class="k">try</span> <span class="o">{</span>
+    <span class="c1">// S3 업로드 로직 수행</span>
+<span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">tempFile</span><span class="o">.</span><span class="na">exists</span><span class="o">())</span> <span class="o">{</span>
+        <span class="n">tempFile</span><span class="o">.</span><span class="na">delete</span><span class="o">();</span> <span class="c1">// 업로드 완료 후 반드시 삭제</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<hr data-content="교훈" />
+
+<p>클라우드 스토리지를 사용하더라도 데이터를 옮기는 과정에서 발생하는 <strong>로컬 리소스의 생명 주기(Lifecycle)</strong>를 명확히 관리하는 것이 안정적인 서비스 운영의 핵심입니다.</p>
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>

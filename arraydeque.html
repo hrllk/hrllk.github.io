@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>ArrayDeque: 스택과 큐를 동시에 잡는 효율형 자료구조</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="ArrayDeque: 스택과 큐를 동시에 잡는 효율형 자료구조" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="1. ArrayDeque란?" />
+<meta property="og:description" content="1. ArrayDeque란?" />
+<link rel="canonical" href="https://hrllk.github.io/arraydeque.html" />
+<meta property="og:url" content="https://hrllk.github.io/arraydeque.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2025-06-27T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="ArrayDeque: 스택과 큐를 동시에 잡는 효율형 자료구조" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2025-06-27T00:00:00+00:00","datePublished":"2025-06-27T00:00:00+00:00","description":"1. ArrayDeque란?","headline":"ArrayDeque: 스택과 큐를 동시에 잡는 효율형 자료구조","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/arraydeque.html"},"url":"https://hrllk.github.io/arraydeque.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2025-06-27 00:00:00 +0000">2025-06-27</time>
+  </p>
+  
+  <h1>ArrayDeque: 스택과 큐를 동시에 잡는 효율형 자료구조</h1>
+
+  <h2 id="1-arraydeque란">1. ArrayDeque란?</h2>
+
+<p><strong>ArrayDeque</strong> (Array Double Ended Queue)는 양쪽 끝에서 요소를 추가하거나 제거할 수 있는 가변 크기 배열 기반의 자료구조입니다.</p>
+
+<h2 id="2-왜-사용하는가">2. 왜 사용하는가?</h2>
+
+<p>자바에서 <strong>Stack</strong> 클래스는 구식이며 멀티스레드 환경을 고려한 동기화 비용 때문에 성능이 떨어집니다. 반면 <code class="language-plaintext highlighter-rouge">ArrayDeque</code>는 동기화를 지원하지 않는 대신, 단일 스레드 환경에서 <strong>Stack보다 강력하고 Queue보다 유연한 성능</strong>을 보여줍니다.</p>
+
+<ul>
+  <li><strong>Stack으로 활용:</strong> <code class="language-plaintext highlighter-rouge">push()</code>, <code class="language-plaintext highlighter-rouge">pop()</code>을 통해 LIFO(Last-In-First-Out) 구현</li>
+  <li><strong>Queue로 활용:</strong> <code class="language-plaintext highlighter-rouge">add()</code>, <code class="language-plaintext highlighter-rouge">poll()</code>을 통해 FIFO(First-In-First-Out) 구현</li>
+</ul>
+
+<h2 id="3-주요-특징">3. 주요 특징</h2>
+
+<ol>
+  <li><strong>고성능:</strong> 내부적으로 배열을 사용하며, 가득 찰 경우 크기를 2배씩 늘립니다.</li>
+  <li><strong>효율적 관리:</strong> <code class="language-plaintext highlighter-rouge">head</code>와 <code class="language-plaintext highlighter-rouge">tail</code>이라는 두 개의 포인터를 유지하여 양 끝단의 처리를 O(1) 시간에 해결합니다.</li>
+  <li><strong>제약 사항:</strong> <code class="language-plaintext highlighter-rouge">Null</code> 요소를 저장할 수 없습니다.</li>
+</ol>
+
+<h2 id="4-오퍼레이션-비교">4. 오퍼레이션 비교</h2>
+
+<p>기능은 같지만 예외 처리 방식에 따라 두 종류의 메소드가 존재합니다.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left">작업</th>
+      <th style="text-align: left">예외 발생 메소드</th>
+      <th style="text-align: left">특수값(null/false) 반환 메소드</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left"><strong>앞에 추가</strong></td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">addFirst(e)</code></td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">offerFirst(e)</code></td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><strong>앞에서 제거</strong></td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">removeFirst()</code></td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">pollFirst()</code></td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><strong>뒤에 추가</strong></td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">addLast(e)</code></td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">offerLast(e)</code></td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><strong>뒤에서 제거</strong></td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">removeLast()</code></td>
+      <td style="text-align: left"><code class="language-plaintext highlighter-rouge">pollLast()</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<hr data-content="정리" />
+
+<p>자바에서 스택이나 큐 기능을 구현해야 한다면, 고민하지 말고 <strong><code class="language-plaintext highlighter-rouge">ArrayDeque</code></strong>를 사용하세요. 가장 현대적이고 빠른 대안입니다.</p>
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>

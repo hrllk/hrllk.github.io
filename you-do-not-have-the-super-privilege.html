@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>[오류 해결] MySQL/MariaDB: You do not have the SUPER privilege</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="[오류 해결] MySQL/MariaDB: You do not have the SUPER privilege" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="문제 발생" />
+<meta property="og:description" content="문제 발생" />
+<link rel="canonical" href="https://hrllk.github.io/you-do-not-have-the-super-privilege.html" />
+<meta property="og:url" content="https://hrllk.github.io/you-do-not-have-the-super-privilege.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2022-03-15T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="[오류 해결] MySQL/MariaDB: You do not have the SUPER privilege" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2022-03-15T00:00:00+00:00","datePublished":"2022-03-15T00:00:00+00:00","description":"문제 발생","headline":"[오류 해결] MySQL/MariaDB: You do not have the SUPER privilege","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/you-do-not-have-the-super-privilege.html"},"url":"https://hrllk.github.io/you-do-not-have-the-super-privilege.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2022-03-15 00:00:00 +0000">2022-03-15</time>
+  </p>
+  
+  <h1>[오류 해결] MySQL/MariaDB: You do not have the SUPER privilege</h1>
+
+  <h2 id="문제-발생">문제 발생</h2>
+
+<p>MariaDB(AWS Cloud RDS) 환경에서 시퀀스(Sequence) 관리를 위해 사용하던 함수(Function)를 추가하려고 했으나, 다음과 같은 권한 오류가 발생했습니다.</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[HY000][1419] You do not have the SUPER privilege and binary logging is enabled (you *might* want to use the less safe log_bin_trust_function_creators variable)
+</code></pre></div></div>
+
+<h2 id="원인-분석">원인 분석</h2>
+
+<p>AWS RDS와 같은 Managed DB 서비스에서는 보안상의 이유로 일반 사용자에게 <code class="language-plaintext highlighter-rouge">SUPER</code> 권한을 부여하지 않습니다. 또한 바이너리 로깅(Binary Logging)이 활성화된 경우, 함수 생성 과정에서 발생할 수 있는 보안 리스크를 방지하기 위해 <code class="language-plaintext highlighter-rouge">log_bin_trust_function_creators</code> 설정이 꺼져 있으면 함수 생성이 차단됩니다.</p>
+
+<h2 id="해결-방법">해결 방법</h2>
+
+<p>AWS RDS 콘솔의 <strong>파라미터 그룹(Parameter Group)</strong> 설정을 통해 이 문제를 해결할 수 있습니다.</p>
+
+<ol>
+  <li>AWS RDS 콘솔 접속 -&gt; 파라미터 그룹 선택</li>
+  <li>사용 중인 파라미터 그룹에서 <code class="language-plaintext highlighter-rouge">log_bin_trust_function_creators</code> 검색</li>
+  <li>값을 <code class="language-plaintext highlighter-rouge">0</code>에서 <strong><code class="language-plaintext highlighter-rouge">1</code></strong>로 변경 후 저장</li>
+  <li>(필요 시) DB 인스턴스 재부팅 후 함수 생성을 재시도하면 정상적으로 생성됩니다.</li>
+</ol>
+
+<hr data-content="요약" />
+
+<p>클라우드 DB 환경에서 함수 정의 권한 문제가 발생하면, <code class="language-plaintext highlighter-rouge">SUPER</code> 권한을 얻으려 하기보다 <strong>파라미터 설정을 통해 신뢰할 수 있는 함수 생성기를 허용</strong>하는 것이 정석입니다.</p>
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>What Happen When Pull Event On Bare</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="What Happen When Pull Event On Bare" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Overview" />
+<meta property="og:description" content="Overview" />
+<link rel="canonical" href="https://hrllk.github.io/what-happen-bare-pull.html" />
+<meta property="og:url" content="https://hrllk.github.io/what-happen-bare-pull.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2025-10-22T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="What Happen When Pull Event On Bare" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2025-10-22T00:00:00+00:00","datePublished":"2025-10-22T00:00:00+00:00","description":"Overview","headline":"What Happen When Pull Event On Bare","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/what-happen-bare-pull.html"},"url":"https://hrllk.github.io/what-happen-bare-pull.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2025-10-22 00:00:00 +0000">2025-10-22</time>
+  </p>
+  
+  <h1>What Happen When Pull Event On Bare</h1>
+
+  <h2 id="overview">Overview</h2>
+
+<p>클라이언트에서 pull event 가 발생했을때의 흐름을 설명한다. 
+클라이언트에서 git pull 명령이 실행되면, 서버에서는 Fetch 요청에 응답하는 과정만 담당하며, 읽기 중심의 동작(read only)을 수행하며, 실제 Merge나 Rebase 등의 작업은 클라이언트 측에서 진행된다.</p>
+
+<h2 id="key-terms-explained">Key Terms Explained</h2>
+<ul>
+  <li>Pack: Git 객체를 효율적으로 저장하기위한 압축 파일 형식으로, .pack 파일과 인덱스역할을 하는.idx 파일로 구성된다.</li>
+  <li>Bare Repository: .git 폴더만 존재하며, 작업 디렉터리(working tree)가 없는 저장소 형태로, 서버에서 원격 저장소로 사용된다.</li>
+</ul>
+
+<h2 id="flow">Flow</h2>
+
+<h3 id="1-discovery">1. Discovery</h3>
+
+<p>원격 상태 파악과 필요 데이터 판단까지의 전반 흐름</p>
+
+<h4 id="1-1-advertise-refs">1-1. Advertise-Refs</h4>
+
+<p>클라이언트가 <code class="language-plaintext highlighter-rouge">git pull</code> 수행 시, 서버의 git-upload-pack 엔드포인트로 refs 정보를 요청</p>
+
+<ul>
+  <li>클라이언트 요청</li>
+</ul>
+
+<div class="language-nginx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">GET</span> <span class="n">/&lt;repo&gt;.git/info/refs?service=git-upload-pack</span>
+</code></pre></div></div>
+
+<ul>
+  <li>서버 응답 항목
+    <ul>
+      <li>HEAD</li>
+      <li>refs/heads/* (브랜치 정보)</li>
+      <li>refs/tags/* (태그 정보)</li>
+      <li>capabilities 목록</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="2-negotiation">2. Negotiation</h3>
+<h4 id="2-1--wantshave-도출">2-1.  wants/have 도출</h4>
+
+<p>서버가 제공한 refs 정보를 기반으로 로컬과 상태 대조를 통한 추가요청을 위한 객체 도출  (wants, have)</p>
+
+<ul>
+  <li>요청 전송</li>
+</ul>
+
+<div class="language-nginx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">POST</span> <span class="n">/&lt;repo&gt;.git/git-upload-pack</span>
+</code></pre></div></div>
+<ul>
+  <li>요청 구성: want, have, shallow 등</li>
+  <li>목적: 공통 조상 확인, 부족한 객체만 선별 요청</li>
+</ul>
+
+<h3 id="3packfile-retrieval">3.Packfile Retrieval</h3>
+
+<p>필요 객체에 대한 팩 생성, 전송, 수신 및 적용 흐름(클라이언트는 위 Negotiation 단계에서 받은 refs 정보를 바탕으로, 서버가 가지고 있지만 로컬에는 없는 커밋들을 요청한다.)
+요청에는 <code class="language-plaintext highlighter-rouge">want</code>, <code class="language-plaintext highlighter-rouge">have</code>, <code class="language-plaintext highlighter-rouge">shallow</code> 옵션 등이 포함됨</p>
+
+<h4 id="3-1-서버--클라이언트-전송-side-band">3-1. 서버 → 클라이언트 전송 (side-band)</h4>
+
+<ul>
+  <li>side-band 스트림: ch1(pack 데이터), ch2(진행률), ch3(에러)</li>
+  <li>thin-pack, ofs-delta, bitmap index 등 최적화 적용 가능</li>
+</ul>
+
+<h4 id="3-2-클라이언트-수신적용">3-2. 클라이언트 수신·적용</h4>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">.pack</code> 수신 및 <code class="language-plaintext highlighter-rouge">.idx</code> 인덱스 생성</li>
+  <li>로컬 객체 DB 반영</li>
+</ul>
+
+<h2 id="diagram">Diagram</h2>
+
+<pre><code class="language-mermaid">sequenceDiagram
+  autonumber
+  participant C as Client
+  participant S as Server (JGit)
+
+  alt Discovery Advertise
+      C-&gt;&gt;S: GET /info/refs?service=git-upload-pack
+      S--&gt;&gt;C: refs + capabilities (Advertise-Refs)
+  end
+  alt Negotiation
+      C-&gt;&gt;C: compute wants/haves
+  end
+  alt Fetching PackFile
+  C-&gt;&gt;S: POST /git-upload-pack (wants, haves, done)
+  S--&gt;&gt;C: PACK (side-band, thin-pack)
+  C-&gt;&gt;C: update remote-tracking branch, merge/rebase
+  end 
+
+</code></pre>
+
+<h2 id="pull-event-trace">Pull Event Trace</h2>
+
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>

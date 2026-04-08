@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>PKCS#12: 인증서와 개인키를 담는 안전한 보관함</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="PKCS#12: 인증서와 개인키를 담는 안전한 보관함" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="1. PKCS#12 (P12) 란?" />
+<meta property="og:description" content="1. PKCS#12 (P12) 란?" />
+<link rel="canonical" href="https://hrllk.github.io/pkcs12.html" />
+<meta property="og:url" content="https://hrllk.github.io/pkcs12.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2025-04-13T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="PKCS#12: 인증서와 개인키를 담는 안전한 보관함" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2025-04-13T00:00:00+00:00","datePublished":"2025-04-13T00:00:00+00:00","description":"1. PKCS#12 (P12) 란?","headline":"PKCS#12: 인증서와 개인키를 담는 안전한 보관함","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/pkcs12.html"},"url":"https://hrllk.github.io/pkcs12.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2025-04-13 00:00:00 +0000">2025-04-13</time>
+  </p>
+  
+  <h1>PKCS#12: 인증서와 개인키를 담는 안전한 보관함</h1>
+
+  <h2 id="1-pkcs12-p12-란">1. PKCS#12 (P12) 란?</h2>
+
+<p><strong>PKCS#12</strong> (Public Key Cryptography Standard #12)는 여러 개의 인증서(인증 체인)와 개인키를 하나의 파일로 결합하여 관리할 수 있도록 설계된 바이너리 포맷의 공개키 암호화 표준입니다. 흔히 <code class="language-plaintext highlighter-rouge">.p12</code> 또는 <code class="language-plaintext highlighter-rouge">.pfx</code> 확장자를 사용합니다.</p>
+
+<h2 id="2-주요-구성-요소">2. 주요 구성 요소</h2>
+
+<ul>
+  <li><strong>개인키 (Private Key):</strong> 서버가 자신을 증명하거나 데이터를 복호화할 때 사용하는 가장 중요한 비밀 정보입니다.</li>
+  <li><strong>인증 체인 (Certificate Chain):</strong> 루트 인증서부터 서버의 최종 인증서까지 이어지는 신뢰의 고리입니다.</li>
+  <li><strong>결합 및 암호화:</strong> 이 모든 요소가 하나의 파일 안에 담기며, 파일 자체를 비밀번호로 보호하여 안전하게 배포하거나 저장할 수 있습니다.</li>
+</ul>
+
+<h2 id="3-활용-및-생성법">3. 활용 및 생성법</h2>
+
+<p>주로 SSL/TLS 설정이나 클라이언트 인증이 필요한 시스템에서 사용됩니다. 오픈소스 도구인 <strong>OpenSSL</strong>을 이용해 다음과 같이 생성할 수 있습니다.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 개인키, 인증서, 체인 인증서를 하나의 .p12 파일로 추출</span>
+<span class="nv">$ </span>openssl pkcs12 <span class="nt">-export</span> <span class="nt">-out</span> mycert.p12 <span class="nt">-inkey</span> mykey.key <span class="nt">-in</span> mycert.crt <span class="nt">-certfile</span> mychain.crt
+</code></pre></div></div>
+
+<hr data-content="결론" />
+
+<p>PKCS#12는 복잡한 인증서 인프라를 <strong>“하나의 안전한 파일”</strong>로 묶어 관리할 수 있게 해주는 아주 편리한 표준 규격입니다.</p>
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>

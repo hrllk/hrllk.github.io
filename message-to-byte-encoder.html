@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Netty: MessageToByteEncoder를 활용한 인코딩 기초</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Netty: MessageToByteEncoder를 활용한 인코딩 기초" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="1. MessageToByteEncoder란?" />
+<meta property="og:description" content="1. MessageToByteEncoder란?" />
+<link rel="canonical" href="https://hrllk.github.io/message-to-byte-encoder.html" />
+<meta property="og:url" content="https://hrllk.github.io/message-to-byte-encoder.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2023-02-20T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Netty: MessageToByteEncoder를 활용한 인코딩 기초" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2023-02-20T00:00:00+00:00","datePublished":"2023-02-20T00:00:00+00:00","description":"1. MessageToByteEncoder란?","headline":"Netty: MessageToByteEncoder를 활용한 인코딩 기초","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/message-to-byte-encoder.html"},"url":"https://hrllk.github.io/message-to-byte-encoder.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2023-02-20 00:00:00 +0000">2023-02-20</time>
+  </p>
+  
+  <h1>Netty: MessageToByteEncoder를 활용한 인코딩 기초</h1>
+
+  <h2 id="1-messagetobyteencoder란">1. MessageToByteEncoder란?</h2>
+
+<p><strong>MessageToByteEncoder</strong>는 자바 기반의 고성능 비동기 네트워크 프레임워크인 <strong>Netty</strong>에서 제공하는 클래스입니다. 비즈니스 로직에서 사용하는 메시지 객체를 네트워크로 전송하기 위해 이진 데이터(Byte)로 변환하는 역할을 수행합니다.</p>
+
+<h2 id="2-주요-용도">2. 주요 용도</h2>
+
+<ul>
+  <li><strong>Outbound 데이터 처리:</strong> 서버에서 클라이언트로 데이터를 보낼 때, 자바 객체를 바이트 버퍼(ByteBuf)로 인코딩합니다.</li>
+  <li><strong>네트워크 전송 준비:</strong> 변환된 바이트 데이터는 최종적으로 네트워크 소켓을 통해 상대방에게 전달됩니다.</li>
+</ul>
+
+<h2 id="3-사용-방법">3. 사용 방법</h2>
+
+<h3 id="클래스-상속-및-구현">클래스 상속 및 구현</h3>
+<p><code class="language-plaintext highlighter-rouge">MessageToByteEncoder&lt;T&gt;</code>를 상속받아 <code class="language-plaintext highlighter-rouge">encode()</code> 메소드를 재정의합니다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">MyEncoder</span> <span class="kd">extends</span> <span class="nc">MessageToByteEncoder</span><span class="o">&lt;</span><span class="nc">MyMessage</span><span class="o">&gt;</span> <span class="o">{</span>
+    <span class="nd">@Override</span> 
+    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">encode</span><span class="o">(</span><span class="nc">ChannelHandlerContext</span> <span class="n">ctx</span><span class="o">,</span> <span class="nc">MyMessage</span> <span class="n">msg</span><span class="o">,</span> <span class="nc">ByteBuf</span> <span class="n">out</span><span class="o">)</span> <span class="o">{</span>
+        <span class="c1">// 1. 메시지 객체를 바이트 배열로 변환</span>
+        <span class="kt">byte</span><span class="o">[]</span> <span class="n">bytes</span> <span class="o">=</span> <span class="n">convertMessageToBytes</span><span class="o">(</span><span class="n">msg</span><span class="o">);</span>
+        
+        <span class="c1">// 2. 출력용 바이트 버퍼에 기록</span>
+        <span class="n">out</span><span class="o">.</span><span class="na">writeBytes</span><span class="o">(</span><span class="n">bytes</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="kd">private</span> <span class="kt">byte</span><span class="o">[]</span> <span class="nf">convertMessageToBytes</span><span class="o">(</span><span class="nc">MyMessage</span> <span class="n">msg</span><span class="o">)</span> <span class="o">{</span>
+        <span class="c1">// 객체를 바이트로 직렬화하는 로직 구현...</span>
+        <span class="k">return</span> <span class="n">msg</span><span class="o">.</span><span class="na">toString</span><span class="o">().</span><span class="na">getBytes</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="동작-방식">동작 방식</h3>
+<p>Netty의 파이프라인에 이 인코더를 등록해두면, 메시지를 전송하는 이벤트가 발생할 때 자동으로 <code class="language-plaintext highlighter-rouge">encode()</code> 메소드가 호출되어 객체가 바이트로 변환된 후 전송됩니다.</p>
+
+<hr data-content="참고" />
+
+<p>Netty는 대규모 트래픽을 처리하는 분산 서버나 게임 서버 등에서 처리 속도와 자원 효율을 극대화하기 위해 널리 사용됩니다.</p>
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>

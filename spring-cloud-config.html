@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Spring Cloud Config: 중앙 집중식 환경 설정 관리</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Spring Cloud Config: 중앙 집중식 환경 설정 관리" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="1. 왜 필요한가?" />
+<meta property="og:description" content="1. 왜 필요한가?" />
+<link rel="canonical" href="https://hrllk.github.io/spring-cloud-config.html" />
+<meta property="og:url" content="https://hrllk.github.io/spring-cloud-config.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2024-09-04T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Spring Cloud Config: 중앙 집중식 환경 설정 관리" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2024-09-04T00:00:00+00:00","datePublished":"2024-09-04T00:00:00+00:00","description":"1. 왜 필요한가?","headline":"Spring Cloud Config: 중앙 집중식 환경 설정 관리","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/spring-cloud-config.html"},"url":"https://hrllk.github.io/spring-cloud-config.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2024-09-04 00:00:00 +0000">2024-09-04</time>
+  </p>
+  
+  <h1>Spring Cloud Config: 중앙 집중식 환경 설정 관리</h1>
+
+  <h2 id="1-왜-필요한가">1. 왜 필요한가?</h2>
+
+<p>마이크로서비스 아키텍처(MSA)에서는 수많은 서버가 각자의 설정값(DB 접속 정보, 외부 API 키 등)을 가집니다. 프로젝트가 비대해질수록 각 서버의 <code class="language-plaintext highlighter-rouge">application.yml</code> 파일을 일일이 관리하는 것은 비효율적이며 보안 사고의 위험도 큽니다.</p>
+
+<h2 id="2-spring-cloud-config의-역할">2. Spring Cloud Config의 역할</h2>
+
+<p><strong>Spring Cloud Config</strong>는 애플리케이션의 모든 설정 정보를 하나의 <strong>Config Server</strong>에서 관리하고, 하위 클라이언트 서비스들이 구동될 때 서버로부터 설정을 내려받아 적용하도록 돕습니다.</p>
+
+<ul>
+  <li><strong>중앙 관리:</strong> 모든 마이크로서비스의 설정을 한곳(Git, 파일 시스템 등)에서 제어합니다.</li>
+  <li><strong>동적 갱신:</strong> 서버 구동 중에 설정이 바뀌어도 재시작 없이 실시간으로 반영할 수 있는 메커니즘을 제공합니다.</li>
+  <li><strong>버전 관리:</strong> 설정 파일을 Git 리포지토리에 보관하므로 변경 이력을 완벽하게 추적할 수 있습니다.</li>
+</ul>
+
+<h2 id="3-구성-방식-요약">3. 구성 방식 요약</h2>
+
+<ol>
+  <li><strong>Config Server:</strong> <code class="language-plaintext highlighter-rouge">@EnableConfigServer</code>를 통해 서버를 올리고, 설정 파일이 담긴 Git 저장소 주소를 등록합니다.</li>
+  <li><strong>Client Services:</strong> 설정 파일명을 명시하고 Config Server의 주소를 가리킵니다. 구동 시 서버로부터 자신의 설정값을 가져와서 컨텍스트에 로드합니다.</li>
+</ol>
+
+<hr data-content="주의" />
+
+<p>Config Server 연결 시에는 SSH 키 등록이나 권한 인증 세팅이 선행되어야 안전하게 데이터를 주고받을 수 있습니다.</p>
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>

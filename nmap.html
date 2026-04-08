@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Nmap: 네트워크 인프라 진단 및 보안 스캔</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Nmap: 네트워크 인프라 진단 및 보안 스캔" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="1. Nmap이란?" />
+<meta property="og:description" content="1. Nmap이란?" />
+<link rel="canonical" href="https://hrllk.github.io/nmap.html" />
+<meta property="og:url" content="https://hrllk.github.io/nmap.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2023-07-17T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Nmap: 네트워크 인프라 진단 및 보안 스캔" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2023-07-17T00:00:00+00:00","datePublished":"2023-07-17T00:00:00+00:00","description":"1. Nmap이란?","headline":"Nmap: 네트워크 인프라 진단 및 보안 스캔","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/nmap.html"},"url":"https://hrllk.github.io/nmap.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2023-07-17 00:00:00 +0000">2023-07-17</time>
+  </p>
+  
+  <h1>Nmap: 네트워크 인프라 진단 및 보안 스캔</h1>
+
+  <h2 id="1-nmap이란">1. Nmap이란?</h2>
+
+<p><strong>Nmap (Network Mapper)</strong>은 네트워크상의 호스트와 서비스(포트)를 검색하여 인프라의 전체적인 지도를 그려주는 고성능 오픈소스 <strong>네트워크 스캐닝 도구</strong>입니다.</p>
+
+<h2 id="2-주요-용도-및-기능">2. 주요 용도 및 기능</h2>
+
+<ul>
+  <li><strong>호스트 감지 (Host Discovery):</strong> 특정 네트워크 대역에서 현재 살아있는(응답하는) 서버가 누구인지 확인합니다.</li>
+  <li><strong>포트 스캐닝 (Port Scanning):</strong> 특정 서버에서 어떤 포트(80, 443, 3306 등)가 열려 있는지, 즉 어떤 서비스가 대기 중인지 스캔합니다.</li>
+  <li><strong>서비스 및 버전 감지:</strong> 열려 있는 포트에서 구동 중인 소프트웨어가 무엇인지, 그리고 그 버전 정보까지 유추해 냅니다.</li>
+  <li><strong>OS 핑거프린팅:</strong> 네트워크 응답 패턴을 분석하여 해당 서버의 운영체제(Linux, Windows 등)를 추측합니다.</li>
+  <li><strong>보안 취약점 진단:</strong> 열린 포트와 버전 정보를 바탕으로 알려진 보안 취약점이나 설정 오류가 있는지 점검하는 용도로도 널리 쓰입니다.</li>
+</ul>
+
+<hr data-content="주의" />
+
+<p>Nmap은 매우 강력한 도구이므로, <strong>승인되지 않은 네트워크에 대한 스캔은 법적 문제</strong>가 발생할 수 있습니다. 반드시 본인이 관리하거나 허가받은 환경에서만 학습 및 진단 목적으로 사용해야 합니다.</p>
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>

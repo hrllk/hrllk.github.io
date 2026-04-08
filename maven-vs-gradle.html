@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Maven vs Gradle: 자바 빌드 도구의 핵심 차이점 비교</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Maven vs Gradle: 자바 빌드 도구의 핵심 차이점 비교" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="1. 개요" />
+<meta property="og:description" content="1. 개요" />
+<link rel="canonical" href="https://hrllk.github.io/maven-vs-gradle.html" />
+<meta property="og:url" content="https://hrllk.github.io/maven-vs-gradle.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2023-07-19T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Maven vs Gradle: 자바 빌드 도구의 핵심 차이점 비교" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2023-07-19T00:00:00+00:00","datePublished":"2023-07-19T00:00:00+00:00","description":"1. 개요","headline":"Maven vs Gradle: 자바 빌드 도구의 핵심 차이점 비교","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/maven-vs-gradle.html"},"url":"https://hrllk.github.io/maven-vs-gradle.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2023-07-19 00:00:00 +0000">2023-07-19</time>
+  </p>
+  
+  <h1>Maven vs Gradle: 자바 빌드 도구의 핵심 차이점 비교</h1>
+
+  <h2 id="1-개요">1. 개요</h2>
+
+<p>자바 프로젝트의 의존성 관리와 빌드 자동화를 책임지는 두 거두, <strong>Maven</strong>과 <strong>Gradle</strong>의 특징과 차이점을 분석합니다.</p>
+
+<h2 id="2-주요-차이점-분석">2. 주요 차이점 분석</h2>
+
+<h3 id="설정-문법-syntax">설정 문법 (Syntax)</h3>
+<ul>
+  <li><strong>Maven:</strong> XML 기반의 <code class="language-plaintext highlighter-rouge">pom.xml</code>을 사용합니다. 구조가 정형화되어 있어 배우기는 쉽지만 코드가 장황해지는 단점이 있습니다.</li>
+  <li><strong>Gradle:</strong> Groovy나 Kotlin 기반의 DSL을 사용합니다. XML보다 훨씬 간결하고 프로그래밍 언어처럼 유연한 로직 작성이 가능합니다.</li>
+</ul>
+
+<h3 id="빌드-생명주기-및-유연성">빌드 생명주기 및 유연성</h3>
+<ul>
+  <li><strong>Maven:</strong> 정해진 빌드 사이클(Compile -&gt; Test -&gt; Package -&gt; ..)에 따라 엄격하게 동작하는 ‘설정보다 관례(Convention over Configuration)’ 중심입니다.</li>
+  <li><strong>Gradle:</strong> ‘Task’ 단위로 빌드가 구성되며, 사용자가 원하는 대로 커스터마이징하기가 훨씬 수월합니다.</li>
+</ul>
+
+<h3 id="성능-performance">성능 (Performance)</h3>
+<ul>
+  <li><strong>Gradle:</strong> 증분 빌드(Incremental Build) 시스템을 통해 변경된 부분만 지능적으로 다시 빌드하고 캐싱을 적극 활용하므로, 특히 대규모 프로젝트에서 Maven보다 압도적으로 빠릅니다.</li>
+</ul>
+
+<h3 id="생태계-및-범용성">생태계 및 범용성</h3>
+<ul>
+  <li><strong>Maven:</strong> 역사가 깊은 만큼 문서가 방대하고 플러그인 생태계가 매우 성숙해 있습니다.</li>
+  <li><strong>Gradle:</strong> 안드로이드 공식 빌드 도구로 채택된 이후 점유율이 급상승했으며, 현대적인 스프링 프로젝트에서 표준으로 자리 잡고 있습니다.</li>
+</ul>
+
+<hr data-content="결론" />
+
+<p>익숙함과 안정성이 최우선이라면 <strong>Maven</strong>을, 빌드 성능과 유연한 커스터마이징이 필요하다면 <strong>Gradle</strong>을 선택하는 것이 합리적인 전략입니다.</p>
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>

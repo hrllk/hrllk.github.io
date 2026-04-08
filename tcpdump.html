@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>tcpdump: 터미널에서 패킷 캡처 및 분석하기</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="tcpdump: 터미널에서 패킷 캡처 및 분석하기" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="1. tcpdump란?" />
+<meta property="og:description" content="1. tcpdump란?" />
+<link rel="canonical" href="https://hrllk.github.io/tcpdump.html" />
+<meta property="og:url" content="https://hrllk.github.io/tcpdump.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2023-01-17T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="tcpdump: 터미널에서 패킷 캡처 및 분석하기" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2023-01-17T00:00:00+00:00","datePublished":"2023-01-17T00:00:00+00:00","description":"1. tcpdump란?","headline":"tcpdump: 터미널에서 패킷 캡처 및 분석하기","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/tcpdump.html"},"url":"https://hrllk.github.io/tcpdump.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2023-01-17 00:00:00 +0000">2023-01-17</time>
+  </p>
+  
+  <h1>tcpdump: 터미널에서 패킷 캡처 및 분석하기</h1>
+
+  <h2 id="1-tcpdump란">1. tcpdump란?</h2>
+
+<p><strong>tcpdump</strong>는 명령줄(CLI) 인터페이스에서 실시간으로 네트워크 인터페이스를 거치는 패킷을 캡처하고 분석할 수 있게 도와주는 강력한 네트워크 유틸리티입니다.</p>
+
+<h2 id="2-주요-옵션-설명">2. 주요 옵션 설명</h2>
+
+<ul>
+  <li><strong><code class="language-plaintext highlighter-rouge">-i [device]</code>:</strong> 어느 네트워크 인터페이스(eth0, any 등)를 캡처할지 지정합니다.</li>
+  <li><strong><code class="language-plaintext highlighter-rouge">-c [number]</code>:</strong> 지정한 개수만큼의 패킷만 캡처한 후 종료합니다.</li>
+  <li><strong><code class="language-plaintext highlighter-rouge">-w [file]</code>:</strong> 캡처한 내용을 텍스트로 출력하는 대신, 추후 분석을 위해 <code class="language-plaintext highlighter-rouge">.pcap</code> 파일로 저장합니다.</li>
+  <li><strong><code class="language-plaintext highlighter-rouge">-n</code>:</strong> IP 주소나 포트 번호를 이름으로 번역(DNS 조회)하지 않고 숫자로만 표시하여 속도를 높입니다.</li>
+  <li><strong><code class="language-plaintext highlighter-rouge">-v / -vv</code>:</strong> 출력되는 정보의 상세 수준을 높입니다.</li>
+</ul>
+
+<h2 id="3-실무-활용-예시">3. 실무 활용 예시</h2>
+
+<p>특정 포트로 들어오고 나가는 모든 트래픽을 실시간으로 확인하고 싶을 때 유용합니다.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 8089 포트로 들어오는 모든 요청 캡처</span>
+<span class="nv">$ </span>tcpdump <span class="nt">-i</span> any port 8089
+</code></pre></div></div>
+
+<hr data-content="정리" />
+
+<p>네트워크 서버 간 통신이 원활하지 않을 때, 실제로 패킷이 오고 가는지 육안으로 확인하는 가장 정석적인 방법이 바로 <strong>tcpdump</strong>를 활용하는 것입니다.</p>
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>

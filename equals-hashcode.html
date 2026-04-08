@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Java 객체의 삼총사: equals, hashCode, toString</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Java 객체의 삼총사: equals, hashCode, toString" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="1. 모든 객체의 조상, Object 클래스" />
+<meta property="og:description" content="1. 모든 객체의 조상, Object 클래스" />
+<link rel="canonical" href="https://hrllk.github.io/equals-hashcode.html" />
+<meta property="og:url" content="https://hrllk.github.io/equals-hashcode.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2025-05-01T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Java 객체의 삼총사: equals, hashCode, toString" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2025-05-01T00:00:00+00:00","datePublished":"2025-05-01T00:00:00+00:00","description":"1. 모든 객체의 조상, Object 클래스","headline":"Java 객체의 삼총사: equals, hashCode, toString","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/equals-hashcode.html"},"url":"https://hrllk.github.io/equals-hashcode.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2025-05-01 00:00:00 +0000">2025-05-01</time>
+  </p>
+  
+  <h1>Java 객체의 삼총사: equals, hashCode, toString</h1>
+
+  <h2 id="1-모든-객체의-조상-object-클래스">1. 모든 객체의 조상, Object 클래스</h2>
+
+<p>자바에서 모든 클래스는 명시적으로 상속받지 않더라도 최상위 클래스인 <strong><code class="language-plaintext highlighter-rouge">Object</code></strong> 클래스를 자동으로 상속받습니다. <code class="language-plaintext highlighter-rouge">Object</code> 클래스가 제공하는 <code class="language-plaintext highlighter-rouge">equals</code>, <code class="language-plaintext highlighter-rouge">hashCode</code>, <code class="language-plaintext highlighter-rouge">toString</code> 메소드들은 객체의 상태와 정체성을 다루는 데 매우 중요한 역할을 합니다.</p>
+
+<h2 id="2-equals-우리는-논리적으로-같은가">2. equals(): “우리는 논리적으로 같은가?”</h2>
+
+<p>두 객체가 <strong>논리적으로 동등한지</strong> 비교할 때 사용합니다.</p>
+
+<ul>
+  <li><strong>기본 동작:</strong> <code class="language-plaintext highlighter-rouge">Object</code> 클래스의 기본 구현은 <code class="language-plaintext highlighter-rouge">==</code> 연산자와 동일한 <strong>참조 비교(주소값 비교)</strong>를 수행합니다.</li>
+  <li><strong>재정의의 필요성:</strong> 실무에서는 주소값이 달라도 내용(필드값)이 같으면 같은 객체로 간주해야 하는 경우가 많습니다. (예: 이름과 주민번호가 같은 두 Person 객체)</li>
+</ul>
+
+<h2 id="3-hashcode-네-해시-버킷-주소는-어디니">3. hashCode(): “네 해시 버킷 주소는 어디니?”</h2>
+
+<p>객체의 지문과 같은 정수 값을 반환합니다. 주로 <code class="language-plaintext highlighter-rouge">HashMap</code>, <code class="language-plaintext highlighter-rouge">HashSet</code> 같은 해시 기반 컬렉션에서 객체를 저장하고 찾을 때 사용됩니다.</p>
+
+<ul>
+  <li><strong>중요한 계약 (Contract):</strong> <code class="language-plaintext highlighter-rouge">equals()</code>를 재정의하여 두 객체가 동등하다고 판단했다면, <strong>반드시 <code class="language-plaintext highlighter-rouge">hashCode()</code>도 동일한 값을 반환하도록 재정의해야 합니다.</strong></li>
+  <li><strong>재정의하지 않을 경우:</strong> <code class="language-plaintext highlighter-rouge">equals()</code>는 같은데 <code class="language-plaintext highlighter-rouge">hashCode()</code>가 다르면, 해시 컬렉션에서 엉뚱한 위치를 뒤지게 되어 <code class="language-plaintext highlighter-rouge">get()</code>이나 <code class="language-plaintext highlighter-rouge">contains()</code>가 정상적으로 동작하지 않는 대참사가 발생합니다.</li>
+</ul>
+
+<h2 id="4-tostring-너를-어떻게-읽으면-좋을까">4. toString(): “너를 어떻게 읽으면 좋을까?”</h2>
+
+<p>객체의 문자열 표현을 반환합니다.</p>
+
+<ul>
+  <li><strong>기본 동작:</strong> <code class="language-plaintext highlighter-rouge">클래스이름@해시코드</code> 형태의 사람이 읽기 힘든 문자열을 반환합니다.</li>
+  <li><strong>재정의의 효과:</strong> 디버깅이나 로깅 시 객체의 내부 필드 값을 바로 확인할 수 있도록 유의미한 정보를 담아 재정의하는 것이 관례입니다.</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Override</span>
+<span class="kd">public</span> <span class="nc">String</span> <span class="nf">toString</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="nc">String</span><span class="o">.</span><span class="na">format</span><span class="o">(</span><span class="s">"User(id=%s, name=%s)"</span><span class="o">,</span> <span class="n">id</span><span class="o">,</span> <span class="n">name</span><span class="o">);</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<hr data-content="정리" />
+
+<p><strong><code class="language-plaintext highlighter-rouge">equals</code></strong>는 같은 사람인지 확인하는 신분증 검사, <strong><code class="language-plaintext highlighter-rouge">hashCode</code></strong>는 그 사람을 빠르게 찾기 위한 인덱스 정보, <strong><code class="language-plaintext highlighter-rouge">toString</code></strong>은 그 사람이 자기소개를 하는 명함이라고 이해하면 명확합니다.</p>
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>
