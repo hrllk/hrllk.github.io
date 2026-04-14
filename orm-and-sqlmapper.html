@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Persistence Framework: SQL Mapper vs ORM (JPA/Hibernate)</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Persistence Framework: SQL Mapper vs ORM (JPA/Hibernate)" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="1. Persistence(영속성)란?" />
+<meta property="og:description" content="1. Persistence(영속성)란?" />
+<link rel="canonical" href="https://hrllk.github.io/orm-and-sqlmapper.html" />
+<meta property="og:url" content="https://hrllk.github.io/orm-and-sqlmapper.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2022-01-08T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Persistence Framework: SQL Mapper vs ORM (JPA/Hibernate)" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2022-01-08T00:00:00+00:00","datePublished":"2022-01-08T00:00:00+00:00","description":"1. Persistence(영속성)란?","headline":"Persistence Framework: SQL Mapper vs ORM (JPA/Hibernate)","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/orm-and-sqlmapper.html"},"url":"https://hrllk.github.io/orm-and-sqlmapper.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2022-01-08 00:00:00 +0000">2022-01-08</time>
+  </p>
+  
+  <h1>Persistence Framework: SQL Mapper vs ORM (JPA/Hibernate)</h1>
+
+  <h2 id="1-persistence영속성란">1. Persistence(영속성)란?</h2>
+
+<p>프로그램이 종료되어도 데이터가 사라지지 않고 유지되는 특성을 말합니다. 자바 생태계에서는 이를 위해 파일 시스템이나 관계형 데이터베이스(RDBMS)를 활용하며, 이를 돕는 도구들을 <strong>Persistence Framework</strong>라고 부릅니다.</p>
+
+<h2 id="2-sql-mapper-mybatis-등">2. SQL Mapper (MyBatis 등)</h2>
+
+<p>객체와 데이터베이스의 데이터를 개발자가 작성한 <strong>SQL</strong>로 연결해 주는 방식입니다.</p>
+
+<ul>
+  <li><strong>특징:</strong> SQL 문을 직접 제어하므로 복잡한 쿼리 처리에 유리하며 SQL 최적화가 수월합니다.</li>
+  <li><strong>단점:</strong> 단순한 조회/저장 작업도 일일이 SQL을 작성해야 하는 번거로움이 있으며, 데이터베이스 제품(DBMS)을 변경할 때 SQL 문법 차이로 인해 코드 수정이 대거 발생할 수 있습니다.</li>
+</ul>
+
+<h2 id="3-orm-object-relational-mapping">3. ORM (Object-Relational Mapping)</h2>
+
+<p>객체와 테이블을 자동으로 매핑해 주어, SQL 작성 없이 자바 코드로 데이터를 조작할 수 있게 해주는 기술입니다.</p>
+
+<ul>
+  <li><strong>특징:</strong> 비즈니스 로직에만 집중할 수 있어 개발 속도가 빠르고 재사용성이 높습니다. 특정 DBMS에 종속되지 않습니다.</li>
+  <li><strong>단점:</strong> 프로젝트가 매우 복잡해지면 학습 곡선이 높고, 설정을 잘못할 경우 의도치 않은 쿼리가 실행되어 성능 저하가 발생할 수 있습니다.</li>
+</ul>
+
+<h2 id="4-jpa와-hibernate">4. JPA와 Hibernate</h2>
+
+<ul>
+  <li><strong>JPA:</strong> 자바 진영에서 정의한 ORM 기술 표준 <strong>인터페이스(규격)</strong>입니다.</li>
+  <li><strong>Hibernate:</strong> JPA라는 규격을 실제로 구현한 가장 대표적인 <strong>구현체</strong>입니다.</li>
+</ul>
+
+<hr data-content="비유" />
+
+<p>JPA가 <strong>“맛있는 떡볶이 레시피”</strong>라면, Hibernate는 그 레시피를 보고 실제로 떡볶이를 만들어 파는 <strong>“음식점”</strong>과 같습니다.</p>
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>

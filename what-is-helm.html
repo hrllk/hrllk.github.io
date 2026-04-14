@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Helm 기초: 쿠버네티스용 패키지 매니저 이해하기</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Helm 기초: 쿠버네티스용 패키지 매니저 이해하기" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="1. Helm이란 무엇인가?" />
+<meta property="og:description" content="1. Helm이란 무엇인가?" />
+<link rel="canonical" href="https://hrllk.github.io/what-is-helm.html" />
+<meta property="og:url" content="https://hrllk.github.io/what-is-helm.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2023-06-12T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Helm 기초: 쿠버네티스용 패키지 매니저 이해하기" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2023-06-12T00:00:00+00:00","datePublished":"2023-06-12T00:00:00+00:00","description":"1. Helm이란 무엇인가?","headline":"Helm 기초: 쿠버네티스용 패키지 매니저 이해하기","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/what-is-helm.html"},"url":"https://hrllk.github.io/what-is-helm.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2023-06-12 00:00:00 +0000">2023-06-12</time>
+  </p>
+  
+  <h1>Helm 기초: 쿠버네티스용 패키지 매니저 이해하기</h1>
+
+  <h2 id="1-helm이란-무엇인가">1. Helm이란 무엇인가?</h2>
+
+<p><strong>Helm</strong>은 쿠버네티스 환경에서 애플리케이션을 정의, 설치 및 업그레이드할 수 있도록 도와주는 <strong>패키지 매니저</strong>입니다. 파이썬의 <code class="language-plaintext highlighter-rouge">pip</code>나 자바스크립트의 <code class="language-plaintext highlighter-rouge">npm</code>과 유사한 역할을 쿠버네티스 세계에서 수행한다고 이해하면 쉽습니다.</p>
+
+<h2 id="2-핵심-개념">2. 핵심 개념</h2>
+
+<h3 id="helm-chart">Helm Chart</h3>
+<p>애플리케이션을 구동하기 위해 필요한 모든 리소스(Pod, Service, Ingress 등) 정의서를 하나로 묶은 <strong>템플릿 패키지</strong>입니다. 복잡한 설정을 미리 구성해 둔 ‘설치 키트’와 같습니다.</p>
+
+<h3 id="helm-repository">Helm Repository</h3>
+<p>차트들이 모여 있는 저장소입니다. 전 세계 개발자들이 만들어 둔 검증된 차트들을 다운로드하여 즉시 내 클러스터에 배포할 수 있습니다.</p>
+
+<h3 id="helm-release">Helm Release</h3>
+<p>차트를 특정 설정(Values)과 결합하여 실제 쿠버네티스 클러스터 위에 설치한 <strong>인스턴스</strong>를 의미합니다. 동일한 차트로 ‘운영 환경’, ‘개발 환경’ 등 여러 개의 릴리즈를 만들 수 있습니다.</p>
+
+<hr data-content="사전 준비" />
+
+<p>Helm을 사용하기 위해서는 당연히 접근 가능한 <strong>쿠버네티스 클러스터</strong>가 이미 구동 중이어야 합니다.</p>
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>

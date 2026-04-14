@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>mesh series: mTLS mechanism with envoy</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="mesh series: mTLS mechanism with envoy" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Overview 지난 포스팅에서 Envoy가 80 패킷을 가로채 443으로 업그레이드하는 과정을 살펴봤다. 그런데 여기서 핵심적인 질문이 남는다." />
+<meta property="og:description" content="Overview 지난 포스팅에서 Envoy가 80 패킷을 가로채 443으로 업그레이드하는 과정을 살펴봤다. 그런데 여기서 핵심적인 질문이 남는다." />
+<link rel="canonical" href="https://hrllk.github.io/mtls-mechanism-with-envoy.html" />
+<meta property="og:url" content="https://hrllk.github.io/mtls-mechanism-with-envoy.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-03-10T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="mesh series: mTLS mechanism with envoy" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2026-03-10T00:00:00+00:00","datePublished":"2026-03-10T00:00:00+00:00","description":"Overview 지난 포스팅에서 Envoy가 80 패킷을 가로채 443으로 업그레이드하는 과정을 살펴봤다. 그런데 여기서 핵심적인 질문이 남는다.","headline":"mesh series: mTLS mechanism with envoy","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/mtls-mechanism-with-envoy.html"},"url":"https://hrllk.github.io/mtls-mechanism-with-envoy.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2026-03-10 00:00:00 +0000">2026-03-10</time>
+  </p>
+  
+  <h1>mesh series: mTLS mechanism with envoy</h1>
+
+  <h3 id="overview">Overview</h3>
+<hr />
+<p>지난 포스팅에서 Envoy가 80 패킷을 가로채 443으로 업그레이드하는 과정을 살펴봤다. 
+그런데 여기서 핵심적인 질문이 남는다.</p>
+
+<blockquote>
+  <p>“Envoy가 사용하는 인증서는 누가 주는 걸까? 그리고 수신측 사이드카는 이 인증서를 어떻게 믿는 거지?”</p>
+</blockquote>
+
+<p>단순히 패킷을 암호화하는 것을 넘어, 서로가 서로를 신뢰할 수 있게 만드는 <strong>mTLS(Mutual TLS)와 Istio의 신뢰 구축 매커니즘</strong>을 파헤쳐 본다.</p>
+
+<h3 id="신뢰의-기원-istiod와-ca">신뢰의 기원: Istiod와 CA</h3>
+<hr />
+<p>사이드카가 스스로 인증서를 생성하는 것은 아니다. Istio 시스템의 관제탑인 <strong>Istiod</strong>가 그 역할을 수행한다.</p>
+
+<ol>
+  <li><strong>인증서 발급 요청 (CSR):</strong> 사이드카(Envoy)가 처음 실행될 때, <code class="language-plaintext highlighter-rouge">Istiod</code>에게 “나 서비스 A인데, 내가 사용할 인증서 좀 줘!”라고 요청한다.</li>
+  <li><strong>신원 확인:</strong> <code class="language-plaintext highlighter-rouge">Istiod</code>는 해당 파드가 정말 서비스 A가 맞는지 쿠버네티스 API를 통해 확인한다.</li>
+  <li><strong>인증서 배달:</strong> 확인이 완료되면 <code class="language-plaintext highlighter-rouge">Istiod</code>는 해당 사이드카에게만 유효한 <strong>짧은 수명의 인증서</strong>를 안전하게 전달한다.</li>
+</ol>
+
+<p>이때 인증서 안에는 <strong>SPIFFE ID</strong>라는 표준 형식이 담기며, 이것이 서비스 메시 안에서의 ‘신분증’ 역할을 한다.</p>
+
+<h3 id="mtls-서로의-신분증을-확인하는-양방향-검증-zero-trust">mTLS: 서로의 신분증을 확인하는 양방향 검증 (Zero Trust)</h3>
+<hr />
+<p>일반적인 HTTPS(TLS)는 클라이언트가 서버만 확인하지만, <strong>mTLS(Mutual TLS)</strong>는 ‘양방향’이다.</p>
+
+<ul>
+  <li><strong>Client Envoy:</strong> “내 신분증 여기 있어. 너도 신분증 보여줘.”</li>
+  <li><strong>Server Envoy:</strong> “나도 신분증 있어. 자, 여기. 너도 내가 믿는 <code class="language-plaintext highlighter-rouge">Istiod</code>가 발급해준 게 맞네!”</li>
+</ul>
+
+<p>두 사이드카가 서로의 인증서를 대조하고, 둘 다 동일한 뿌리(Root CA)에서 발급된 것임을 확인하는 순간 <strong>암호화된 터널</strong>이 뚫린다.</p>
+
+<h3 id="왜-mtls가-강력한가">왜 mTLS가 강력한가?</h3>
+<hr />
+<ol>
+  <li><strong>중간자 공격(MITM) 방지:</strong> 트래픽을 가로채도 암호화되어 읽을 수 없다.</li>
+  <li><strong>신원 도용 방지:</strong> 인증서가 없는 가짜 서비스는 메시 안에서 통신 자체가 불가능하다.</li>
+  <li><strong>자동 갱신:</strong> 개발자가 신경 쓰지 않아도 <code class="language-plaintext highlighter-rouge">Istiod</code>가 주기적으로 인증서를 갈아치우기 때문에 보안 수준이 항상 높게 유지된다.</li>
+</ol>
+
+<h3 id="conclusion">Conclusion</h3>
+<hr />
+<p>결국 서비스 메시에서의 보안은 <strong>“누구도 믿지 않는다(Zero Trust)”</strong>는 원칙에서 시작한다.</p>
+
+<p>모든 서비스는 매번 통신할 때마다 자신의 신원을 증명해야 하며, 이 복잡한 과정을 개발자 대신 사이드카와 Istiod가 처리해 준다. 우리는 그저 안전하게 구축된 신뢰의 도로 위를 달리기만 하면 된다.</p>
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>

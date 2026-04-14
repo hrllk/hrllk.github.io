@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Troubleshooting: 0.0.0.0 vs 127.0.0.1의 차이와 외부 접속 설정</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Troubleshooting: 0.0.0.0 vs 127.0.0.1의 차이와 외부 접속 설정" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="1. 문제 상황" />
+<meta property="og:description" content="1. 문제 상황" />
+<link rel="canonical" href="https://hrllk.github.io/0-0-0-0-vs-127-0-0-1.html" />
+<meta property="og:url" content="https://hrllk.github.io/0-0-0-0-vs-127-0-0-1.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2025-03-23T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Troubleshooting: 0.0.0.0 vs 127.0.0.1의 차이와 외부 접속 설정" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2025-03-23T00:00:00+00:00","datePublished":"2025-03-23T00:00:00+00:00","description":"1. 문제 상황","headline":"Troubleshooting: 0.0.0.0 vs 127.0.0.1의 차이와 외부 접속 설정","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/0-0-0-0-vs-127-0-0-1.html"},"url":"https://hrllk.github.io/0-0-0-0-vs-127-0-0-1.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2025-03-23 00:00:00 +0000">2025-03-23</time>
+  </p>
+  
+  <h1>Troubleshooting: 0.0.0.0 vs 127.0.0.1의 차이와 외부 접속 설정</h1>
+
+  <h2 id="1-문제-상황">1. 문제 상황</h2>
+
+<p>로컬 환경(예: 내 PC)에서 고성능 LLM 서버를 구동하고 외부에서 접속하려고 했으나, 포트 포워딩 설정을 마쳤음에도 불구하고 접속이 되지 않는 문제가 발생했습니다.</p>
+
+<h2 id="2-원인-분석-bind-address">2. 원인 분석 (Bind Address)</h2>
+
+<p>서버가 실행될 때 어느 IP 주소에서 대기(Listen)할지를 결정하는 <strong>바인딩 주소</strong> 설정이 문제였습니다.</p>
+
+<ul>
+  <li><strong><code class="language-plaintext highlighter-rouge">127.0.0.1</code> (localhost):</strong> 서버가 내 컴퓨터 내부에서만 신호를 받습니다. 외부 기기는 물론, 같은 와이파이를 쓰는 옆 컴퓨터에서도 접속할 수 없습니다.</li>
+  <li><strong><code class="language-plaintext highlighter-rouge">0.0.0.0</code> (모든 인터페이스):</strong> 서버가 내 컴퓨터에 연결된 모든 입구(유선/무선 네트워크 등)에서 들어오는 요청을 받습니다. 외부 접속을 허용하려면 반드시 이 설정을 사용해야 합니다.</li>
+</ul>
+
+<h2 id="3-해결-단계">3. 해결 단계</h2>
+
+<ol>
+  <li><strong>서버 호스트 설정 변경:</strong> 서버 실행 옵션이나 설정 파일에서 Host 또는 Bind 주소를 <code class="language-plaintext highlighter-rouge">127.0.0.1</code>에서 <code class="language-plaintext highlighter-rouge">0.0.0.0</code>으로 변경합니다.</li>
+  <li><strong>포트 포워딩 확인:</strong> 공유기 설정에서 해당 포트가 내 PC의 IP로 올바르게 연결되어 있는지 확인합니다.</li>
+  <li><strong>접속 테스트:</strong> 외부에서 공인 IP 또는 DDNS 주소를 통해 접속을 시도합니다.</li>
+</ol>
+
+<hr data-content="결론" />
+
+<p>로컬 전 전용 서비스라면 <code class="language-plaintext highlighter-rouge">127.0.0.1</code>이 보안상 안전하며, 외부와 통신해야 하는 서비스라면 <code class="language-plaintext highlighter-rouge">0.0.0.0</code>으로 문을 열어주어야 합니다.</p>
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>DHCP: IP 자동 할당 프로토콜의 작동 원리</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="DHCP: IP 자동 할당 프로토콜의 작동 원리" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="1. DHCP(Dynamic Host Configuration Protocol)란?" />
+<meta property="og:description" content="1. DHCP(Dynamic Host Configuration Protocol)란?" />
+<link rel="canonical" href="https://hrllk.github.io/what-is-dhcp.html" />
+<meta property="og:url" content="https://hrllk.github.io/what-is-dhcp.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2024-01-20T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="DHCP: IP 자동 할당 프로토콜의 작동 원리" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2024-01-20T00:00:00+00:00","datePublished":"2024-01-20T00:00:00+00:00","description":"1. DHCP(Dynamic Host Configuration Protocol)란?","headline":"DHCP: IP 자동 할당 프로토콜의 작동 원리","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/what-is-dhcp.html"},"url":"https://hrllk.github.io/what-is-dhcp.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2024-01-20 00:00:00 +0000">2024-01-20</time>
+  </p>
+  
+  <h1>DHCP: IP 자동 할당 프로토콜의 작동 원리</h1>
+
+  <h2 id="1-dhcpdynamic-host-configuration-protocol란">1. DHCP(Dynamic Host Configuration Protocol)란?</h2>
+
+<p><strong>DHCP</strong>는 IP 네트워크에 접속하는 단말(호스트)들에게 <strong>IP 주소 및 기타 네트워크 설정 정보를 자동으로 할당하고 관리</strong>해 주는 프로토콜입니다.</p>
+
+<h2 id="2-주요-기능과-장점">2. 주요 기능과 장점</h2>
+
+<ul>
+  <li><strong>자동 할당:</strong> 사용자가 일일이 서브넷 마스크, 게이트웨이, DNS 서버 정보를 입력할 필요 없이 서비스에 연결만 하면 자동으로 설정됩니다.</li>
+  <li><strong>중앙 집중 관리:</strong> 관리자는 DHCP 서버에서 IP 대역폭(Scope)과 임대 기간을 한곳에서 관리할 수 있어 효율적입니다.</li>
+  <li><strong>리소스 최적화:</strong> 한정된 IP 주소 자원을 필요한 기기에만 임대하고, 사용이 끝나면 회수하여 재사용하므로 IP 낭비를 방지합니다.</li>
+</ul>
+
+<h2 id="3-임대lease-기반-메커니즘">3. 임대(Lease) 기반 메커니즘</h2>
+
+<p>DHCP는 IP를 영구적으로 주는 것이 아니라 <strong>임대</strong>해 줍니다.</p>
+<ul>
+  <li><strong>갱신:</strong> 임대 기간이 만료되기 전에 클라이언트는 서버에 연장을 요청합니다.</li>
+  <li><strong>회수:</strong> 장치를 끄거나 네트워크를 이탈하여 갱신이 이루어지지 않으면, 해당 IP는 다시 풀(Pool)로 돌아가 다른 장치가 사용할 수 있게 됩니다.</li>
+</ul>
+
+<hr data-content="결론" />
+
+<p>DHCP는 복잡한 네트워크 환경에서 우리가 복잡한 설정 없이 와이파이를 즉시 쓸 수 있게 해주는 <strong>“자동 네트워크 가입 비서”</strong>와 같습니다.</p>
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>

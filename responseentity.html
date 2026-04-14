@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>ResponseEntity: HTTP 응답을 세밀하게 제어하기</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="ResponseEntity: HTTP 응답을 세밀하게 제어하기" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="1. ResponseEntity란?" />
+<meta property="og:description" content="1. ResponseEntity란?" />
+<link rel="canonical" href="https://hrllk.github.io/responseentity.html" />
+<meta property="og:url" content="https://hrllk.github.io/responseentity.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2022-06-07T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="ResponseEntity: HTTP 응답을 세밀하게 제어하기" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2022-06-07T00:00:00+00:00","datePublished":"2022-06-07T00:00:00+00:00","description":"1. ResponseEntity란?","headline":"ResponseEntity: HTTP 응답을 세밀하게 제어하기","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/responseentity.html"},"url":"https://hrllk.github.io/responseentity.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2022-06-07 00:00:00 +0000">2022-06-07</time>
+  </p>
+  
+  <h1>ResponseEntity: HTTP 응답을 세밀하게 제어하기</h1>
+
+  <h2 id="1-responseentity란">1. ResponseEntity란?</h2>
+
+<p><strong>ResponseEntity</strong>는 Spring Framework에서 HTTP 응답의 전체 내용(상태 코드, 헤더, 바디)을 나타내는 클래스입니다. 이를 통해 컨트롤러에서 클라이언트에게 보낼 응답을 프로그래밍 방식으로 정교하게 구성할 수 있습니다.</p>
+
+<h2 id="2-왜-사용하는가">2. 왜 사용하는가?</h2>
+
+<p>단순히 객체를 반환하는 방식과 달리, <code class="language-plaintext highlighter-rouge">ResponseEntity</code>를 사용하면 상황에 맞는 <strong>HTTP 상태 코드(Status Code)</strong>를 직접 지정할 수 있습니다.</p>
+
+<ul>
+  <li><strong>예시:</strong> 사용자가 요청한 리소스가 없을 때 단순히 빈 리스트를 보내는 대신, <code class="language-plaintext highlighter-rouge">404 Not Found</code> 혹은 <code class="language-plaintext highlighter-rouge">204 No Content</code> 상태 코드를 명확히 전달하여 클라이언트가 적절한 대응을 할 수 있게 합니다.</li>
+</ul>
+
+<h2 id="3-활용-예제">3. 활용 예제</h2>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@GetMapping</span><span class="o">(</span><span class="s">"/messages/{userId}"</span><span class="o">)</span>
+<span class="kd">public</span> <span class="nc">ResponseEntity</span><span class="o">&lt;</span><span class="nc">List</span><span class="o">&lt;</span><span class="nc">Message</span><span class="o">&gt;&gt;</span> <span class="nf">getMessages</span><span class="o">(</span><span class="nd">@PathVariable</span><span class="o">(</span><span class="s">"userId"</span><span class="o">)</span> <span class="kt">long</span> <span class="n">userId</span><span class="o">)</span> <span class="o">{</span>
+    <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Message</span><span class="o">&gt;</span> <span class="n">messageList</span> <span class="o">=</span> <span class="n">messageService</span><span class="o">.</span><span class="na">getByUserId</span><span class="o">(</span><span class="n">userId</span><span class="o">);</span>
+
+    <span class="k">if</span> <span class="o">(</span><span class="n">messageList</span><span class="o">.</span><span class="na">isEmpty</span><span class="o">())</span> <span class="o">{</span>
+        <span class="c1">// 데이터가 없을 때 204 No Content 반환</span>
+        <span class="k">return</span> <span class="nc">ResponseEntity</span><span class="o">.</span><span class="na">noContent</span><span class="o">().</span><span class="na">build</span><span class="o">();</span>
+    <span class="o">}</span>
+    
+    <span class="c1">// 성공 시 데이터와 함께 200 OK 반환</span>
+    <span class="k">return</span> <span class="nc">ResponseEntity</span><span class="o">.</span><span class="na">ok</span><span class="o">(</span><span class="n">messageList</span><span class="o">);</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<hr data-content="팁" />
+
+<p><code class="language-plaintext highlighter-rouge">new ResponseEntity&lt;&gt;(...)</code> 생성자 방식보다는 스타일리시하고 가독성이 좋은 <strong>Builder 패턴(<code class="language-plaintext highlighter-rouge">ResponseEntity.ok().body(...)</code>)</strong> 방식을 사용하는 것이 현대적인 모던 자바 개발 권장 사항입니다.</p>
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>

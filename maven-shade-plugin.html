@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Troubleshooting: Maven Shade Plugin과 Fat JAR</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Troubleshooting: Maven Shade Plugin과 Fat JAR" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="1. 문제 상황" />
+<meta property="og:description" content="1. 문제 상황" />
+<link rel="canonical" href="https://hrllk.github.io/maven-shade-plugin.html" />
+<meta property="og:url" content="https://hrllk.github.io/maven-shade-plugin.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2023-09-28T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Troubleshooting: Maven Shade Plugin과 Fat JAR" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2023-09-28T00:00:00+00:00","datePublished":"2023-09-28T00:00:00+00:00","description":"1. 문제 상황","headline":"Troubleshooting: Maven Shade Plugin과 Fat JAR","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/maven-shade-plugin.html"},"url":"https://hrllk.github.io/maven-shade-plugin.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2023-09-28 00:00:00 +0000">2023-09-28</time>
+  </p>
+  
+  <h1>Troubleshooting: Maven Shade Plugin과 Fat JAR</h1>
+
+  <h2 id="1-문제-상황">1. 문제 상황</h2>
+
+<p>성공적으로 빌드한 라이브러리(.jar)를 배포했으나, 이를 사용하는 쪽에서 클래스를 찾지 못하는(NoClassDefFoundError) 현상이 발생했습니다.</p>
+
+<h2 id="2-원인-분석">2. 원인 분석</h2>
+
+<p>우리가 만든 라이브러리가 의존하고 있는 외부 라이브러리들이 배포용 빌드본(.jar)에 포함되지 않은 <strong>불완전한 패킹</strong>이 원인이었습니다.</p>
+
+<ul>
+  <li><strong>원인:</strong> 일반적인 Maven 빌드는 내가 짠 코드만 패키징합니다.</li>
+  <li><strong>결과:</strong> 실행 시점에 의존성 라이브러리가 클래스패스에 없어 오류가 발생합니다.</li>
+</ul>
+
+<h2 id="3-해결책-maven-shade-plugin">3. 해결책: Maven Shade Plugin</h2>
+
+<p>이 플러그인은 프로젝트의 모든 의존성 라이브러리를 하나의 커다란 JAR 파일로 합쳐주는 역할을 합니다. 이를 흔히 <strong>Fat JAR</strong> 또는 <strong>Uber JAR</strong>라고 부릅니다.</p>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;plugin&gt;</span>
+    <span class="nt">&lt;groupId&gt;</span>org.apache.maven.plugins<span class="nt">&lt;/groupId&gt;</span>
+    <span class="nt">&lt;artifactId&gt;</span>maven-shade-plugin<span class="nt">&lt;/artifactId&gt;</span>
+    <span class="nt">&lt;version&gt;</span>3.2.4<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;executions&gt;</span>
+        <span class="nt">&lt;execution&gt;</span>
+            <span class="nt">&lt;phase&gt;</span>package<span class="nt">&lt;/phase&gt;</span>
+            <span class="nt">&lt;goals&gt;&lt;goal&gt;</span>shade<span class="nt">&lt;/goal&gt;&lt;/goals&gt;</span>
+        <span class="nt">&lt;/execution&gt;</span>
+    <span class="nt">&lt;/executions&gt;</span>
+<span class="nt">&lt;/plugin&gt;</span>
+</code></pre></div></div>
+
+<hr data-content="정리" />
+
+<p>라이브러리나 실행 파일을 단독으로 배포해야 하는 상황이라면, 의존성 지옥을 피하기 위해 <strong>Shade Plugin</strong> 설정을 고려해 보아야 합니다.</p>
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>

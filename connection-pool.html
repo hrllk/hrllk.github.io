@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Connection Pool: 데이터베이스 접속 비용 최적화</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Connection Pool: 데이터베이스 접속 비용 최적화" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="1. Connection Pool이란?" />
+<meta property="og:description" content="1. Connection Pool이란?" />
+<link rel="canonical" href="https://hrllk.github.io/connection-pool.html" />
+<meta property="og:url" content="https://hrllk.github.io/connection-pool.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2023-01-12T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Connection Pool: 데이터베이스 접속 비용 최적화" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2023-01-12T00:00:00+00:00","datePublished":"2023-01-12T00:00:00+00:00","description":"1. Connection Pool이란?","headline":"Connection Pool: 데이터베이스 접속 비용 최적화","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/connection-pool.html"},"url":"https://hrllk.github.io/connection-pool.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2023-01-12 00:00:00 +0000">2023-01-12</time>
+  </p>
+  
+  <h1>Connection Pool: 데이터베이스 접속 비용 최적화</h1>
+
+  <h2 id="1-connection-pool이란">1. Connection Pool이란?</h2>
+
+<p>데이터베이스에 접근할 때마다 매번 새로운 연결(Connection)을 만드는 것이 아니라, 미리 일정 수의 연결을 생성해 <strong>풀(Pool) 속에 담아두고 재사용</strong>하는 기법을 의미합니다.</p>
+
+<h2 id="2-왜-사용하는가-도입-효과">2. 왜 사용하는가? (도입 효과)</h2>
+
+<ul>
+  <li><strong>비용 절감:</strong> DB 연결을 맺고 끊는 과정은 네트워크 통신과 인증 절차 등으로 인해 생각보다 많은 비용(시간/자원)이 소모됩니다. 미리 만들어진 것을 빌려 쓰면 이 비용을 즉시 절약할 수 있습니다.</li>
+  <li><strong>응답 속도 향상:</strong> 생성 과정이 생략되므로 쿼리를 실행하기까지의 대기 시간이 줄어듭니다.</li>
+  <li><strong>자원 제어:</strong> 무분별한 커넥션 생성을 방지하여 DB 서버가 감당할 수 있는 수준의 부하를 유지합니다.</li>
+</ul>
+
+<h2 id="3-설정-최적화-가이드">3. 설정 최적화 가이드</h2>
+
+<p>커넥션 풀은 무조건 크다고 좋은 것이 아닙니다. 풀이 커지면 메모리 점유율이 늘어나고 유지 관리 비용이 상승합니다.</p>
+
+<p>MySQL의 공식 레퍼런스 가이드에 따르면, 서비스 규모에 따라 다르지만 보통 수백 명의 동시 사용자를 처리하는 데 20~30개 정도의 커넥션 풀로도 충분한 경우가 많습니다. 본인의 애플리케이션 트래픽 규모를 정밀하게 분석하여 적절한 수치를 설정하는 것이 핵심입니다.</p>
+
+<hr data-content="한 줄 요약" />
+
+<p>Connection Pool은 <strong>“매번 새 차를 뽑지 않고 렌터카를 빌려 타는 것”</strong>과 같습니다. 훨씬 경제적이고 빠릅니다.</p>
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>

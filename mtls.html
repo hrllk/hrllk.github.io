@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>mTLS(Mutual TLS): 상호 인증을 통한 철저한 위변조 방지</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="mTLS(Mutual TLS): 상호 인증을 통한 철저한 위변조 방지" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="1. mTLS란?" />
+<meta property="og:description" content="1. mTLS란?" />
+<link rel="canonical" href="https://hrllk.github.io/mtls.html" />
+<meta property="og:url" content="https://hrllk.github.io/mtls.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2025-04-13T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="mTLS(Mutual TLS): 상호 인증을 통한 철저한 위변조 방지" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2025-04-13T00:00:00+00:00","datePublished":"2025-04-13T00:00:00+00:00","description":"1. mTLS란?","headline":"mTLS(Mutual TLS): 상호 인증을 통한 철저한 위변조 방지","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/mtls.html"},"url":"https://hrllk.github.io/mtls.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2025-04-13 00:00:00 +0000">2025-04-13</time>
+  </p>
+  
+  <h1>mTLS(Mutual TLS): 상호 인증을 통한 철저한 위변조 방지</h1>
+
+  <h2 id="1-mtls란">1. mTLS란?</h2>
+
+<p><strong>mTLS (Mutual TLS)</strong>는 기존 TLS(HTTPS) 프로토콜의 확장 버전으로, 서버만 자신을 증명하는 일반적인 방식과 달리 <strong>클라이언트와 서버가 서로의 인증서를 대조하여 상호 인증</strong>하는 방식입니다.</p>
+
+<h2 id="2-동작-원리">2. 동작 원리</h2>
+
+<ol>
+  <li><strong>인증서 교환:</strong> 클라이언트와 서버가 연결 시 각자의 인증서를 상대방에게 보냅니다.</li>
+  <li><strong>상호 검증:</strong> 양쪽 모두 받은 인증서가 신뢰할 수 있는 기관(CA)에서 발급되었는지 확인합니다.</li>
+  <li><strong>채팅 채널 수립:</strong> 상호 신원이 확인된 후에야 비로소 암호화된 통신 채널이 열립니다.</li>
+</ol>
+
+<h2 id="3-주요-이점">3. 주요 이점</h2>
+
+<ul>
+  <li><strong>강력한 보안:</strong> 공격자가 서버를 속이거나 클라이언트를 사칭하는 것을 원천 차단합니다.</li>
+  <li><strong>데이터 무결성:</strong> 전송 중에 데이터가 변조되는 것을 완벽하게 보장합니다.</li>
+  <li><strong>기밀성:</strong> 오직 허가된 당사자들만 데이터를 읽을 수 있도록 보호합니다.</li>
+</ul>
+
+<hr data-content="정리" />
+
+<p>mTLS는 <strong>“나도 너를 믿고, 너도 나를 믿어야만 대화를 시작하겠다”</strong>는 가장 엄격한 통신 약속입니다. 금융권이나 고도의 보안이 필요한 내부 마이크로서비스 간 통신에 주로 사용됩니다.</p>
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Git Adverties Refs Deep Dive</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Git Adverties Refs Deep Dive" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Overview" />
+<meta property="og:description" content="Overview" />
+<link rel="canonical" href="https://hrllk.github.io/git-pull-event-adverties-refs-deep-dive.html" />
+<meta property="og:url" content="https://hrllk.github.io/git-pull-event-adverties-refs-deep-dive.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2025-11-11T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Git Adverties Refs Deep Dive" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2025-11-11T00:00:00+00:00","datePublished":"2025-11-11T00:00:00+00:00","description":"Overview","headline":"Git Adverties Refs Deep Dive","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/git-pull-event-adverties-refs-deep-dive.html"},"url":"https://hrllk.github.io/git-pull-event-adverties-refs-deep-dive.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2025-11-11 00:00:00 +0000">2025-11-11</time>
+  </p>
+  
+  <h1>Git Adverties Refs Deep Dive</h1>
+
+  <h2 id="overview">Overview</h2>
+
+<p>git pull 혹은 git fetch 명령은 단순히 “서버에서 파일을 받기위한 명령이아니라, 형상정보를 제공받기전에, 양쪽 저장소의 그래프(커밋 DAG) 비교가 선행되어야 하며, 해당 단계를 Advertise-Refs라 하며, 해당포스트에서는 이에대한 내용을 설명함.</p>
+
+<h2 id="단계">단계</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>단계</th>
+      <th>역할</th>
+      <th>요청/응답</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>①</td>
+      <td>Client → Server</td>
+      <td><code class="language-plaintext highlighter-rouge">/info/refs?service=git-upload-pack</code> 요청 (GET)</td>
+    </tr>
+    <tr>
+      <td>②</td>
+      <td>Server → Client</td>
+      <td>각 브랜치의 tip SHA(최신 커밋 해시)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="1-클라이언트--서버-inforefs-요청">1. 클라이언트 → 서버: /info/refs 요청</h3>
+
+<h4 id="http-요청-예시">HTTP 요청 예시</h4>
+<div class="language-http highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">GET</span> <span class="nn">/okgit/git/CMPART/repo4.git/info/refs?service=git-upload-pack</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Host</span><span class="p">:</span> <span class="s">localhost:8084</span>
+<span class="na">User-Agent</span><span class="p">:</span> <span class="s">git/2.47.0</span>
+<span class="na">Accept</span><span class="p">:</span> <span class="s">*/*</span>
+</code></pre></div></div>
+
+<h4 id="클라이언트-내부-동작-discovery">클라이언트 내부 동작 (discovery)</h4>
+<ol>
+  <li><code class="language-plaintext highlighter-rouge">git pull</code> 명령 실행 시, 내부적으로 <code class="language-plaintext highlighter-rouge">git fetch</code> 호출</li>
+  <li>클라이언트는 <code class="language-plaintext highlighter-rouge">/info/refs</code> 엔드포인트로 <strong>GET 요청</strong></li>
+</ol>
+
+<h3 id="2-서버--클라이언트-refs-광고-응답">2. 서버 → 클라이언트: refs 광고 응답</h3>
+
+<h2 id="2-서버--클라이언트-refs-광고-응답-1">2. 서버 → 클라이언트: refs 광고 응답</h2>
+
+<h4 id="서버-응답-예시-http-body">서버 응답 예시 (HTTP Body)</h4>
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>001e# service=git-upload-pack
+0000
+5451d6013b97bb6728ec8aa048ea208a9dae923a HEAD\0 include-tag multi_ack_detailed multi_ack ofs-delta side-band side-band-64k thin-pack no-progress agent=JGit/7.3.0 symref=HEAD:refs/heads/main
+19f8d70c656327448e14978578f8864344584011 refs/heads/feature/login
+d7dedb6ca08292dc602c36c2dd95ab0c1373c102 refs/heads/devs
+0000
+</code></pre></div></div>
+
+<h4 id="주요-구성-요소">주요 구성 요소</h4>
+<p>| 항목 | 설명 |
+|——|——|
+| <code class="language-plaintext highlighter-rouge"># service=git-upload-pack</code> | 이 서비스는 <strong>fetch/pull용(upload-pack)</strong> 이라는 선언 |
+| <code class="language-plaintext highlighter-rouge">HEAD</code> | 현재 기본 브랜치(보통 main/master)가 가리키는 커밋 |
+| <code class="language-plaintext highlighter-rouge">refs/heads/*</code> | 각 브랜치 이름 및 tip commit SHA |
+| <code class="language-plaintext highlighter-rouge">\0</code> 이후 문자열 | 서버가 지원하는 <strong>capability 목록</strong> |
+| <code class="language-plaintext highlighter-rouge">0000</code> | flush 패킷 (advertisement 종료) |</p>
+
+<h2 id="서버-동작방식">서버 동작방식</h2>
+
+<ol>
+  <li>클라이언트로부터 요청 수신 후 fetch 서비스 준비</li>
+  <li>저장소의 참조(ref) 목록 조회<br />
+→ 브랜치와 태그 등 주요 참조 대상 확인</li>
+  <li>각 참조가 가리키는 최신 커밋 해시 수집</li>
+  <li>지원 기능(capabilities) 목록 정리</li>
+  <li>패킷 규격에 맞춘 광고 정보 전송</li>
+</ol>
+
+<ul>
+  <li>단계 목적: 클라이언트의 동기화 필요 범위 파악</li>
+  <li>전송 데이터: 참조 이름, tip 해시, 지원 기능 목록</li>
+  <li>비전송 항목: 커밋 본문, 트리, 블롭 등 객체 데이터</li>
+</ul>
+
+<h2 id="advertise-refs-로그">Advertise-Refs 로그</h2>
+<hr />
+
+<h4 id="client-trace">Client TRACE</h4>
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>16:03:05.716606 http.c:872 =&gt; Send header: GET /info/refs?service=git-upload-pack
+16:03:05.799599 pkt-line.c:86 packet: git&lt; # service=git-upload-pack
+16:03:05.799616 pkt-line.c:86 packet: git&lt; 5451d6... HEAD\0 include-tag ...
+16:03:05.799637 pkt-line.c:86 packet: git&lt; 2dd5b7... refs/heads/devs
+16:03:05.799670 pkt-line.c:86 packet: git&lt; 0000
+</code></pre></div></div>
+
+<h4 id="server-trace">Server TRACE</h4>
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[INFO] GET /okgit/git/CMPART/repo4.git/info/refs
+[INFO] AdvertiseRefsHook advertiseRefs! discovery!: client: [::1]
+[INFO] refKey: [refs/heads/devs] = d7dedb6c...
+[INFO] refKey: [refs/heads/main] = 5451d6...
+</code></pre></div></div>
+
+<h2 id="advertise-refs-단계의-핵심-요약">Advertise-Refs 단계의 핵심 요약</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>관점</th>
+      <th>설명</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>클라이언트</strong></td>
+      <td>“서버야, 네가 가진 모든 브랜치의 최신 커밋 해시를 알려줘.”</td>
+    </tr>
+    <tr>
+      <td><strong>서버</strong></td>
+      <td>“내 main은 C, devs는 D, feature는 E야.” (각 tip SHA 광고)</td>
+    </tr>
+    <tr>
+      <td><strong>데이터 전송</strong></td>
+      <td>오직 각 브랜치의 최종 커밋 해시 + capabilities</td>
+    </tr>
+    <tr>
+      <td><strong>이 단계에서 커밋 내용 전송?</strong></td>
+      <td>❌ 전혀 없음</td>
+    </tr>
+    <tr>
+      <td><strong>목적</strong></td>
+      <td>이후 <code class="language-plaintext highlighter-rouge">upload-pack</code> 단계에서 필요한 커밋을 판단하기 위한 <strong>사전 discovery 단계</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- <div align="center"><a href="/2025/09/16/bare-repository/#refs">그러면.. refs 는 어디에서 사용되는가?</a></div> -->
+
+<h2 id="diagram">Diagram</h2>
+
+<pre><code class="language-mermaid">sequenceDiagram
+    autonumber
+    participant Client
+    participant Server
+
+    alt Advertise-Refs
+    Client-&gt;&gt;Server: GET /info/refs?service=git-upload-pack
+    Server--&gt;&gt;Client: Advertise refs&lt;br&gt;(tip commit hashes + capabilities)
+    else
+    end
+    Client-&gt;&gt;Client: Compare local vs remote refs
+        Client-&gt;&gt;Server: (no further request)
+        Client-&gt;&gt;Client: "Already up to date."
+        Client-&gt;&gt;Server: POST /git-upload-pack&lt;br&gt;(wants/haves negotiation)
+</code></pre>
+
+<h2 id="summary">Summary</h2>
+<p><code class="language-plaintext highlighter-rouge">Adverties</code> 단계는 Git 프로토콜의 핵심토대라 할 수 있으며, 해당 요청 한번으로 어떤 브랜치가 존재하고 각 브랜치가 어느커밋을 가르키고있는지 클라이언트가 뭘해야하는지 알려주는 연계에 해당됨</p>
+
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>

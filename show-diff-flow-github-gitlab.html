@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>GitHub vs GitLab Flow: 단순하고 빠른 배포 전략</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="GitHub vs GitLab Flow: 단순하고 빠른 배포 전략" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="1. GitHub Flow: 극단적인 단순함" />
+<meta property="og:description" content="1. GitHub Flow: 극단적인 단순함" />
+<link rel="canonical" href="https://hrllk.github.io/show-diff-flow-github-gitlab.html" />
+<meta property="og:url" content="https://hrllk.github.io/show-diff-flow-github-gitlab.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2023-07-10T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="GitHub vs GitLab Flow: 단순하고 빠른 배포 전략" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2023-07-10T00:00:00+00:00","datePublished":"2023-07-10T00:00:00+00:00","description":"1. GitHub Flow: 극단적인 단순함","headline":"GitHub vs GitLab Flow: 단순하고 빠른 배포 전략","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/show-diff-flow-github-gitlab.html"},"url":"https://hrllk.github.io/show-diff-flow-github-gitlab.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2023-07-10 00:00:00 +0000">2023-07-10</time>
+  </p>
+  
+  <h1>GitHub vs GitLab Flow: 단순하고 빠른 배포 전략</h1>
+
+  <h2 id="1-github-flow-극단적인-단순함">1. GitHub Flow: 극단적인 단순함</h2>
+
+<p>Git Flow가 너무 무겁고 복잡하다고 느껴질 때 사용하는 전략입니다. 지속적인 배포(CD) 환경에 매우 적합합니다.</p>
+
+<ul>
+  <li><strong>브랜치 구조:</strong> <code class="language-plaintext highlighter-rouge">master</code>와 <code class="language-plaintext highlighter-rouge">작업 브랜치</code>로만 구성됩니다.</li>
+  <li><strong>철학:</strong> 모든 작업은 <code class="language-plaintext highlighter-rouge">master</code>에서 시작하고, 작업이 끝난 후 Pull Request(PR)를 통해 리뷰를 거쳐 즉시 <code class="language-plaintext highlighter-rouge">master</code>로 병합 및 배포됩니다.</li>
+  <li><strong>핵심:</strong> <code class="language-plaintext highlighter-rouge">master</code>는 언제나 곧장 배포 가능한 최신 상태를 유지해야 합니다.</li>
+</ul>
+
+<h2 id="2-gitlab-flow-단순함과-안정성의-조화">2. GitLab Flow: 단순함과 안정성의 조화</h2>
+
+<p>GitHub Flow는 너무 단순하여 운영 환경과 개발 환경의 시차를 관리하기 어려울 수 있습니다. 이를 보완한 것이 GitLab Flow입니다.</p>
+
+<ul>
+  <li><strong>Pre-production 브랜치 도입:</strong> <code class="language-plaintext highlighter-rouge">master</code>와 제품 환경(<code class="language-plaintext highlighter-rouge">production</code>) 사이에 <code class="language-plaintext highlighter-rouge">pre-production</code>이라는 검증용 브랜치를 추가합니다.</li>
+  <li><strong>흐름:</strong> <code class="language-plaintext highlighter-rouge">master</code>에 병합된 코드를 먼저 <code class="language-plaintext highlighter-rouge">pre-production</code>에서 충분히 테스트한 뒤, 결정된 시점에 <code class="language-plaintext highlighter-rouge">production</code>으로 병합하여 배포합니다.</li>
+</ul>
+
+<hr data-content="요약" />
+
+<ul>
+  <li><strong>GitHub Flow:</strong> “병합 즉시 배포”가 가능한 환경에 추천합니다.</li>
+  <li><strong>GitLab Flow:</strong> 배포 전 단계별 검증 절차가 필요한 환경에 추천합니다.</li>
+</ul>
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>

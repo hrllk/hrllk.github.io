@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Interface: 협업과 설계를 위한 객체 지향의 '틀'</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Interface: 협업과 설계를 위한 객체 지향의 ‘틀’" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="1. 인터페이스(Interface)의 정의" />
+<meta property="og:description" content="1. 인터페이스(Interface)의 정의" />
+<link rel="canonical" href="https://hrllk.github.io/why-we-use-interface.html" />
+<meta property="og:url" content="https://hrllk.github.io/why-we-use-interface.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-01-23T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Interface: 협업과 설계를 위한 객체 지향의 ‘틀’" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2021-01-23T00:00:00+00:00","datePublished":"2021-01-23T00:00:00+00:00","description":"1. 인터페이스(Interface)의 정의","headline":"Interface: 협업과 설계를 위한 객체 지향의 ‘틀’","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/why-we-use-interface.html"},"url":"https://hrllk.github.io/why-we-use-interface.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2021-01-23 00:00:00 +0000">2021-01-23</time>
+  </p>
+  
+  <h1>Interface: 협업과 설계를 위한 객체 지향의 '틀'</h1>
+
+  <h2 id="1-인터페이스interface의-정의">1. 인터페이스(Interface)의 정의</h2>
+
+<p>인터페이스는 객체의 <strong>설계도</strong>이자, 클래스가 반드시 구현해야 하는 행동의 <strong>틀</strong>입니다. 객체가 무엇을 할 수 있는지 정의하지만, 구체적인 방법(구현)은 다루지 않습니다.</p>
+
+<h2 id="2-왜-사용하는가-협업의-관점">2. 왜 사용하는가? (협업의 관점)</h2>
+
+<p>인터페이스의 가장 큰 목적 중 하나는 <strong>“동시 작업과 혼선 방지”</strong>입니다.</p>
+
+<ul>
+  <li><strong>병렬 개발:</strong> 서비스의 명세(Method Signature)가 인터페이스로 정의되어 있다면, 구현체가 완성되지 않아도 이를 사용하는 쪽에서는 인터페이스를 기반으로 비즈니스 로직을 미리 짤 수 있습니다.</li>
+  <li><strong>의사소통 비용 절감:</strong> 인터페이스는 개발자 간의 약속입니다. 서로 어떤 메서드를 어떤 인자로 호출할지 명확히 규정하므로, 나중에 코드를 합칠 때 발생할 수 있는 수많은 런타임 오류와 리팩토링 수고를 줄여줍니다.</li>
+</ul>
+
+<h2 id="3-요약">3. 요약</h2>
+
+<p>인터페이스 없이 개발하는 것은 설계도 없이 건물을 짓는 것과 같습니다. 인터페이스를 통해 시스템의 뼈대를 튼튼히 하고, 개발자 간의 신뢰할 수 있는 소통 채널을 구축하는 것이 좋은 소프트웨어 설계의 시작입니다.</p>
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>

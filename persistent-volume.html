@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Persistent Volume(PV): 쿠버네티스의 영구 저장소</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Persistent Volume(PV): 쿠버네티스의 영구 저장소" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Persistent Volume(PV)이란?" />
+<meta property="og:description" content="Persistent Volume(PV)이란?" />
+<link rel="canonical" href="https://hrllk.github.io/persistent-volume.html" />
+<meta property="og:url" content="https://hrllk.github.io/persistent-volume.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2023-06-13T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Persistent Volume(PV): 쿠버네티스의 영구 저장소" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2023-06-13T00:00:00+00:00","datePublished":"2023-06-13T00:00:00+00:00","description":"Persistent Volume(PV)이란?","headline":"Persistent Volume(PV): 쿠버네티스의 영구 저장소","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/persistent-volume.html"},"url":"https://hrllk.github.io/persistent-volume.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2023-06-13 00:00:00 +0000">2023-06-13</time>
+  </p>
+  
+  <h1>Persistent Volume(PV): 쿠버네티스의 영구 저장소</h1>
+
+  <h2 id="persistent-volumepv이란">Persistent Volume(PV)이란?</h2>
+
+<p>쿠버네티스(K8s) 환경에서 데이터를 <strong>영구적으로 저장</strong>할 수 있는 물리적인 저장 공간을 추상화한 리소스입니다.</p>
+
+<h2 id="왜-필요한가-도입-배경">왜 필요한가? (도입 배경)</h2>
+
+<p>컨테이너는 기본적으로 <strong>휘발성(Ephemeral)</strong>입니다. 컨테이너 내부에서 생성된 데이터는 기본적으로 메모리나 임시 디스크에 저장되는데, 파드(Pod)가 종료되거나 재시작되면 해당 데이터도 함께 소멸합니다.</p>
+
+<p>데이터베이스의 데이터나 로그 파일처럼 파드의 생명주기와 상관없이 보존되어야 하는 데이터를 위해 <strong>Persistent Volume</strong>을 사용합니다.</p>
+
+<h2 id="주요-특징">주요 특징</h2>
+
+<ol>
+  <li><strong>독립적 관리:</strong> PV는 파드와 독립적으로 클러스터 내에서 생성되고 관리됩니다.</li>
+  <li><strong>바인딩 및 공유:</strong> 여러 파드 간에 데이터를 공유하거나, 특정 파드에만 전송되도록 바인딩할 수 있습니다.</li>
+  <li><strong>외부 스토리지 연결:</strong> 네트워크를 통해 NFS, AWS EBS, Google Persistent Disk 등 다양한 외부 스토리지 시스템과 연결하여 데이터를 읽고 쓸 수 있습니다.</li>
+  <li><strong>데이터 신뢰성:</strong> 자체적인 데이터 복제 및 백업 기능을 지원하는 스토리지와 연동하여 안정성을 높일 수 있습니다.</li>
+</ol>
+
+<hr data-content="한 줄 요약" />
+
+<p>PV는 컨테이너가 사라져도 데이터는 살아남게 해주는 <strong>“쿠버네티스 전용 하드디스크”</strong>입니다.</p>
+
+</article>
+      </div>
+    </main>
+  </body>
+</html>
