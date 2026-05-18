@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Transactional Outbox in Practice: Atomic Persist and Enqueue</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Transactional Outbox in Practice: Atomic Persist and Enqueue" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="TOC Overview Application Service의 책임 Outgoing Port 분리 Outbox Row의 의미 주의할 점 Conclusion Next Step" />
+<meta property="og:description" content="TOC Overview Application Service의 책임 Outgoing Port 분리 Outbox Row의 의미 주의할 점 Conclusion Next Step" />
+<link rel="canonical" href="https://hrllk.github.io/transactional-outbox-in-practice-atomic-persist-and-enqueue.html" />
+<meta property="og:url" content="https://hrllk.github.io/transactional-outbox-in-practice-atomic-persist-and-enqueue.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-04-21T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Transactional Outbox in Practice: Atomic Persist and Enqueue" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2026-04-21T00:00:00+00:00","datePublished":"2026-04-21T00:00:00+00:00","description":"TOC Overview Application Service의 책임 Outgoing Port 분리 Outbox Row의 의미 주의할 점 Conclusion Next Step","headline":"Transactional Outbox in Practice: Atomic Persist and Enqueue","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/transactional-outbox-in-practice-atomic-persist-and-enqueue.html"},"url":"https://hrllk.github.io/transactional-outbox-in-practice-atomic-persist-and-enqueue.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2026-04-21 00:00:00 +0000">2026-04-21</time>
+  </p>
+  
+  <h1>Transactional Outbox in Practice: Atomic Persist and Enqueue</h1>
+
+  <h3 id="toc">TOC</h3>
+<hr />
+<ol>
+  <li><a href="#overview">Overview</a></li>
+  <li><a href="#application-service의-책임">Application Service의 책임</a></li>
+  <li><a href="#outgoing-port-분리">Outgoing Port 분리</a></li>
+  <li><a href="#outbox-row의-의미">Outbox Row의 의미</a></li>
+  <li><a href="#주의할-점">주의할 점</a></li>
+  <li><a href="#conclusion">Conclusion</a></li>
+  <li><a href="#next-step">Next Step</a></li>
+</ol>
+
+<h3 id="overview">Overview</h3>
+<hr />
+<p>이전 글에서는 DB 저장과 MQ 발행을 동시에 성공시키기 어렵다는 문제를 정리했다. 이번 글에서는 그 첫 번째 해법으로 <strong>비즈니스 데이터와 Outbox row를 같은 트랜잭션에 저장하는 구조</strong>를 다룬다.</p>
+
+<p>중요한 점은 application service가 Kafka를 직접 호출하지 않는다는 것이다. 이 계층은 “저장할 데이터”와 “발행할 의도”만 함께 남긴다.</p>
+
+<h3 id="application-service의-책임">Application Service의 책임</h3>
+<hr />
+<p>Producer 측 application service는 요청을 검증하고, 비즈니스 데이터를 여러 테이블에 저장하고, 상세 단위 이벤트를 Outbox에 적재한다.</p>
+
+<p><strong>이 모든 작업은 하나의 <code class="language-plaintext highlighter-rouge">@Transactional</code> 안에서 수행</strong>된다. 따라서 중간에 예외가 발생하면 비즈니스 데이터와 Outbox row가 함께 롤백된다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Service</span>
+<span class="nd">@RequiredArgsConstructor</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">GitLabUserRegistrationService</span> <span class="kd">implements</span> <span class="nc">GitLabUserManagementUseCase</span> <span class="o">{</span>
+
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">GitLabUserRegistrationCommandPort</span> <span class="n">commandPort</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">UserRegistrationEventPublishPort</span> <span class="n">publishPort</span><span class="o">;</span>
+    <span class="c1">// ...</span>
+
+    <span class="nd">@Override</span>
+    <span class="nd">@Transactional</span>
+    <span class="kd">public</span> <span class="nc">GitLabUserRegistrationResult</span> <span class="nf">enqueueBulkUserRegistration</span><span class="o">(</span><span class="nc">GitLabUserRegistrationCommand</span> <span class="n">command</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">validator</span><span class="o">.</span><span class="na">validateNoInProgressRequest</span><span class="o">(</span><span class="n">command</span><span class="o">.</span><span class="na">getToolId</span><span class="o">());</span>
+
+        <span class="c1">// 마스터/상세/사이클/이력 4-테이블 INSERT</span>
+        <span class="nc">GitLabUserRegistrationPersistResult</span> <span class="n">persisted</span> <span class="o">=</span>
+                <span class="n">commandPort</span><span class="o">.</span><span class="na">saveUserRegistrationRequests</span><span class="o">(</span><span class="n">persistenceMapper</span><span class="o">.</span><span class="na">toPersistenceCommand</span><span class="o">(</span><span class="n">command</span><span class="o">));</span>
+
+        <span class="c1">// 상세 단위 이벤트 → Outbox row 적재 (같은 @Transactional 안)</span>
+        <span class="n">publishPort</span><span class="o">.</span><span class="na">publishAll</span><span class="o">(</span><span class="n">eventMapper</span><span class="o">.</span><span class="na">toEvents</span><span class="o">(</span><span class="n">command</span><span class="o">,</span> <span class="n">persisted</span><span class="o">));</span>
+
+        <span class="k">return</span> <span class="k">new</span> <span class="nf">GitLabUserRegistrationResult</span><span class="o">(</span><span class="n">persisted</span><span class="o">.</span><span class="na">getRequestId</span><span class="o">());</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="outgoing-port-분리">Outgoing Port 분리</h3>
+<hr />
+<p>영속 포트와 Outbox 포트는 모두 외부로 나가는 포트지만 책임이 다르다.</p>
+
+<ul>
+  <li>영속 포트는 비즈니스 데이터를 저장한다.</li>
+  <li>Outbox 포트는 Kafka로 보낼 이벤트를 DB row로 저장한다.</li>
+</ul>
+
+<p>이 분리 덕분에 application 계층은 Kafka topic, 직렬화 방식, schema registry 같은 인프라 세부사항을 알 필요가 없다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">GitLabUserRegistrationCommandPort</span> <span class="o">{</span>
+    <span class="c1">// 마스터/상세/사이클/이력 4-테이블 일괄 저장</span>
+    <span class="nc">GitLabUserRegistrationPersistResult</span> <span class="nf">saveUserRegistrationRequests</span><span class="o">(</span><span class="nc">GitLabUserRegistrationPersistenceCommand</span> <span class="n">cmd</span><span class="o">);</span>
+    <span class="c1">// 상태 전이 메서드(markInProgress / markSuccess / markFailure)는 3편 Consumer에서 소개한다</span>
+<span class="o">}</span>
+
+<span class="kd">public</span> <span class="kd">interface</span> <span class="nc">UserRegistrationEventPublishPort</span> <span class="o">{</span>
+    <span class="c1">// 호출자 @Transactional에 참여 — 절대 새 트랜잭션을 시작하지 않는다</span>
+    <span class="kt">void</span> <span class="nf">publishAll</span><span class="o">(</span><span class="nc">List</span><span class="o">&lt;</span><span class="nc">UserRegistrationEvent</span><span class="o">&gt;</span> <span class="n">events</span><span class="o">);</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="outbox-row의-의미">Outbox Row의 의미</h3>
+<hr />
+<p>Outbox row에는 메시징을 위한 정보(topic, message key, payload, 발행 상태)가 저장된다. 이 row는 “이미 발행된 메시지”가 아니라 <strong>나중에 발행해야 할 의도</strong>를 표현한다.</p>
+
+<p>payload는 Kafka로 흘려보낼 메시지 본문을 그대로 직렬화해 둔다. 우리는 Avro 스키마를 그대로 사용해 producer 시점에 한 번 직렬화하고, 폴러는 별도 변환 없이 그 byte를 그대로 전송한다. 트랜잭션 안에서는 schema registry 같은 외부 의존을 호출하지 않는 것이 안전하다.</p>
+
+<h3 id="주의할-점">주의할 점</h3>
+<hr />
+<p>Outbox adapter가 <strong>별도 트랜잭션을 새로 시작하면 원자성이 깨질 수 있다</strong>. producer의 트랜잭션에 참여하도록 두는 것이 핵심이다.</p>
+
+<p>검증은 단순하다. 저장 직후 예외를 강제로 발생시켰을 때 비즈니스 데이터와 Outbox row가 모두 남지 않아야 한다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Component</span>
+<span class="nd">@RequiredArgsConstructor</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">UserRegistrationEventPublishAdapter</span> <span class="kd">implements</span> <span class="nc">UserRegistrationEventPublishPort</span> <span class="o">{</span>
+
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">EventPublisher</span> <span class="n">eventPublisher</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">UserRegistrationEventAvroMapper</span> <span class="n">avroMapper</span><span class="o">;</span>
+
+    <span class="nd">@Override</span>
+    <span class="c1">// @Transactional 없음 — 호출자(Service)의 트랜잭션에 참여한다</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">publishAll</span><span class="o">(</span><span class="nc">List</span><span class="o">&lt;</span><span class="nc">UserRegistrationEvent</span><span class="o">&gt;</span> <span class="n">events</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">for</span> <span class="o">(</span><span class="nc">UserRegistrationEvent</span> <span class="n">event</span> <span class="o">:</span> <span class="n">events</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">eventPublisher</span><span class="o">.</span><span class="na">publish</span><span class="o">(</span>
+                    <span class="n">event</span><span class="o">.</span><span class="na">getUserRegDmndDtlId</span><span class="o">(),</span>               <span class="c1">// Kafka key = 상세 ID</span>
+                    <span class="n">avroMapper</span><span class="o">.</span><span class="na">toAvro</span><span class="o">(</span><span class="n">event</span><span class="o">),</span>
+                    <span class="nc">Topics</span><span class="o">.</span><span class="na">GITLAB_USER_REG_COMMAND</span><span class="o">.</span><span class="na">getValue</span><span class="o">());</span>
+            <span class="c1">// EventPublisher 내부에서 entityManager.persist(OutboxEventEntity) 수행</span>
+            <span class="c1">// → 비즈니스 INSERT와 같은 커밋 단위</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="conclusion">Conclusion</h3>
+<hr />
+<p>이 단계에서 보장되는 것은 <strong>저장과 발행 의도의 원자성</strong>이다. Kafka에 아직 메시지가 도달한 것은 아니지만, 적어도 “저장은 됐는데 발행 의도는 사라지는” 상태는 막을 수 있다.</p>
+
+<h3 id="next-step">Next Step</h3>
+<hr />
+<p>다음 포스트에서는 <strong><a href="/transactional-outbox-in-practice-thin-poller-and-at-least-once.html">Thin Poller and At-least-once</a></strong>를 다룬다. DB에 남겨둔 발행 의도를 실제 Kafka 메시지로 흘려보내는 얇은 폴러의 역할을 정리한다.</p>
+
+</article>
+      </div>
+    </main>
+    <script type="module" src="/assets/js/mermaid-init.js"></script>
+  </body>
+</html>

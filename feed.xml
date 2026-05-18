@@ -1,0 +1,1212 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.10.0">Jekyll</generator><link href="https://hrllk.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hrllk.github.io/" rel="alternate" type="text/html" /><updated>2026-05-18T09:04:49+00:00</updated><id>https://hrllk.github.io/feed.xml</id><title type="html">knowledge.log</title><subtitle>knowledge.log
+</subtitle><author><name>HwiRyung Kim</name></author><entry><title type="html">Transactional Outbox in Practice: Operating in Production</title><link href="https://hrllk.github.io/transactional-outbox-in-practice-operating-in-production.html" rel="alternate" type="text/html" title="Transactional Outbox in Practice: Operating in Production" /><published>2026-04-27T00:00:00+00:00</published><updated>2026-04-27T00:00:00+00:00</updated><id>https://hrllk.github.io/transactional-outbox-in-practice-operating-in-production</id><content type="html" xml:base="https://hrllk.github.io/transactional-outbox-in-practice-operating-in-production.html"><![CDATA[<h3 id="toc">TOC</h3>
+<hr />
+<ol>
+  <li><a href="#overview">Overview</a></li>
+  <li><a href="#멀티-인스턴스와-중복-발행">멀티 인스턴스와 중복 발행</a></li>
+  <li><a href="#운영-설정-예시">운영 설정 예시</a></li>
+  <li><a href="#관측-지점">관측 지점</a></li>
+  <li><a href="#dlt-정책">DLT 정책</a></li>
+  <li><a href="#conclusion">Conclusion</a></li>
+</ol>
+
+<h3 id="overview">Overview</h3>
+<hr />
+<p>앞선 글들에서 producer, poller, consumer의 기본 책임을 나눴다. 운영 환경에서는 여기에 멀티 인스턴스, 오래 쌓인 row, 컨슈머 실패 같은 현실 문제가 더해진다.</p>
+
+<p>이번 글은 Outbox를 운영할 때 반드시 정해야 하는 몇 가지 기준을 짧게 정리한다.</p>
+
+<h3 id="멀티-인스턴스와-중복-발행">멀티 인스턴스와 중복 발행</h3>
+<hr />
+<p>애플리케이션 인스턴스가 다중화되면 각 인스턴스의 폴러가 같은 PENDING row를 동시에 읽을 수 있다.</p>
+
+<p>우리는 폴 쿼리에 <code class="language-plaintext highlighter-rouge">SELECT ... FOR UPDATE SKIP LOCKED</code>를 기본으로 둬 경합을 방지한다. 그래도 PROCESSING 도중 인스턴스가 죽는 시나리오는 남기 때문에, 발행 중복 자체를 0으로 만들기보다 멱등 컨슈머가 흡수하는 모델을 유지한다.</p>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- Outbox 폴러가 PENDING row를 클레임하는 쿼리 패턴</span>
+<span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">TB_TRB_OX_001</span>
+ <span class="k">WHERE</span> <span class="n">STATUS</span> <span class="o">=</span> <span class="s1">'PENDING'</span>
+ <span class="k">ORDER</span> <span class="k">BY</span> <span class="n">CREATED_AT</span>
+ <span class="k">LIMIT</span> <span class="mi">50</span>
+   <span class="k">FOR</span> <span class="k">UPDATE</span> <span class="n">SKIP</span> <span class="n">LOCKED</span><span class="p">;</span>
+<span class="c1">-- SKIP LOCKED: 다른 인스턴스가 이미 잠근 row는 자동으로 건너뜀</span>
+</code></pre></div></div>
+
+<h3 id="운영-설정-예시">운영 설정 예시</h3>
+<hr />
+<p>message-lib이 제공하는 주요 설정값을 정리한다. 폴러 동작 튜닝과 SENT row 보관 정책이 핵심이다.</p>
+
+<p>SENT row를 무한히 보관하면 폴링 쿼리와 테이블 관리 비용이 커진다. PENDING/PROCESSING/DEAD row는 정리 대상에서 제외하는 것이 원칙이다. 발행되지 않은 row는 아직 시스템이 처리해야 할 의도이고, DEAD는 운영자가 들여다봐야 할 신호이기 때문이다.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">outbox</span><span class="pi">:</span>
+  <span class="c1"># 폴러 동작</span>
+  <span class="na">poll-interval-ms</span><span class="pi">:</span> <span class="m">500</span>         <span class="c1"># 발행 latency 상한 (ms)</span>
+  <span class="na">batch-size</span><span class="pi">:</span> <span class="m">50</span>                <span class="c1"># 한 폴 사이클에 처리할 최대 PENDING row 수</span>
+  <span class="na">max-retries</span><span class="pi">:</span> <span class="m">3</span>                <span class="c1"># 재시도 초과 시 DEAD 전환</span>
+
+  <span class="c1"># Row 보관</span>
+  <span class="na">cleanup-retention-days</span><span class="pi">:</span> <span class="m">30</span>    <span class="c1"># SENT row 보관 기간 (이후 삭제)</span>
+  <span class="na">cleanup-cron</span><span class="pi">:</span> <span class="s2">"</span><span class="s">0</span><span class="nv"> </span><span class="s">0</span><span class="nv"> </span><span class="s">3</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*"</span>   <span class="c1"># 매일 새벽 3시 실행</span>
+  <span class="c1"># PENDING / PROCESSING / DEAD 는 정리 대상에서 제외</span>
+</code></pre></div></div>
+
+<h3 id="관측-지점">관측 지점</h3>
+<hr />
+<p>Outbox가 정상 동작하는지는 코드만으로는 알 수 없다. 발행 파이프라인이 살아 있는지는 메트릭으로 확인해야 한다.</p>
+
+<p>이 시리즈에서 Outbox 폴러·발행을 담당하는 공용 SDK인 <code class="language-plaintext highlighter-rouge">message-lib</code>은 폴링·재시도·DEAD 전환을 내부에서 처리하며, 4개 메트릭을 기본으로 노출한다.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>메트릭</th>
+      <th>타입</th>
+      <th>의미</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">outbox.events.published</code></td>
+      <td>Counter</td>
+      <td>Kafka 발행 성공 횟수</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">outbox.events.failed</code></td>
+      <td>Counter</td>
+      <td>Kafka 발행 실패 횟수</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">outbox.events.dead</code></td>
+      <td>Counter</td>
+      <td>DEAD 상태 전환 횟수</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">outbox.queue.pending</code></td>
+      <td>Gauge</td>
+      <td>현재 미발행 PENDING row 수</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>운영에서 먼저 봐야 하는 두 값은 <code class="language-plaintext highlighter-rouge">outbox.queue.pending</code>과 <code class="language-plaintext highlighter-rouge">outbox.events.dead</code>다. <code class="language-plaintext highlighter-rouge">pending</code>이 늘어나면 폴러가 처리 속도를 따라가지 못하거나 멈췄다는 신호다. <code class="language-plaintext highlighter-rouge">dead</code>가 발생하면 Consumer가 끝내 처리하지 못한 메시지가 있다는 뜻이며, 이는 다음 섹션의 DLT 정책과 직접 연결된다.</p>
+
+<h3 id="dlt-정책">DLT 정책</h3>
+<hr />
+<p>재시도를 모두 소진한 메시지가 DLT에 도착했을 때의 정책도 미리 정해야 한다.</p>
+
+<p>대부분의 경우 상세 상태를 <code class="language-plaintext highlighter-rouge">FAIL</code>로 마감하고 운영자 알림을 보내는 방식이 적합하다. 로깅만 하고 상태를 남겨두면 사용자 입장에서는 작업이 영원히 진행 중인 것처럼 보일 수 있다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@DltHandler</span>
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">onDlt</span><span class="o">(</span><span class="nc">ConsumerRecord</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">UserRegistrationEventAvro</span><span class="o">&gt;</span> <span class="n">record</span><span class="o">)</span> <span class="o">{</span>
+    <span class="nc">UserRegistrationEventAvro</span> <span class="n">event</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="na">value</span><span class="o">();</span>
+    <span class="nc">String</span> <span class="n">dtlId</span> <span class="o">=</span> <span class="n">event</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">?</span> <span class="n">event</span><span class="o">.</span><span class="na">getUserRegDmndDtlId</span><span class="o">().</span><span class="na">toString</span><span class="o">()</span> <span class="o">:</span> <span class="s">"&lt;unknown&gt;"</span><span class="o">;</span>
+    <span class="n">log</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="s">"[UserRegistration] DLT received: dtlId={}"</span><span class="o">,</span> <span class="n">dtlId</span><span class="o">);</span>
+
+    <span class="c1">// ① 상세 상태를 FAIL로 마감 — 사용자에게 "처리 실패"로 노출</span>
+    <span class="n">consumeUseCase</span><span class="o">.</span><span class="na">markAsDeadLetter</span><span class="o">(</span><span class="n">dtlId</span><span class="o">,</span> <span class="s">"max retries exhausted"</span><span class="o">);</span>
+
+    <span class="c1">// ② 운영자 알림 (Slack / Email 등) — 알림 채널은 팀 인프라에 맞게 연결</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="conclusion">Conclusion</h3>
+<hr />
+<p>Transactional Outbox는 exactly-once를 공짜로 주는 패턴이 아니다. 분산 트랜잭션의 부담을 <strong>발행 재시도, 멱등 소비, 운영 관측</strong>이라는 더 다루기 쉬운 책임으로 나누는 패턴이다.</p>
+
+<p>이 시리즈의 결론은 단순하다. 저장과 발행 의도를 원자적으로 묶고, 발행은 at-least-once로 받아들이며, 컨슈머와 운영 도구가 중복과 누락을 흡수하게 만든다.</p>]]></content><author><name>HwiRyung Kim</name></author><category term="design" /><summary type="html"><![CDATA[TOC Overview 멀티 인스턴스와 중복 발행 운영 설정 예시 관측 지점 DLT 정책 Conclusion]]></summary></entry><entry><title type="html">Transactional Outbox in Practice: Idempotent Consumer</title><link href="https://hrllk.github.io/transactional-outbox-in-practice-idempotent-consumer.html" rel="alternate" type="text/html" title="Transactional Outbox in Practice: Idempotent Consumer" /><published>2026-04-25T00:00:00+00:00</published><updated>2026-04-25T00:00:00+00:00</updated><id>https://hrllk.github.io/transactional-outbox-in-practice-idempotent-consumer</id><content type="html" xml:base="https://hrllk.github.io/transactional-outbox-in-practice-idempotent-consumer.html"><![CDATA[<h3 id="toc">TOC</h3>
+<hr />
+<ol>
+  <li><a href="#overview">Overview</a></li>
+  <li><a href="#consumer의-위치">Consumer의 위치</a></li>
+  <li><a href="#멱등-상태-머신">멱등 상태 머신</a></li>
+  <li><a href="#race-condition-대응">Race Condition 대응</a></li>
+  <li><a href="#외부-api와-상태-전이-분리">외부 API와 상태 전이 분리</a></li>
+  <li><a href="#conclusion">Conclusion</a></li>
+  <li><a href="#next-step">Next Step</a></li>
+</ol>
+
+<h3 id="overview">Overview</h3>
+<hr />
+<p>이전 글에서 Outbox 발행은 at-least-once라고 정리했다. 즉, 같은 메시지가 두 번 도착할 수 있고 컨슈머는 이를 정상 상황으로 받아들여야 한다.</p>
+
+<p>이번 글에서는 중복 메시지가 와도 비즈니스 상태가 흔들리지 않도록 만드는 <strong>멱등 컨슈머</strong>의 기준을 정리한다.</p>
+
+<h3 id="consumer의-위치">Consumer의 위치</h3>
+<hr />
+<p>Kafka consumer는 외부 시스템에서 들어오는 입력을 application use case로 전달하는 inbound adapter다 — 외부 메시지를 내부 유스케이스 호출로 변환하는 역할.</p>
+
+<p>메시지를 역직렬화하고 use case를 호출하되, 상태 전이와 정합성 판단은 application/domain 쪽에 둔다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Component</span>
+<span class="nd">@RequiredArgsConstructor</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">GitLabUserRegistrationConsumer</span> <span class="o">{</span>
+
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">GitLabUserRegistrationConsumeUseCase</span> <span class="n">consumeUseCase</span><span class="o">;</span>
+
+    <span class="nd">@RetryableTopic</span><span class="o">(</span><span class="n">attempts</span> <span class="o">=</span> <span class="s">"3"</span><span class="o">,</span> <span class="n">backoff</span> <span class="o">=</span> <span class="nd">@Backoff</span><span class="o">(</span><span class="n">delay</span> <span class="o">=</span> <span class="mi">1000</span><span class="o">,</span> <span class="n">multiplier</span> <span class="o">=</span> <span class="mf">2.0</span><span class="o">))</span>
+    <span class="nd">@KafkaListener</span><span class="o">(</span><span class="n">topics</span> <span class="o">=</span> <span class="s">"#{T(Topics).GITLAB_USER_REG_COMMAND.getValue()}"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onMessage</span><span class="o">(</span><span class="nd">@Payload</span> <span class="nc">UserRegistrationEventAvro</span> <span class="n">event</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">consumeUseCase</span><span class="o">.</span><span class="na">processRegistrationEvent</span><span class="o">(</span><span class="n">event</span><span class="o">);</span>   <span class="c1">// 상태 전이 책임은 UseCase에</span>
+    <span class="o">}</span>
+
+    <span class="nd">@DltHandler</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onDlt</span><span class="o">(</span><span class="nc">ConsumerRecord</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">UserRegistrationEventAvro</span><span class="o">&gt;</span> <span class="n">record</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">String</span> <span class="n">dtlId</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="na">value</span><span class="o">().</span><span class="na">getUserRegDmndDtlId</span><span class="o">().</span><span class="na">toString</span><span class="o">();</span>
+        <span class="n">consumeUseCase</span><span class="o">.</span><span class="na">markAsDeadLetter</span><span class="o">(</span><span class="n">dtlId</span><span class="o">,</span> <span class="s">"max retries exhausted"</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="멱등-상태-머신">멱등 상태 머신</h3>
+<hr />
+<p>상세 처리 상태를 <code class="language-plaintext highlighter-rouge">WAIT → EXCN → SCS/FAIL</code>처럼 명확한 상태 머신으로 둔다.</p>
+
+<p>핵심 규칙은 단순하다. <code class="language-plaintext highlighter-rouge">SCS</code>와 <code class="language-plaintext highlighter-rouge">FAIL</code>은 종결 상태이며, 종결된 row는 같은 메시지가 다시 와도 더 이상 상태를 바꾸지 않는다. 상태 전이 메서드(<code class="language-plaintext highlighter-rouge">markInProgress</code>, <code class="language-plaintext highlighter-rouge">markSuccess</code>, <code class="language-plaintext highlighter-rouge">markFailure</code>)는 모두 종결 상태에서 들어온 호출을 silent skip하도록 짠다. 컨슈머 진입 직후 <code class="language-plaintext highlighter-rouge">isTerminated</code> early skip까지 더하면 같은 메시지의 재처리는 자연스럽게 흡수된다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 상세 처리 상태 enum</span>
+<span class="kd">public</span> <span class="kd">enum</span> <span class="nc">GitLabUserRegistrationDetailStatus</span> <span class="o">{</span>
+    <span class="no">WAIT</span><span class="o">,</span> <span class="no">EXCN</span><span class="o">,</span> <span class="no">SCS</span><span class="o">,</span> <span class="no">FAIL</span><span class="o">;</span>
+
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">isTerminated</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="k">this</span> <span class="o">==</span> <span class="no">SCS</span> <span class="o">||</span> <span class="k">this</span> <span class="o">==</span> <span class="no">FAIL</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="c1">// 엔티티 도메인 메서드 — 종결 상태에서 재전이는 silent skip</span>
+<span class="kd">public</span> <span class="nc">GitLabUserRegistrationDetailStatus</span> <span class="nf">current</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="nc">GitLabUserRegistrationDetailStatus</span><span class="o">.</span><span class="na">from</span><span class="o">(</span><span class="k">this</span><span class="o">.</span><span class="na">prgrsSttsCd</span><span class="o">);</span>
+<span class="o">}</span>
+
+<span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">isTerminated</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="nf">current</span><span class="o">().</span><span class="na">isTerminated</span><span class="o">();</span>
+<span class="o">}</span>
+
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">markInProgress</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">isTerminated</span><span class="o">()</span> <span class="o">||</span> <span class="n">current</span><span class="o">()</span> <span class="o">==</span> <span class="no">EXCN</span><span class="o">)</span> <span class="k">return</span><span class="o">;</span>
+    <span class="k">this</span><span class="o">.</span><span class="na">prgrsSttsCd</span> <span class="o">=</span> <span class="no">EXCN</span><span class="o">.</span><span class="na">getCode</span><span class="o">();</span>
+    <span class="k">this</span><span class="o">.</span><span class="na">rsn</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+<span class="o">}</span>
+
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">markSuccess</span><span class="o">(</span><span class="nc">String</span> <span class="n">msg</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">isTerminated</span><span class="o">())</span> <span class="k">return</span><span class="o">;</span>
+    <span class="k">this</span><span class="o">.</span><span class="na">prgrsSttsCd</span> <span class="o">=</span> <span class="no">SCS</span><span class="o">.</span><span class="na">getCode</span><span class="o">();</span>
+    <span class="k">this</span><span class="o">.</span><span class="na">rsn</span> <span class="o">=</span> <span class="n">msg</span><span class="o">;</span>
+<span class="o">}</span>
+
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">markFailure</span><span class="o">(</span><span class="nc">String</span> <span class="n">msg</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">isTerminated</span><span class="o">())</span> <span class="k">return</span><span class="o">;</span>
+    <span class="k">this</span><span class="o">.</span><span class="na">prgrsSttsCd</span> <span class="o">=</span> <span class="no">FAIL</span><span class="o">.</span><span class="na">getCode</span><span class="o">();</span>
+    <span class="k">this</span><span class="o">.</span><span class="na">rsn</span> <span class="o">=</span> <span class="n">msg</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="race-condition-대응">Race Condition 대응</h3>
+<hr />
+<p>중복 메시지가 거의 동시에 도착할 수 있는데, 우리는 <code class="language-plaintext highlighter-rouge">@Version</code> 같은 낙관락을 따로 두지 않는다. 운영 중인 테이블에 컬럼을 추가하는 DDL ALTER 비용을 피하고, 대신 다음 세 가지로 race를 흡수한다.</p>
+
+<ol>
+  <li>Kafka 파티션 정합성 — 메시지 key를 상세 ID로 고정하면 같은 상세는 항상 같은 파티션, 같은 컨슈머 스레드에서 직렬로 처리된다.</li>
+  <li>컨슈머 진입 시 <code class="language-plaintext highlighter-rouge">isTerminated</code> early skip — 종결된 건은 비즈니스 로직 자체에 들어가지 않는다.</li>
+  <li>멱등한 상태 전이 메서드 — 들어왔다 하더라도 종결 상태에서는 no-op.</li>
+</ol>
+
+<p>다중 인스턴스 리밸런싱 도중 짧게 겹치는 시나리오는 위 3중 가드로 흡수된다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Override</span>
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">processRegistrationEvent</span><span class="o">(</span><span class="nc">UserRegistrationEventAvro</span> <span class="n">event</span><span class="o">)</span> <span class="o">{</span>
+    <span class="nc">GitLabUserRegistrationDetailId</span> <span class="n">id</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">GitLabUserRegistrationDetailId</span><span class="o">(</span>
+            <span class="n">event</span><span class="o">.</span><span class="na">getUserRegDmndId</span><span class="o">().</span><span class="na">toString</span><span class="o">(),</span>
+            <span class="n">event</span><span class="o">.</span><span class="na">getUserRegDmndDtlId</span><span class="o">().</span><span class="na">toString</span><span class="o">());</span>
+
+    <span class="c1">// ① 멱등 가드 — 이미 종결된 건은 여기서 끊는다</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">queryPort</span><span class="o">.</span><span class="na">isTerminated</span><span class="o">(</span><span class="n">id</span><span class="o">))</span> <span class="o">{</span>
+        <span class="k">return</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="c1">// ② EXCN 으로 전이 (REQUIRES_NEW — 짧은 트랜잭션)</span>
+    <span class="n">commandPort</span><span class="o">.</span><span class="na">markInProgress</span><span class="o">(</span><span class="n">id</span><span class="o">);</span>
+
+    <span class="k">try</span> <span class="o">{</span>
+        <span class="c1">// ③ 외부 API 호출 (트랜잭션 밖)</span>
+        <span class="n">provisionPort</span><span class="o">.</span><span class="na">registerUser</span><span class="o">(</span><span class="n">event</span><span class="o">.</span><span class="na">getToolId</span><span class="o">().</span><span class="na">toString</span><span class="o">(),</span> <span class="n">event</span><span class="o">.</span><span class="na">getTargetUserId</span><span class="o">().</span><span class="na">toString</span><span class="o">());</span>
+        <span class="n">commandPort</span><span class="o">.</span><span class="na">markSuccess</span><span class="o">(</span><span class="n">id</span><span class="o">,</span> <span class="s">"정상 등록 완료"</span><span class="o">);</span>    <span class="c1">// REQUIRES_NEW</span>
+    <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">commandPort</span><span class="o">.</span><span class="na">markFailure</span><span class="o">(</span><span class="n">id</span><span class="o">,</span> <span class="n">e</span><span class="o">.</span><span class="na">getMessage</span><span class="o">());</span>      <span class="c1">// REQUIRES_NEW</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="외부-api와-상태-전이-분리">외부 API와 상태 전이 분리</h3>
+<hr />
+<p>외부 API 호출이 오래 걸리는 동안 DB 트랜잭션을 붙잡고 있으면 진행 상태가 보이지 않고 락 유지 시간도 길어진다.</p>
+
+<p><code class="language-plaintext highlighter-rouge">markInProgress</code>, <code class="language-plaintext highlighter-rouge">markSuccess</code>, <code class="language-plaintext highlighter-rouge">markFailure</code> 같은 상태 전이는 짧은 트랜잭션으로 분리하는 편이 운영상 유리하다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 영속 어댑터 — 상태 전이마다 REQUIRES_NEW로 별도 커밋</span>
+<span class="nd">@Override</span>
+<span class="nd">@Transactional</span><span class="o">(</span><span class="n">propagation</span> <span class="o">=</span> <span class="nc">Propagation</span><span class="o">.</span><span class="na">REQUIRES_NEW</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">markInProgress</span><span class="o">(</span><span class="nc">GitLabUserRegistrationDetailId</span> <span class="n">id</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">loadDetail</span><span class="o">(</span><span class="n">id</span><span class="o">).</span><span class="na">markInProgress</span><span class="o">();</span>         <span class="c1">// findById → 도메인 메서드 → dirty checking flush</span>
+    <span class="n">refreshMasterStatus</span><span class="o">(</span><span class="n">id</span><span class="o">.</span><span class="na">getUserRegDmndId</span><span class="o">());</span>
+<span class="o">}</span>
+
+<span class="nd">@Override</span>
+<span class="nd">@Transactional</span><span class="o">(</span><span class="n">propagation</span> <span class="o">=</span> <span class="nc">Propagation</span><span class="o">.</span><span class="na">REQUIRES_NEW</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">markSuccess</span><span class="o">(</span><span class="nc">GitLabUserRegistrationDetailId</span> <span class="n">id</span><span class="o">,</span> <span class="nc">String</span> <span class="n">msg</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">loadDetail</span><span class="o">(</span><span class="n">id</span><span class="o">).</span><span class="na">markSuccess</span><span class="o">(</span><span class="n">msg</span><span class="o">);</span>
+    <span class="n">refreshMasterStatus</span><span class="o">(</span><span class="n">id</span><span class="o">.</span><span class="na">getUserRegDmndId</span><span class="o">());</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="conclusion">Conclusion</h3>
+<hr />
+<p>멱등 컨슈머의 목적은 중복을 막는 것이 아니라 <strong>중복이 와도 결과가 같게 만드는 것</strong>이다. 이 원칙이 있어야 Outbox의 at-least-once 발행을 현실적인 설계로 받아들일 수 있다.</p>
+
+<h3 id="next-step">Next Step</h3>
+<hr />
+<p>다음 포스트에서는 <strong><a href="/transactional-outbox-in-practice-operating-in-production.html">Operating in Production</a></strong>을 다룬다. 멀티 인스턴스, row retention, DLT 같은 운영 이슈를 정리한다.</p>]]></content><author><name>HwiRyung Kim</name></author><category term="design" /><summary type="html"><![CDATA[TOC Overview Consumer의 위치 멱등 상태 머신 Race Condition 대응 외부 API와 상태 전이 분리 Conclusion Next Step]]></summary></entry><entry><title type="html">Transactional Outbox in Practice: Thin Poller and At-least-once</title><link href="https://hrllk.github.io/transactional-outbox-in-practice-thin-poller-and-at-least-once.html" rel="alternate" type="text/html" title="Transactional Outbox in Practice: Thin Poller and At-least-once" /><published>2026-04-23T00:00:00+00:00</published><updated>2026-04-23T00:00:00+00:00</updated><id>https://hrllk.github.io/transactional-outbox-in-practice-thin-poller-and-at-least-once</id><content type="html" xml:base="https://hrllk.github.io/transactional-outbox-in-practice-thin-poller-and-at-least-once.html"><![CDATA[<h3 id="toc">TOC</h3>
+<hr />
+<ol>
+  <li><a href="#overview">Overview</a></li>
+  <li><a href="#thin-poller의-역할">Thin Poller의 역할</a></li>
+  <li><a href="#발행과-마킹의-순서">발행과 마킹의 순서</a></li>
+  <li><a href="#at-least-once-수용">At-least-once 수용</a></li>
+  <li><a href="#운영-관점">운영 관점</a></li>
+  <li><a href="#conclusion">Conclusion</a></li>
+  <li><a href="#next-step">Next Step</a></li>
+</ol>
+
+<h3 id="overview">Overview</h3>
+<hr />
+<p>이전 글에서 비즈니스 데이터와 발행 의도를 Outbox table에 안전하게 저장했다. 이제 남은 일은 그 row를 Kafka로 보내고, 성공한 row를 발행 완료로 표시하는 것이다.</p>
+
+<p>이번 글의 핵심은 폴러를 얇게 유지하는 것이다. 폴러는 비즈니스 로직을 처리하지 않고, <strong>미발행 row를 가져와 발행하고 마킹하는 일</strong>만 맡는다.</p>
+
+<h3 id="thin-poller의-역할">Thin Poller의 역할</h3>
+<hr />
+<p>폴러가 외부 API 호출, 상태 전이, 실패 분류까지 떠안으면 거대한 배치 잡이 된다.</p>
+
+<p>Outbox 폴러는 인프라성 컴포넌트로 두고, 실제 비즈니스 처리는 Kafka 컨슈머에게 넘긴다. 그래야 발행 실패와 소비 실패를 서로 다른 지점에서 관측하고 재시도할 수 있다.</p>
+
+<h3 id="발행과-마킹의-순서">발행과 마킹의 순서</h3>
+<hr />
+<p>폴러는 row를 <code class="language-plaintext highlighter-rouge">PENDING</code>에서 <code class="language-plaintext highlighter-rouge">PROCESSING</code>으로 클레임한 뒤 Kafka send를 시도하고, send가 성공한 시점에 <code class="language-plaintext highlighter-rouge">SENT</code>로 전환한다. 실패하면 재시도 카운트를 올리거나 일정 횟수를 넘기면 <code class="language-plaintext highlighter-rouge">DEAD</code>로 분리한다. send를 먼저 했다고 가정하고 row를 미리 <code class="language-plaintext highlighter-rouge">SENT</code>로 바꾸면, send 실패 시 row가 이미 발행된 것처럼 보이기 때문이다.</p>
+
+<p>하지만 send 성공 직후 <code class="language-plaintext highlighter-rouge">SENT</code> 전환 직전에 애플리케이션이 죽으면 같은 <code class="language-plaintext highlighter-rouge">PROCESSING</code> row가 다음 폴링에서 다시 발행될 수 있다. 이것이 Outbox가 기본적으로 <strong>at-least-once</strong>인 이유다.</p>
+
+<details>
+<summary><strong>at-least-once 전달 보장이란?</strong></summary>
+<br />
+
+메시지 전달 보장에는 세 가지 수준이 있다.
+
+| 보장 수준 | 의미 | 중복 가능 | 유실 가능 |
+|---|---|---|---|
+| **at-most-once** | 최대 한 번 | 없음 | 있음 |
+| **at-least-once** | 최소 한 번 | 있음 | 없음 |
+| **exactly-once** | 정확히 한 번 | 없음 | 없음 |
+
+Outbox 폴러가 at-least-once인 이유는 **`PROCESSING` → `SENT` 전환 사이에 윈도우**가 있기 때문이다.
+
+```
+① PENDING → PROCESSING  (클레임)
+② Kafka send 성공
+③ ← 이 순간 애플리케이션이 죽으면 row는 여전히 PROCESSING
+④ 재시작된 폴러가 같은 row를 다시 발행
+```
+
+유실 없는 도달을 보장하는 대신, 중복 도달 가능성을 수용한다. exactly-once를 구현하려면 분산 트랜잭션(2PC) 같은 훨씬 무거운 프로토콜이 필요해지며, 그 비용이 실익보다 크다. 이 시리즈는 **중복을 Consumer가 흡수하는 설계**로 at-least-once를 실용적으로 처리한다.
+
+</details>
+
+<h3 id="at-least-once-수용">At-least-once 수용</h3>
+<hr />
+<p>이 시리즈에서는 그 비용을 치르지 않고, 중복을 컨슈머가 흡수하는 방향을 선택한다.</p>
+
+<p>따라서 message key는 같은 대상이 같은 파티션으로 가도록 신중히 잡아야 한다. 예를 들어 상세 ID를 key로 쓰면 같은 상세에 대한 중복 메시지는 같은 순서 안에서 처리될 가능성이 높아진다. 같은 파티션에서 직렬로 도착해야 멱등 가드가 제대로 작동하는 이유는 3편 Race Condition 대응에서 자세히 다룬다.</p>
+
+<h3 id="운영-관점">운영 관점</h3>
+<hr />
+<p>폴 주기는 latency와 DB 부하 사이의 trade-off다. 짧게 잡으면 발행 지연은 줄지만 빈 SELECT가 늘고, 길게 잡으면 DB 부담은 줄지만 메시지 도착이 늦어진다.</p>
+
+<p>운영에서는 미발행 row 수와 발행 지연 시간을 함께 봐야 한다. 이 두 값이 Outbox 폴러의 건강 상태를 가장 직접적으로 보여준다.</p>
+
+<h3 id="conclusion">Conclusion</h3>
+<hr />
+<p>이 단계에서 보장되는 것은 발행 책임의 분리다. 저장은 producer가, 발행은 폴러가, 중복 처리는 consumer가 맡는다.</p>
+
+<h3 id="next-step">Next Step</h3>
+<hr />
+<p>다음 포스트에서는 <strong><a href="/transactional-outbox-in-practice-idempotent-consumer.html">Idempotent Consumer</a></strong>를 다룬다. at-least-once로 도착한 메시지를 어떻게 안전하게 소비할지 정리한다.</p>]]></content><author><name>HwiRyung Kim</name></author><category term="design" /><summary type="html"><![CDATA[TOC Overview Thin Poller의 역할 발행과 마킹의 순서 At-least-once 수용 운영 관점 Conclusion Next Step]]></summary></entry><entry><title type="html">Transactional Outbox in Practice: Atomic Persist and Enqueue</title><link href="https://hrllk.github.io/transactional-outbox-in-practice-atomic-persist-and-enqueue.html" rel="alternate" type="text/html" title="Transactional Outbox in Practice: Atomic Persist and Enqueue" /><published>2026-04-21T00:00:00+00:00</published><updated>2026-04-21T00:00:00+00:00</updated><id>https://hrllk.github.io/transactional-outbox-in-practice-atomic-persist-and-enqueue</id><content type="html" xml:base="https://hrllk.github.io/transactional-outbox-in-practice-atomic-persist-and-enqueue.html"><![CDATA[<h3 id="toc">TOC</h3>
+<hr />
+<ol>
+  <li><a href="#overview">Overview</a></li>
+  <li><a href="#application-service의-책임">Application Service의 책임</a></li>
+  <li><a href="#outgoing-port-분리">Outgoing Port 분리</a></li>
+  <li><a href="#outbox-row의-의미">Outbox Row의 의미</a></li>
+  <li><a href="#주의할-점">주의할 점</a></li>
+  <li><a href="#conclusion">Conclusion</a></li>
+  <li><a href="#next-step">Next Step</a></li>
+</ol>
+
+<h3 id="overview">Overview</h3>
+<hr />
+<p>이전 글에서는 DB 저장과 MQ 발행을 동시에 성공시키기 어렵다는 문제를 정리했다. 이번 글에서는 그 첫 번째 해법으로 <strong>비즈니스 데이터와 Outbox row를 같은 트랜잭션에 저장하는 구조</strong>를 다룬다.</p>
+
+<p>중요한 점은 application service가 Kafka를 직접 호출하지 않는다는 것이다. 이 계층은 “저장할 데이터”와 “발행할 의도”만 함께 남긴다.</p>
+
+<h3 id="application-service의-책임">Application Service의 책임</h3>
+<hr />
+<p>Producer 측 application service는 요청을 검증하고, 비즈니스 데이터를 여러 테이블에 저장하고, 상세 단위 이벤트를 Outbox에 적재한다.</p>
+
+<p><strong>이 모든 작업은 하나의 <code class="language-plaintext highlighter-rouge">@Transactional</code> 안에서 수행</strong>된다. 따라서 중간에 예외가 발생하면 비즈니스 데이터와 Outbox row가 함께 롤백된다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Service</span>
+<span class="nd">@RequiredArgsConstructor</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">GitLabUserRegistrationService</span> <span class="kd">implements</span> <span class="nc">GitLabUserManagementUseCase</span> <span class="o">{</span>
+
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">GitLabUserRegistrationCommandPort</span> <span class="n">commandPort</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">UserRegistrationEventPublishPort</span> <span class="n">publishPort</span><span class="o">;</span>
+    <span class="c1">// ...</span>
+
+    <span class="nd">@Override</span>
+    <span class="nd">@Transactional</span>
+    <span class="kd">public</span> <span class="nc">GitLabUserRegistrationResult</span> <span class="nf">enqueueBulkUserRegistration</span><span class="o">(</span><span class="nc">GitLabUserRegistrationCommand</span> <span class="n">command</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">validator</span><span class="o">.</span><span class="na">validateNoInProgressRequest</span><span class="o">(</span><span class="n">command</span><span class="o">.</span><span class="na">getToolId</span><span class="o">());</span>
+
+        <span class="c1">// 마스터/상세/사이클/이력 4-테이블 INSERT</span>
+        <span class="nc">GitLabUserRegistrationPersistResult</span> <span class="n">persisted</span> <span class="o">=</span>
+                <span class="n">commandPort</span><span class="o">.</span><span class="na">saveUserRegistrationRequests</span><span class="o">(</span><span class="n">persistenceMapper</span><span class="o">.</span><span class="na">toPersistenceCommand</span><span class="o">(</span><span class="n">command</span><span class="o">));</span>
+
+        <span class="c1">// 상세 단위 이벤트 → Outbox row 적재 (같은 @Transactional 안)</span>
+        <span class="n">publishPort</span><span class="o">.</span><span class="na">publishAll</span><span class="o">(</span><span class="n">eventMapper</span><span class="o">.</span><span class="na">toEvents</span><span class="o">(</span><span class="n">command</span><span class="o">,</span> <span class="n">persisted</span><span class="o">));</span>
+
+        <span class="k">return</span> <span class="k">new</span> <span class="nf">GitLabUserRegistrationResult</span><span class="o">(</span><span class="n">persisted</span><span class="o">.</span><span class="na">getRequestId</span><span class="o">());</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="outgoing-port-분리">Outgoing Port 분리</h3>
+<hr />
+<p>영속 포트와 Outbox 포트는 모두 외부로 나가는 포트지만 책임이 다르다.</p>
+
+<ul>
+  <li>영속 포트는 비즈니스 데이터를 저장한다.</li>
+  <li>Outbox 포트는 Kafka로 보낼 이벤트를 DB row로 저장한다.</li>
+</ul>
+
+<p>이 분리 덕분에 application 계층은 Kafka topic, 직렬화 방식, schema registry 같은 인프라 세부사항을 알 필요가 없다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">GitLabUserRegistrationCommandPort</span> <span class="o">{</span>
+    <span class="c1">// 마스터/상세/사이클/이력 4-테이블 일괄 저장</span>
+    <span class="nc">GitLabUserRegistrationPersistResult</span> <span class="nf">saveUserRegistrationRequests</span><span class="o">(</span><span class="nc">GitLabUserRegistrationPersistenceCommand</span> <span class="n">cmd</span><span class="o">);</span>
+    <span class="c1">// 상태 전이 메서드(markInProgress / markSuccess / markFailure)는 3편 Consumer에서 소개한다</span>
+<span class="o">}</span>
+
+<span class="kd">public</span> <span class="kd">interface</span> <span class="nc">UserRegistrationEventPublishPort</span> <span class="o">{</span>
+    <span class="c1">// 호출자 @Transactional에 참여 — 절대 새 트랜잭션을 시작하지 않는다</span>
+    <span class="kt">void</span> <span class="nf">publishAll</span><span class="o">(</span><span class="nc">List</span><span class="o">&lt;</span><span class="nc">UserRegistrationEvent</span><span class="o">&gt;</span> <span class="n">events</span><span class="o">);</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="outbox-row의-의미">Outbox Row의 의미</h3>
+<hr />
+<p>Outbox row에는 메시징을 위한 정보(topic, message key, payload, 발행 상태)가 저장된다. 이 row는 “이미 발행된 메시지”가 아니라 <strong>나중에 발행해야 할 의도</strong>를 표현한다.</p>
+
+<p>payload는 Kafka로 흘려보낼 메시지 본문을 그대로 직렬화해 둔다. 우리는 Avro 스키마를 그대로 사용해 producer 시점에 한 번 직렬화하고, 폴러는 별도 변환 없이 그 byte를 그대로 전송한다. 트랜잭션 안에서는 schema registry 같은 외부 의존을 호출하지 않는 것이 안전하다.</p>
+
+<h3 id="주의할-점">주의할 점</h3>
+<hr />
+<p>Outbox adapter가 <strong>별도 트랜잭션을 새로 시작하면 원자성이 깨질 수 있다</strong>. producer의 트랜잭션에 참여하도록 두는 것이 핵심이다.</p>
+
+<p>검증은 단순하다. 저장 직후 예외를 강제로 발생시켰을 때 비즈니스 데이터와 Outbox row가 모두 남지 않아야 한다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Component</span>
+<span class="nd">@RequiredArgsConstructor</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">UserRegistrationEventPublishAdapter</span> <span class="kd">implements</span> <span class="nc">UserRegistrationEventPublishPort</span> <span class="o">{</span>
+
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">EventPublisher</span> <span class="n">eventPublisher</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">UserRegistrationEventAvroMapper</span> <span class="n">avroMapper</span><span class="o">;</span>
+
+    <span class="nd">@Override</span>
+    <span class="c1">// @Transactional 없음 — 호출자(Service)의 트랜잭션에 참여한다</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">publishAll</span><span class="o">(</span><span class="nc">List</span><span class="o">&lt;</span><span class="nc">UserRegistrationEvent</span><span class="o">&gt;</span> <span class="n">events</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">for</span> <span class="o">(</span><span class="nc">UserRegistrationEvent</span> <span class="n">event</span> <span class="o">:</span> <span class="n">events</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">eventPublisher</span><span class="o">.</span><span class="na">publish</span><span class="o">(</span>
+                    <span class="n">event</span><span class="o">.</span><span class="na">getUserRegDmndDtlId</span><span class="o">(),</span>               <span class="c1">// Kafka key = 상세 ID</span>
+                    <span class="n">avroMapper</span><span class="o">.</span><span class="na">toAvro</span><span class="o">(</span><span class="n">event</span><span class="o">),</span>
+                    <span class="nc">Topics</span><span class="o">.</span><span class="na">GITLAB_USER_REG_COMMAND</span><span class="o">.</span><span class="na">getValue</span><span class="o">());</span>
+            <span class="c1">// EventPublisher 내부에서 entityManager.persist(OutboxEventEntity) 수행</span>
+            <span class="c1">// → 비즈니스 INSERT와 같은 커밋 단위</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="conclusion">Conclusion</h3>
+<hr />
+<p>이 단계에서 보장되는 것은 <strong>저장과 발행 의도의 원자성</strong>이다. Kafka에 아직 메시지가 도달한 것은 아니지만, 적어도 “저장은 됐는데 발행 의도는 사라지는” 상태는 막을 수 있다.</p>
+
+<h3 id="next-step">Next Step</h3>
+<hr />
+<p>다음 포스트에서는 <strong><a href="/transactional-outbox-in-practice-thin-poller-and-at-least-once.html">Thin Poller and At-least-once</a></strong>를 다룬다. DB에 남겨둔 발행 의도를 실제 Kafka 메시지로 흘려보내는 얇은 폴러의 역할을 정리한다.</p>]]></content><author><name>HwiRyung Kim</name></author><category term="design" /><summary type="html"><![CDATA[TOC Overview Application Service의 책임 Outgoing Port 분리 Outbox Row의 의미 주의할 점 Conclusion Next Step]]></summary></entry><entry><title type="html">Transactional Outbox in Practice: Prologue</title><link href="https://hrllk.github.io/transactional-outbox-in-practice-prologue.html" rel="alternate" type="text/html" title="Transactional Outbox in Practice: Prologue" /><published>2026-04-19T00:00:00+00:00</published><updated>2026-04-19T00:00:00+00:00</updated><id>https://hrllk.github.io/transactional-outbox-in-practice-prologue</id><content type="html" xml:base="https://hrllk.github.io/transactional-outbox-in-practice-prologue.html"><![CDATA[<h3 id="toc">TOC</h3>
+<hr />
+<ol>
+  <li><a href="#overview">Overview</a></li>
+  <li><a href="#문제의-시작">문제의 시작</a></li>
+  <li><a href="#outbox-어원">Outbox 어원</a></li>
+  <li><a href="#transactional-outbox의-핵심">Transactional Outbox의 핵심</a></li>
+  <li><a href="#연재-계획">연재 계획</a></li>
+  <li><a href="#약속-our-principle">약속 (Our Principle)</a></li>
+  <li><a href="#next-step">Next Step</a></li>
+</ol>
+
+<h3 id="overview">Overview</h3>
+<hr />
+<p>백엔드 서비스에서 DB 저장과 Kafka 발행을 한 흐름으로 묶고 싶을 때가 있다. 하지만 RDB commit과 Kafka ack는 같은 트랜잭션으로 움직이지 않는다.</p>
+
+<p>이번 시리즈는 이 간극을 분산 트랜잭션으로 덮지 않고, <strong>발행 의도를 DB에 먼저 저장하는 Transactional Outbox 패턴</strong>으로 풀어가는 과정을 정리한다.</p>
+
+<h3 id="문제의-시작">문제의 시작</h3>
+<hr />
+<p>예를 들어 사용자 등록 정보를 DB에 저장한 뒤 Kafka로 후속 처리를 요청하는 흐름이 있다고 하자. DB 저장은 성공했는데 메시지 발행이 실패하거나, 반대로 메시지만 먼저 나가면 운영 데이터는 쉽게 어긋난다.</p>
+
+<p>이 문제는 코드 순서를 조금 바꾼다고 사라지지 않는다. 서로 다른 시스템의 commit 시점이 다르기 때문에 생기는 구조적 문제다.</p>
+
+<h3 id="outbox-어원">Outbox 어원</h3>
+<hr />
+<p>Outbox는 <strong>outgoing box</strong>의 줄임말로, 밖으로 나갈 메시지를 잠시 보관하는 함을 뜻한다.</p>
+
+<p>사전적으로도 outbox는 “아직 보내지 않은 이메일 메시지를 보관하는 폴더” 또는 “처리 후 외부로 보낼 문서를 담는 책상 위 트레이”를 의미한다. 이름 그대로 이 패턴은 메시지를 즉시 보내는 대신 일단 DB의 outbox 테이블에 담아두고, 나중에 꺼내 보내는 흐름을 따른다.</p>
+
+<h3 id="transactional-outbox의-핵심">Transactional Outbox의 핵심</h3>
+<hr />
+<p>핵심은 메시지를 즉시 발행하지 않는 것이다. 비즈니스 데이터와 함께 <code class="language-plaintext highlighter-rouge">outbox</code> row를 같은 DB 트랜잭션에 저장하고, 실제 발행은 별도 폴러가 나중에 처리한다.</p>
+
+<pre><code class="language-mermaid">sequenceDiagram
+    box Application
+        participant Prod as Producer
+        participant Poller as Poller
+        participant Cons as Consumer
+    end
+    participant DB
+    participant MQ as Message Queue
+
+    Note over Prod,DB: [1편] 원자적 저장
+    Prod-&gt;&gt;DB: 비즈니스 데이터 INSERT
+    Prod-&gt;&gt;DB: Outbox row INSERT (PENDING)
+    Note right of Prod: 같은 @Transactional
+
+    Note over Poller,MQ: [2편] 발행
+    loop 폴링
+        Poller-&gt;&gt;DB: PENDING row 조회 (FOR UPDATE SKIP LOCKED)
+        DB--&gt;&gt;Poller: rows
+        Poller-&gt;&gt;MQ: Kafka 발행
+        Poller-&gt;&gt;DB: 상태 PENDING → SENT
+    end
+
+    Note over MQ,Cons: [3편] 소비
+    MQ--&gt;&gt;Cons: 메시지 수신 (at-least-once)
+    Cons-&gt;&gt;DB: 멱등 상태 전이 (WAIT → SCS / FAIL)
+</code></pre>
+
+<p>이렇게 하면 저장과 발행 의도는 원자적으로 묶이고, Kafka 발행 실패는 재시도 가능한 별도 단계로 분리된다.</p>
+
+<h3 id="연재-계획">연재 계획</h3>
+<hr />
+<ol>
+  <li><a href="/transactional-outbox-in-practice-prologue.html">[프롤로그] DB와 MQ 사이의 균열, 그리고 Outbox라는 선택 (현재 글)</a></li>
+  <li><a href="/transactional-outbox-in-practice-atomic-persist-and-enqueue.html">[1편] Atomic Persist and Enqueue: 저장과 발행 의도를 같은 트랜잭션에 묶기</a></li>
+  <li><a href="/transactional-outbox-in-practice-thin-poller-and-at-least-once.html">[2편] Thin Poller and At-least-once: 얇은 폴러와 중복 발행을 받아들이는 설계</a></li>
+  <li><a href="/transactional-outbox-in-practice-idempotent-consumer.html">[3편] Idempotent Consumer: 중복 메시지를 흡수하는 소비자 만들기</a></li>
+  <li><a href="/transactional-outbox-in-practice-operating-in-production.html">[4편] Operating in Production: 멀티 인스턴스와 운영 이슈 정리</a></li>
+</ol>
+
+<h3 id="약속-our-principle">약속 (Our Principle)</h3>
+<hr />
+<ul>
+  <li><strong>원자성:</strong> 비즈니스 데이터와 발행 의도는 같은 DB 트랜잭션에 묶는다.</li>
+  <li><strong>분리:</strong> 발행과 소비는 각각 별도 책임으로 다룬다.</li>
+  <li><strong>멱등성:</strong> at-least-once 발행으로 생기는 중복은 컨슈머가 흡수한다.</li>
+</ul>
+
+<h3 id="next-step">Next Step</h3>
+<hr />
+<p>다음 포스트에서는 <a href="/transactional-outbox-in-practice-atomic-persist-and-enqueue.html">Atomic Persist and Enqueue</a>를 다룬다. Outbox 패턴의 출발점인 “저장과 발행 의도 적재”를 어떤 코드 경계 안에 둬야 하는지 정리한다.</p>]]></content><author><name>HwiRyung Kim</name></author><category term="design" /><summary type="html"><![CDATA[TOC Overview 문제의 시작 Outbox 어원 Transactional Outbox의 핵심 연재 계획 약속 (Our Principle) Next Step]]></summary></entry><entry><title type="html">Modern Beautiful API Response Design: Exception Translation Layer</title><link href="https://hrllk.github.io/modern-beautiful-api-response-design-exception-translation-layer.html" rel="alternate" type="text/html" title="Modern Beautiful API Response Design: Exception Translation Layer" /><published>2026-03-18T00:00:00+00:00</published><updated>2026-03-18T00:00:00+00:00</updated><id>https://hrllk.github.io/modern-beautiful-api-response-design-exception-translation-layer</id><content type="html" xml:base="https://hrllk.github.io/modern-beautiful-api-response-design-exception-translation-layer.html"><![CDATA[<h3 id="toc">TOC</h3>
+<hr />
+<ol>
+  <li><a href="#overview">Overview</a></li>
+  <li><a href="#왜-번역-계층이-따로-필요한가">왜 번역 계층이 따로 필요한가</a></li>
+  <li><a href="#설계-목표">설계 목표</a></li>
+  <li><a href="#1-번역-책임은-프레젠테이션-계층에-둔다">1. 번역 책임은 프레젠테이션 계층에 둔다</a></li>
+  <li><a href="#2-advisor는-내부-계약을-외부-계약으로-바꾼다">2. Advisor는 내부 계약을 외부 계약으로 바꾼다</a></li>
+  <li><a href="#3-번역-계층이-하면-안-되는-일">3. 번역 계층이 하면 안 되는 일</a></li>
+  <li><a href="#closing">Closing</a></li>
+</ol>
+
+<h3 id="overview">Overview</h3>
+<hr />
+<p>앞선 글에서 내부 예외 모델과 외부 에러 계약을 분리했다. 이제 남은 질문은 하나다. <strong>이 둘을 어디서 연결할 것인가?</strong></p>
+
+<p>이 글에서는 <code class="language-plaintext highlighter-rouge">ProblemDetail</code> 같은 외부 응답 계약을 실제로 누가 만들고, 왜 그 책임을 프레젠테이션 계층에 두어야 하는지를 다룬다.</p>
+
+<h3 id="왜-번역-계층이-따로-필요한가">왜 번역 계층이 따로 필요한가</h3>
+<hr />
+<p>내부 예외 모델과 외부 응답 계약은 역할이 다르다.</p>
+
+<ul>
+  <li>내부는 아키텍처와 도메인 책임을 지키기 위한 모델이다.</li>
+  <li>외부는 클라이언트와의 안정적인 통신 계약이다.</li>
+</ul>
+
+<p>이 둘을 같은 계층에서 처리하면 내부 설계가 외부 포맷에 끌려가고, 외부 포맷 변경이 내부 코드까지 흔들게 된다. 그래서 중간에 <strong>번역 계층</strong>이 필요하다.</p>
+
+<h3 id="설계-목표">설계 목표</h3>
+<hr />
+<ol>
+  <li>내부 예외 모델은 순수하게 유지한다.</li>
+  <li>외부 응답 계약은 프레젠테이션 계층에서만 조립한다.</li>
+  <li>번역 계층은 비즈니스 판단 없이 변환만 수행한다.</li>
+</ol>
+
+<h3 id="1-번역-책임은-프레젠테이션-계층에-둔다">1. 번역 책임은 프레젠테이션 계층에 둔다</h3>
+<hr />
+<p>헥사고날 아키텍처 기준으로 HTTP 응답은 프레젠테이션 어댑터의 책임이다. 따라서 예외를 <code class="language-plaintext highlighter-rouge">ProblemDetail</code>이나 공통 API 에러 포맷으로 바꾸는 일도 프레젠테이션 계층이 맡아야 한다.</p>
+
+<p>즉:</p>
+
+<ul>
+  <li>도메인 계층은 예외를 던진다.</li>
+  <li>애플리케이션 계층은 흐름을 제어하다가 예외를 던진다.</li>
+  <li>프레젠테이션 계층은 그 예외를 HTTP 응답으로 번역한다.</li>
+</ul>
+
+<p>그래서 <code class="language-plaintext highlighter-rouge">@RestControllerAdvice</code>는 단순 편의 기능이 아니라, 아키텍처적으로도 자연스러운 번역 지점이다.</p>
+
+<h3 id="2-advisor는-내부-계약을-외부-계약으로-바꾼다">2. Advisor는 내부 계약을 외부 계약으로 바꾼다</h3>
+<hr />
+<p><code class="language-plaintext highlighter-rouge">Advisor</code>의 역할은 새 규칙을 만드는 것이 아니라, 이미 정의된 내부 계약을 외부 계약으로 <strong>번역</strong>하는 것이다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@RestControllerAdvice</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">GlobalExceptionAdvisor</span> <span class="o">{</span>
+
+    <span class="nd">@ExceptionHandler</span><span class="o">(</span><span class="nc">ApplicationException</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="nc">ProblemDetail</span> <span class="nf">handleApplicationException</span><span class="o">(</span><span class="nc">ApplicationException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">HttpStatus</span> <span class="n">status</span> <span class="o">=</span> <span class="n">determineHttpStatus</span><span class="o">(</span><span class="n">e</span><span class="o">.</span><span class="na">getErrorCode</span><span class="o">());</span>
+
+        <span class="nc">ProblemDetail</span> <span class="n">problem</span> <span class="o">=</span> <span class="nc">ProblemDetail</span><span class="o">.</span><span class="na">forStatus</span><span class="o">(</span><span class="n">status</span><span class="o">);</span>
+        <span class="n">problem</span><span class="o">.</span><span class="na">setTitle</span><span class="o">(</span><span class="s">"Application error"</span><span class="o">);</span>
+        <span class="n">problem</span><span class="o">.</span><span class="na">setDetail</span><span class="o">(</span><span class="n">e</span><span class="o">.</span><span class="na">getMessage</span><span class="o">());</span>
+        <span class="n">problem</span><span class="o">.</span><span class="na">setType</span><span class="o">(</span><span class="no">URI</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="s">"https://api.example.com/problems/"</span> <span class="o">+</span> <span class="n">e</span><span class="o">.</span><span class="na">getSpecificCode</span><span class="o">()));</span>
+        <span class="n">problem</span><span class="o">.</span><span class="na">setProperty</span><span class="o">(</span><span class="s">"code"</span><span class="o">,</span> <span class="n">e</span><span class="o">.</span><span class="na">getSpecificCode</span><span class="o">());</span>
+        <span class="n">problem</span><span class="o">.</span><span class="na">setProperty</span><span class="o">(</span><span class="s">"source"</span><span class="o">,</span> <span class="s">"application"</span><span class="o">);</span>
+
+        <span class="k">return</span> <span class="n">problem</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>핵심은 두 가지다.</p>
+
+<ol>
+  <li>상태 코드는 여전히 내부의 <code class="language-plaintext highlighter-rouge">ErrorCode</code>를 기준으로 결정한다.</li>
+  <li>클라이언트 식별 코드는 <code class="language-plaintext highlighter-rouge">ProblemSpec</code>이 제공한 값을 응답에 싣는다.</li>
+</ol>
+
+<p>즉 <code class="language-plaintext highlighter-rouge">Advisor</code>는 내부 계약을 외부 계약으로 바꿀 뿐, 새로운 비즈니스 판단을 하지 않는다.</p>
+
+<h3 id="3-번역-계층이-하면-안-되는-일">3. 번역 계층이 하면 안 되는 일</h3>
+<hr />
+<p>번역 계층이 과도하게 똑똑해지면 다시 책임이 섞인다. <code class="language-plaintext highlighter-rouge">Advisor</code>는 아래 일을 하면 안 된다.</p>
+
+<ul>
+  <li>도메인 규칙을 새로 판단하는 일</li>
+  <li>예외를 보고 비즈니스 흐름을 다시 결정하는 일</li>
+  <li>원래 없던 식별 코드를 임의로 만드는 일</li>
+</ul>
+
+<p>번역 계층은 이미 만들어진 내부 계약을 받아, 외부 포맷으로 안정적으로 바꾸는 데만 집중해야 한다.</p>
+
+<h3 id="closing">Closing</h3>
+<hr />
+<p>시리즈를 정리하면 역할은 이렇게 나뉜다.</p>
+
+<ul>
+  <li><strong>Internal Exception Model</strong>: 서버 내부에서 실패를 어떻게 모델링할 것인가</li>
+  <li><strong>External Error Contract</strong>: 클라이언트에게 어떤 에러 계약을 보여줄 것인가</li>
+  <li><strong>Exception Translation Layer</strong>: 그 둘을 어디서, 어떻게 연결할 것인가</li>
+</ul>
+
+<p>이렇게 나누면 내부 설계와 외부 계약이 서로를 덜 오염시키고, 각 계층의 책임도 훨씬 선명해진다.</p>]]></content><author><name>HwiRyung Kim</name></author><category term="design" /><summary type="html"><![CDATA[TOC Overview 왜 번역 계층이 따로 필요한가 설계 목표 1. 번역 책임은 프레젠테이션 계층에 둔다 2. Advisor는 내부 계약을 외부 계약으로 바꾼다 3. 번역 계층이 하면 안 되는 일 Closing]]></summary></entry><entry><title type="html">Modern Beautiful API Response Design: External Error Contract</title><link href="https://hrllk.github.io/modern-beautiful-api-response-design-external-error-contract.html" rel="alternate" type="text/html" title="Modern Beautiful API Response Design: External Error Contract" /><published>2026-03-17T00:00:00+00:00</published><updated>2026-03-17T00:00:00+00:00</updated><id>https://hrllk.github.io/modern-beautiful-api-response-design-external-error-contract</id><content type="html" xml:base="https://hrllk.github.io/modern-beautiful-api-response-design-external-error-contract.html"><![CDATA[<h3 id="toc">TOC</h3>
+<hr />
+<ol>
+  <li><a href="#overview">Overview</a></li>
+  <li><a href="#왜-에러-응답도-계약이어야-하는가">왜 에러 응답도 계약이어야 하는가</a></li>
+  <li><a href="#설계-목표">설계 목표</a></li>
+  <li><a href="#1-내부-예외와-외부-응답은-분리되어야-한다">1. 내부 예외와 외부 응답은 분리되어야 한다</a></li>
+  <li><a href="#2-왜-problemdetail인가">2. 왜 ProblemDetail인가</a></li>
+  <li><a href="#3-어떤-정보를-응답에-담아야-하는가">3. 어떤 정보를 응답에 담아야 하는가</a></li>
+  <li><a href="#4-응답-필드의-책임-분리">4. 응답 필드의 책임 분리</a></li>
+  <li><a href="#closing">Closing</a></li>
+</ol>
+
+<h3 id="overview">Overview</h3>
+<hr />
+<p>앞선 글에서는 서버 내부에서 실패를 어떻게 모델링할지 정리했다. 공통 부모 예외, 계층별 예외, <code class="language-plaintext highlighter-rouge">ErrorCode</code>, <code class="language-plaintext highlighter-rouge">ProblemSpec</code>까지 모두 내부 계약의 일부다.</p>
+
+<p>하지만 내부 예외 계약이 잘 설계되어 있어도, 최종적으로 클라이언트가 받는 응답 포맷이 일관되지 않으면 계약은 다시 흔들린다. 그래서 이 단계에서는 예외 자체보다 <strong>응답 번역 규격</strong>이 핵심이 된다.</p>
+
+<p>이 글에서는 내부 예외를 외부 API 에러 응답으로 어떻게 번역할지, 그리고 왜 <code class="language-plaintext highlighter-rouge">ProblemDetail</code>이 이 번역의 중심이 되어야 하는지를 다룬다.</p>
+
+<h3 id="왜-에러-응답도-계약이어야-하는가">왜 에러 응답도 계약이어야 하는가</h3>
+<hr />
+<p>에러 응답을 즉흥적으로 만들면 보통 아래 문제가 발생한다.</p>
+
+<ol>
+  <li>예외마다 JSON 구조가 달라진다.</li>
+  <li>HTTP 상태 코드와 본문 의미가 어긋난다.</li>
+  <li>클라이언트가 <code class="language-plaintext highlighter-rouge">message</code> 문구에 의존해 분기하게 된다.</li>
+  <li>내부 예외 구조가 외부 계약에 그대로 새어 나온다.</li>
+</ol>
+
+<p>즉, 내부 설계와 외부 계약 사이에 <strong>번역 계층</strong>이 없으면 응답은 오래 버티지 못한다.</p>
+
+<h3 id="설계-목표">설계 목표</h3>
+<hr />
+<p>이번 단계의 목표는 명확하다.</p>
+
+<ol>
+  <li>내부 예외와 외부 응답 포맷을 분리한다.</li>
+  <li>외부 응답은 하나의 표준 구조로 통일한다.</li>
+  <li>상태 코드, 식별 코드, 사용자 메시지의 역할을 분리한다.</li>
+  <li>번역 책임은 프레젠테이션 계층에서만 담당한다.</li>
+</ol>
+
+<h3 id="1-내부-예외와-외부-응답은-분리되어야-한다">1. 내부 예외와 외부 응답은 분리되어야 한다</h3>
+<hr />
+<p><code class="language-plaintext highlighter-rouge">ApplicationException</code>, <code class="language-plaintext highlighter-rouge">DomainException</code>, <code class="language-plaintext highlighter-rouge">InfrastructureException</code>은 모두 <strong>서버 내부 모델</strong>이다. 이 객체들은 서비스 코드와 아키텍처 책임 분리를 위해 존재한다.</p>
+
+<p>반면 클라이언트가 받아야 하는 것은 서버 내부 클래스 이름이 아니라, <strong>안정적인 외부 계약</strong>이다.<br />
+즉 내부에서는:</p>
+
+<ul>
+  <li>어떤 계층에서 실패했는가</li>
+  <li>어떤 상태 범주인가</li>
+  <li>어떤 <code class="language-plaintext highlighter-rouge">ProblemSpec</code>을 사용하는가</li>
+</ul>
+
+<p>를 다루고, 외부에서는:</p>
+
+<ul>
+  <li>HTTP 상태 코드</li>
+  <li>문제 식별자</li>
+  <li>사용자 메시지</li>
+  <li>요청 문맥</li>
+</ul>
+
+<p>을 다뤄야 한다.</p>
+
+<p>이 둘을 같은 객체로 처리하려고 하면 내부 구조가 외부로 새고, 외부 포맷 변경이 내부 설계까지 흔들게 된다.</p>
+
+<h3 id="2-왜-problemdetail인가">2. 왜 ProblemDetail인가</h3>
+<hr />
+<p>스프링 6부터는 에러 응답을 표현하는 표준 구조로 <code class="language-plaintext highlighter-rouge">ProblemDetail</code>을 제공한다. 이 객체는 HTTP 에러 응답을 일관되게 만들기 위한 최소 골격을 제공한다.</p>
+
+<p>핵심은 단순하다.</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">status</code>: HTTP 상태 코드</li>
+  <li><code class="language-plaintext highlighter-rouge">title</code>: 문제의 짧은 이름</li>
+  <li><code class="language-plaintext highlighter-rouge">detail</code>: 사람이 읽을 설명</li>
+  <li><code class="language-plaintext highlighter-rouge">type</code>: 문제 유형 식별자</li>
+  <li><code class="language-plaintext highlighter-rouge">properties</code>: 팀이 추가로 넣고 싶은 확장 필드</li>
+</ul>
+
+<p>즉 <code class="language-plaintext highlighter-rouge">ProblemDetail</code>은 “에러 응답의 기본 뼈대”를 제공하고, 우리 시스템은 그 위에 <code class="language-plaintext highlighter-rouge">code</code>, <code class="language-plaintext highlighter-rouge">source</code> 같은 팀 규칙을 얹으면 된다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">ProblemDetail</span> <span class="n">problem</span> <span class="o">=</span> <span class="nc">ProblemDetail</span><span class="o">.</span><span class="na">forStatus</span><span class="o">(</span><span class="nc">HttpStatus</span><span class="o">.</span><span class="na">NOT_FOUND</span><span class="o">);</span>
+<span class="n">problem</span><span class="o">.</span><span class="na">setTitle</span><span class="o">(</span><span class="s">"Resource not found"</span><span class="o">);</span>
+<span class="n">problem</span><span class="o">.</span><span class="na">setDetail</span><span class="o">(</span><span class="s">"User not found"</span><span class="o">);</span>
+<span class="n">problem</span><span class="o">.</span><span class="na">setType</span><span class="o">(</span><span class="no">URI</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="s">"https://api.example.com/problems/user-not-found"</span><span class="o">));</span>
+<span class="n">problem</span><span class="o">.</span><span class="na">setProperty</span><span class="o">(</span><span class="s">"code"</span><span class="o">,</span> <span class="s">"USER-404"</span><span class="o">);</span>
+<span class="n">problem</span><span class="o">.</span><span class="na">setProperty</span><span class="o">(</span><span class="s">"source"</span><span class="o">,</span> <span class="s">"application"</span><span class="o">);</span>
+</code></pre></div></div>
+
+<h3 id="3-어떤-정보를-응답에-담아야-하는가">3. 어떤 정보를 응답에 담아야 하는가</h3>
+<hr />
+<p>여기서 중요한 것은 “많이 담는 것”이 아니라, <strong>각 필드가 무엇을 책임지는지 분리하는 것</strong>이다.</p>
+
+<ul>
+  <li><strong>HTTP status</strong>: 전송 계층의 의미다. 요청이 실패했는지, 권한 문제인지, 서버 문제인지 표현한다.</li>
+  <li><strong><code class="language-plaintext highlighter-rouge">type</code></strong>: 문제 유형의 안정적인 식별자다.</li>
+  <li><strong><code class="language-plaintext highlighter-rouge">code</code></strong>: 프론트엔드나 운영 도구가 분기하기 쉬운 팀 내부 규격 코드다.</li>
+  <li><strong><code class="language-plaintext highlighter-rouge">detail</code></strong>: 사람이 읽을 수 있는 설명이다.</li>
+  <li><strong><code class="language-plaintext highlighter-rouge">source</code></strong>: 선택적이다. 어느 계층에서 번역되었는지 드러내고 싶을 때만 둔다.</li>
+</ul>
+
+<p>즉 같은 “에러”라도 역할은 다르다.</p>
+
+<ul>
+  <li>상태 코드는 HTTP를 위한 것</li>
+  <li>식별 코드는 클라이언트 분기를 위한 것</li>
+  <li>메시지는 사람을 위한 것</li>
+</ul>
+
+<p>이 셋을 하나의 필드로 뭉개면 다시 문자열 파싱 구조로 되돌아간다.</p>
+
+<h3 id="4-응답-필드의-책임-분리">4. 응답 필드의 책임 분리</h3>
+<hr />
+<p>앞선 두 글과 이번 글을 합치면 역할은 이렇게 정리된다.</p>
+
+<ul>
+  <li><strong>Exception Hierarchy</strong>: 실패의 출처와 책임을 분리한다.</li>
+  <li><strong><code class="language-plaintext highlighter-rouge">ErrorCode</code></strong>: 각 계층이 가질 수 있는 본질적인 상태 범주를 표현한다.</li>
+  <li><strong><code class="language-plaintext highlighter-rouge">ProblemSpec</code></strong>: 외부에 노출할 식별 코드와 메시지 키를 관리한다.</li>
+  <li><strong><code class="language-plaintext highlighter-rouge">ProblemDetail</code></strong>: 외부 에러 응답 계약의 기본 뼈대를 제공한다.</li>
+</ul>
+
+<p>즉 내부에서는 아키텍처를 지키고, 외부에서는 표준 응답 포맷을 지키는 구조다. 이 둘을 하나로 합치지 않고, 번역 지점을 둔 것이 핵심이다.</p>
+
+<h3 id="closing">Closing</h3>
+<hr />
+<p>예외 계층과 <code class="language-plaintext highlighter-rouge">ErrorCode</code>, <code class="language-plaintext highlighter-rouge">ProblemSpec</code>이 내부 계약의 뼈대라면, <code class="language-plaintext highlighter-rouge">ProblemDetail</code>은 그 계약을 외부 세계로 내보내는 표준 포맷이다. 내부 설계와 외부 응답을 분리해 두면, 서버는 더 안정적으로 진화하고 클라이언트는 더 예측 가능한 계약 위에서 동작할 수 있다.</p>
+
+<p>다음 글에서는 이 외부 계약을 실제로 <a href="/modern-beautiful-api-response-design-exception-translation-layer.html">어디서, 어떻게 번역해야 하는지</a> 다룬다. 즉 <code class="language-plaintext highlighter-rouge">@RestControllerAdvice</code>와 번역 계층의 위치를 정리한다.</p>]]></content><author><name>HwiRyung Kim</name></author><category term="design" /><summary type="html"><![CDATA[TOC Overview 왜 에러 응답도 계약이어야 하는가 설계 목표 1. 내부 예외와 외부 응답은 분리되어야 한다 2. 왜 ProblemDetail인가 3. 어떤 정보를 응답에 담아야 하는가 4. 응답 필드의 책임 분리 Closing]]></summary></entry><entry><title type="html">Modern Beautiful API Response Design: Internal Exception Model</title><link href="https://hrllk.github.io/modern-beautiful-api-response-design-internal-exception-model.html" rel="alternate" type="text/html" title="Modern Beautiful API Response Design: Internal Exception Model" /><published>2026-03-16T00:00:00+00:00</published><updated>2026-03-16T00:00:00+00:00</updated><id>https://hrllk.github.io/modern-beautiful-api-response-design-internal-exception-model</id><content type="html" xml:base="https://hrllk.github.io/modern-beautiful-api-response-design-internal-exception-model.html"><![CDATA[<h3 id="toc">TOC</h3>
+<hr />
+<ol>
+  <li><a href="#overview">Overview</a></li>
+  <li><a href="#평면적인-예외-정의의-문제">평면적인 예외 정의의 문제</a></li>
+  <li><a href="#설계-목표">설계 목표</a></li>
+  <li><a href="#1-공통-부모-예외">1. 공통 부모 예외</a></li>
+  <li><a href="#2-계층별-예외-분리">2. 계층별 예외 분리</a></li>
+  <li><a href="#3-계층별-베이스-예외">3. 계층별 베이스 예외</a></li>
+  <li><a href="#4-번역-책임의-위치">4. 번역 책임의 위치</a></li>
+  <li><a href="#5-errorcode는-분류다">5. ErrorCode는 분류다</a></li>
+  <li><a href="#6-problemspec은-공개-명세다">6. ProblemSpec은 공개 명세다</a></li>
+  <li><a href="#7-커스텀-예외와의-결합">7. 커스텀 예외와의 결합</a></li>
+  <li><a href="#closing">Closing</a></li>
+</ol>
+
+<h3 id="overview">Overview</h3>
+<hr />
+<p>예외를 설계하지 않은 시스템은 결국 문자열에 의존하게 된다.</p>
+
+<p>처음에는 표준 예외만으로도 기능 구현이 가능해 보이지만, 서비스가 커질수록 문제가 드러난다. 예외 타입과 메시지 형식이 제각각이며, 비즈니스 오류인지 인프라 장애인지 구분하기 어렵다. 클라이언트는 문장 파싱에 가까운 분기 처리를 하게 되고, 서버는 로그를 봐도 무엇이 의도된 실패인지 판단하기 어렵다.</p>
+
+<p>예외에도 <strong>족보</strong>가 필요하다. 예외를 계층화하면 실패의 출처와 책임을 더 명확하게 통제할 수 있다.</p>
+
+<p>이 글의 범위는 <strong>서버 내부 예외 모델</strong>까지다. 즉, 공통 부모 예외, 계층별 예외, <code class="language-plaintext highlighter-rouge">ErrorCode</code>, <code class="language-plaintext highlighter-rouge">ProblemSpec</code>이 내부에서 어떤 책임을 가져야 하는지까지 설명한다.</p>
+
+<h3 id="평면적인-예외-정의의-문제">평면적인 예외 정의의 문제</h3>
+<hr />
+<p>예외를 즉흥적으로 추가하면 다음과 같은 문제가 발생한다.</p>
+
+<ol>
+  <li>동일한 실패 상황에서도 예외 타입과 메시지가 파편화된다.</li>
+  <li>예외가 발생한 계층의 역할이 모호해진다.</li>
+  <li>로그에서 의도된 비즈니스 실패와 실제 시스템 장애를 분리하기 어렵다.</li>
+  <li>예외 번역 책임이 뒤섞여 응답 계약도 흔들린다.</li>
+</ol>
+
+<h3 id="설계-목표">설계 목표</h3>
+<hr />
+<p>계층형 예외 설계의 목표는 명확하다.</p>
+
+<ol>
+  <li><strong>모든 커스텀 예외가 공통 부모를 따른다.</strong></li>
+  <li><strong>각 계층은 자기 책임에 맞는 예외만 던진다.</strong></li>
+  <li><strong>예외 번역 책임은 프레젠테이션 계층으로 밀어낸다.</strong></li>
+</ol>
+
+<h3 id="1-공통-부모-예외">1. 공통 부모 예외</h3>
+<hr />
+<p>모든 예외의 근간이 되는 <code class="language-plaintext highlighter-rouge">BaseException</code>은 최소한의 공통 계약만 가진다. 운영 코드에서는 <code class="language-plaintext highlighter-rouge">JgitkinsException</code>처럼 “명시 메시지가 없으면 기본 메시지로 fallback”하는 생성자 체계를 두는 편이 실용적이다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">ErrorCode</span> <span class="o">{</span>
+    <span class="nc">String</span> <span class="nf">getCode</span><span class="o">();</span>
+    <span class="nc">String</span> <span class="nf">getDefaultMessage</span><span class="o">();</span>
+<span class="o">}</span>
+
+<span class="kd">public</span> <span class="kd">abstract</span> <span class="kd">class</span> <span class="nc">BaseException</span> <span class="kd">extends</span> <span class="nc">RuntimeException</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">ErrorCode</span> <span class="n">errorCode</span><span class="o">;</span>
+
+    <span class="kd">protected</span> <span class="nf">BaseException</span><span class="o">(</span><span class="nc">ErrorCode</span> <span class="n">errorCode</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">(</span><span class="n">errorCode</span><span class="o">,</span> <span class="kc">null</span><span class="o">,</span> <span class="kc">null</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="kd">protected</span> <span class="nf">BaseException</span><span class="o">(</span><span class="nc">ErrorCode</span> <span class="n">errorCode</span><span class="o">,</span> <span class="nc">String</span> <span class="n">message</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">(</span><span class="n">errorCode</span><span class="o">,</span> <span class="n">message</span><span class="o">,</span> <span class="kc">null</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="kd">protected</span> <span class="nf">BaseException</span><span class="o">(</span><span class="nc">ErrorCode</span> <span class="n">errorCode</span><span class="o">,</span> <span class="nc">String</span> <span class="n">message</span><span class="o">,</span> <span class="nc">Throwable</span> <span class="n">cause</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kd">super</span><span class="o">((</span><span class="n">message</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">||</span> <span class="n">message</span><span class="o">.</span><span class="na">isBlank</span><span class="o">())</span>
+                <span class="o">?</span> <span class="n">errorCode</span><span class="o">.</span><span class="na">getDefaultMessage</span><span class="o">()</span>
+                <span class="o">:</span> <span class="n">message</span><span class="o">,</span> <span class="n">cause</span><span class="o">);</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">errorCode</span> <span class="o">=</span> <span class="n">errorCode</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="nc">ErrorCode</span> <span class="nf">getErrorCode</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">errorCode</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="2-계층별-예외-분리">2. 계층별 예외 분리</h3>
+<hr />
+
+<ul>
+  <li><strong><code class="language-plaintext highlighter-rouge">ApplicationException</code></strong>: 흐름 제어, 조회 결과, 권한</li>
+  <li><strong><code class="language-plaintext highlighter-rouge">DomainException</code></strong>: 비즈니스 규칙, 상태 전이, 정책 위반</li>
+  <li><strong><code class="language-plaintext highlighter-rouge">InfrastructureException</code></strong>: DB, 파일시스템, 외부 라이브러리 실패</li>
+</ul>
+
+<p>이렇게 나누면 실패 원인을 “무슨 일이 일어났는가”뿐 아니라 “어느 계층 책임인가”까지 함께 표현할 수 있다.</p>
+
+<h3 id="3-계층별-베이스-예외">3. 계층별 베이스 예외</h3>
+<hr />
+<p>이제 <code class="language-plaintext highlighter-rouge">BaseException</code>을 상속받아 계층별 최상위 예외를 만든다. 각 계층은 자기 계층의 명세만 받도록 제한해야 한다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">abstract</span> <span class="kd">class</span> <span class="nc">DomainException</span> <span class="kd">extends</span> <span class="nc">BaseException</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">DomainProblemSpec</span> <span class="n">problemSpec</span><span class="o">;</span>
+
+    <span class="kd">protected</span> <span class="nf">DomainException</span><span class="o">(</span><span class="nc">DomainProblemSpec</span> <span class="n">problemSpec</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kd">super</span><span class="o">(</span><span class="n">problemSpec</span><span class="o">.</span><span class="na">getErrorCode</span><span class="o">());</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">problemSpec</span> <span class="o">=</span> <span class="n">problemSpec</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">getSpecificCode</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">problemSpec</span><span class="o">.</span><span class="na">getCode</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">abstract</span> <span class="kd">class</span> <span class="nc">ApplicationException</span> <span class="kd">extends</span> <span class="nc">BaseException</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">ApplicationProblemSpec</span> <span class="n">problemSpec</span><span class="o">;</span>
+
+    <span class="kd">protected</span> <span class="nf">ApplicationException</span><span class="o">(</span><span class="nc">ApplicationProblemSpec</span> <span class="n">problemSpec</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kd">super</span><span class="o">(</span><span class="n">problemSpec</span><span class="o">.</span><span class="na">getErrorCode</span><span class="o">());</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">problemSpec</span> <span class="o">=</span> <span class="n">problemSpec</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">getSpecificCode</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">problemSpec</span><span class="o">.</span><span class="na">getCode</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">abstract</span> <span class="kd">class</span> <span class="nc">InfrastructureException</span> <span class="kd">extends</span> <span class="nc">BaseException</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">InfrastructureProblemSpec</span> <span class="n">problemSpec</span><span class="o">;</span>
+
+    <span class="kd">protected</span> <span class="nf">InfrastructureException</span><span class="o">(</span><span class="nc">InfrastructureProblemSpec</span> <span class="n">problemSpec</span><span class="o">,</span> <span class="nc">Throwable</span> <span class="n">cause</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kd">super</span><span class="o">(</span><span class="n">problemSpec</span><span class="o">.</span><span class="na">getErrorCode</span><span class="o">(),</span> <span class="kc">null</span><span class="o">,</span> <span class="n">cause</span><span class="o">);</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">problemSpec</span> <span class="o">=</span> <span class="n">problemSpec</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">getSpecificCode</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">problemSpec</span><span class="o">.</span><span class="na">getCode</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>이 구조는 도메인 로직에서 인프라 예외를 던지는 식의 계층 오염을 컴파일 타임에 줄여 준다.</p>
+
+<h3 id="4-번역-책임의-위치">4. 번역 책임의 위치</h3>
+<hr />
+<p>비즈니스 로직은 순수하게 예외만 던지고, 이를 실제 HTTP 응답으로 바꾸는 책임은 <code class="language-plaintext highlighter-rouge">@RestControllerAdvice</code>가 담당한다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@RestControllerAdvice</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">GlobalExceptionAdvisor</span> <span class="o">{</span>
+
+    <span class="nd">@ExceptionHandler</span><span class="o">(</span><span class="nc">ApplicationException</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="nc">ResponseEntity</span><span class="o">&lt;</span><span class="nc">CommonResponse</span><span class="o">&lt;?&gt;&gt;</span> <span class="n">handleApplicationException</span><span class="o">(</span><span class="nc">ApplicationException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">HttpStatus</span> <span class="n">status</span> <span class="o">=</span> <span class="n">determineHttpStatus</span><span class="o">(</span><span class="n">e</span><span class="o">.</span><span class="na">getErrorCode</span><span class="o">());</span>
+        <span class="k">return</span> <span class="nc">ResponseEntity</span><span class="o">.</span><span class="na">status</span><span class="o">(</span><span class="n">status</span><span class="o">)</span>
+                <span class="o">.</span><span class="na">body</span><span class="o">(</span><span class="nc">CommonResponse</span><span class="o">.</span><span class="na">fail</span><span class="o">(</span><span class="n">e</span><span class="o">.</span><span class="na">getSpecificCode</span><span class="o">(),</span> <span class="n">e</span><span class="o">.</span><span class="na">getMessage</span><span class="o">()));</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>이 시점까지는 아직 <strong>서버 내부 모델</strong>이다. 실제 외부 응답 포맷 자체는 다음 글에서 다룬다.</p>
+
+<h3 id="5-errorcode는-분류다">5. ErrorCode는 분류다</h3>
+<hr />
+<p>예외 계층만 나눈다고 계약이 완성되지는 않는다. 각 계층이 가질 수 있는 <strong>상태 범주</strong>도 정리해야 한다.</p>
+
+<p><code class="language-plaintext highlighter-rouge">ErrorCode</code>의 구현체인 enum에는 <code class="language-plaintext highlighter-rouge">"USER-404"</code> 같은 구체 코드를 넣지 않는다. 대신 각 계층이 가질 수 있는 <strong>본질적인 실패 범주</strong>만 둔다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="nc">DomainErrorCode</span> <span class="kd">implements</span> <span class="nc">ErrorCode</span> <span class="o">{</span>
+    <span class="no">RULE_VIOLATION</span><span class="o">(</span><span class="s">"RULE_VIOLATION"</span><span class="o">,</span> <span class="s">"Domain rule violation"</span><span class="o">),</span>
+    <span class="no">INVALID_STATE</span><span class="o">(</span><span class="s">"INVALID_STATE"</span><span class="o">,</span> <span class="s">"Domain state transition is invalid"</span><span class="o">),</span>
+    <span class="no">POLICY_VIOLATION</span><span class="o">(</span><span class="s">"POLICY_VIOLATION"</span><span class="o">,</span> <span class="s">"Domain policy violation"</span><span class="o">);</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>예를 들면:</p>
+
+<ul>
+  <li><strong><code class="language-plaintext highlighter-rouge">ApplicationErrorCode</code></strong>: 흐름 제어, 인증/인가, 조회 결과</li>
+  <li><strong><code class="language-plaintext highlighter-rouge">DomainErrorCode</code></strong>: 비즈니스 규칙, 상태 전이, 정책 위반</li>
+  <li><strong><code class="language-plaintext highlighter-rouge">InfraErrorCode</code></strong>: DB, 파일시스템, 외부 라이브러리 실패</li>
+</ul>
+
+<h3 id="6-problemspec은-공개-명세다">6. ProblemSpec은 공개 명세다</h3>
+<hr />
+<p><code class="language-plaintext highlighter-rouge">ProblemSpec</code>이 필요한 이유는 단순히 <code class="language-plaintext highlighter-rouge">"USER-404"</code> 같은 문자열을 한곳에 모으기 위해서가 아니다. 더 중요한 목적은 <strong>계층별 상태 범주와 예외별 식별자를 분리</strong>하는 데 있다.</p>
+
+<p><code class="language-plaintext highlighter-rouge">ApplicationErrorCode</code>, <code class="language-plaintext highlighter-rouge">DomainErrorCode</code>, <code class="language-plaintext highlighter-rouge">InfrastructureErrorCode</code>는 각 계층이 가질 수 있는 <strong>본질적인 실패 범주</strong>만 표현해야 한다. 반대로 클라이언트가 분기 처리에 사용할 <code class="language-plaintext highlighter-rouge">"USER-404"</code>, <code class="language-plaintext highlighter-rouge">"REPO-409"</code> 같은 식별자는 훨씬 더 구체적이고 자주 늘어나거나 바뀔 수 있다. 이 식별자까지 <code class="language-plaintext highlighter-rouge">ErrorCode</code> enum에 넣어버리면, 계층 enum이 범주 표현이 아니라 개별 사례 목록으로 비대해진다.</p>
+
+<p>그래서 <code class="language-plaintext highlighter-rouge">ProblemSpec</code>은 <strong>계층 enum을 건드리지 않고도</strong>, 예외별 식별 코드, 기본 메시지, 메시지 키 같은 구체 명세를 중앙에서 관리하게 해 준다. 즉, <code class="language-plaintext highlighter-rouge">ErrorCode</code>는 <strong>분류</strong>, <code class="language-plaintext highlighter-rouge">ProblemSpec</code>은 <strong>공개 명세</strong>다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">ProblemSpec</span><span class="o">&lt;</span><span class="no">T</span> <span class="kd">extends</span> <span class="nc">ErrorCode</span><span class="o">&gt;</span> <span class="o">{</span>
+    <span class="no">T</span> <span class="nf">getErrorCode</span><span class="o">();</span>
+    <span class="nc">String</span> <span class="nf">getCode</span><span class="o">();</span>
+    <span class="nc">String</span> <span class="nf">getDefaultMessage</span><span class="o">();</span>
+    <span class="nc">String</span> <span class="nf">getMessageKey</span><span class="o">();</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>실무에서는 공통 <code class="language-plaintext highlighter-rouge">ProblemSpec</code> 인터페이스 위에 계층별 카탈로그 enum을 두는 방식이 가장 단순하다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="nc">ApplicationProblemSpec</span> <span class="kd">implements</span> <span class="nc">ProblemSpec</span><span class="o">&lt;</span><span class="nc">ApplicationErrorCode</span><span class="o">&gt;</span> <span class="o">{</span>
+    <span class="no">USER_NOT_FOUND</span><span class="o">(</span><span class="nc">ApplicationErrorCode</span><span class="o">.</span><span class="na">NOT_FOUND</span><span class="o">,</span> <span class="s">"USER-404"</span><span class="o">,</span> <span class="s">"User not found"</span><span class="o">,</span> <span class="s">"user.notFound"</span><span class="o">);</span>
+    <span class="c1">// 필드, 생성자, getter 생략</span>
+<span class="o">}</span>
+
+<span class="kd">public</span> <span class="kd">enum</span> <span class="nc">DomainProblemSpec</span> <span class="kd">implements</span> <span class="nc">ProblemSpec</span><span class="o">&lt;</span><span class="nc">DomainErrorCode</span><span class="o">&gt;</span> <span class="o">{</span>
+    <span class="no">INVALID_ORDER_STATE</span><span class="o">(</span><span class="nc">DomainErrorCode</span><span class="o">.</span><span class="na">INVALID_STATE</span><span class="o">,</span> <span class="s">"ORDER-409"</span><span class="o">,</span> <span class="s">"Order state is invalid"</span><span class="o">,</span> <span class="s">"order.invalidState"</span><span class="o">);</span>
+    <span class="c1">// 필드, 생성자, getter 생략</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="7-커스텀-예외와의-결합">7. 커스텀 예외와의 결합</h3>
+<hr />
+<p>실제 비즈니스 로직에서는 상태(Enum)와 코드(String)를 예외 클래스 내부 문자열이 아니라, 계층별 <code class="language-plaintext highlighter-rouge">ProblemSpec</code> 카탈로그에서 결합한다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">UserNotFoundException</span> <span class="kd">extends</span> <span class="nc">ApplicationException</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="nf">UserNotFoundException</span><span class="o">()</span> <span class="o">{</span>
+        <span class="kd">super</span><span class="o">(</span><span class="nc">ApplicationProblemSpec</span><span class="o">.</span><span class="na">USER_NOT_FOUND</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">InvalidOrderStateException</span> <span class="kd">extends</span> <span class="nc">DomainException</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="nf">InvalidOrderStateException</span><span class="o">()</span> <span class="o">{</span>
+        <span class="kd">super</span><span class="o">(</span><span class="nc">DomainProblemSpec</span><span class="o">.</span><span class="na">INVALID_ORDER_STATE</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>이렇게 하면 예외 클래스는 “무슨 상황인가”만 표현하고, 코드 체계의 유일성과 명세 소유권은 <code class="language-plaintext highlighter-rouge">ProblemSpec</code> 카탈로그에 모을 수 있다.</p>
+
+<h3 id="closing">Closing</h3>
+<hr />
+<p>예외 계층, <code class="language-plaintext highlighter-rouge">ErrorCode</code>, <code class="language-plaintext highlighter-rouge">ProblemSpec</code>을 함께 정리하면 내부 예외 모델의 뼈대가 완성된다. 이 글의 목적은 어디까지나 <strong>서버 내부에서 실패를 어떻게 모델링할 것인가</strong>를 정리하는 데 있다.</p>
+
+<p>다음 글에서는 이 내부 예외 모델을 바탕으로 <a href="/modern-beautiful-api-response-design-external-error-contract.html"><strong>외부 에러 응답 계약</strong></a>을 어떻게 설계할지 다룬다.</p>]]></content><author><name>HwiRyung Kim</name></author><category term="design" /><summary type="html"><![CDATA[TOC Overview 평면적인 예외 정의의 문제 설계 목표 1. 공통 부모 예외 2. 계층별 예외 분리 3. 계층별 베이스 예외 4. 번역 책임의 위치 5. ErrorCode는 분류다 6. ProblemSpec은 공개 명세다 7. 커스텀 예외와의 결합 Closing]]></summary></entry><entry><title type="html">Modern Beautiful API Response Design: Prologue</title><link href="https://hrllk.github.io/modern-beautiful-api-response-design-prologue.html" rel="alternate" type="text/html" title="Modern Beautiful API Response Design: Prologue" /><published>2026-03-15T00:00:00+00:00</published><updated>2026-03-15T00:00:00+00:00</updated><id>https://hrllk.github.io/modern-beautiful-api-response-design-prologue</id><content type="html" xml:base="https://hrllk.github.io/modern-beautiful-api-response-design-prologue.html"><![CDATA[<h3 id="toc">TOC</h3>
+<hr />
+<ol>
+  <li><a href="#overview">Overview</a></li>
+  <li><a href="#목표">목표</a></li>
+  <li><a href="#연재-계획">연재 계획</a></li>
+  <li><a href="#약속-our-principle">약속 (Our Principle)</a></li>
+  <li><a href="#next-step">Next Step</a></li>
+</ol>
+
+<h3 id="overview">Overview</h3>
+<hr />
+<p>API 응답 시스템은 보통 프로젝트 후반에 뒤늦게 손보게 된다. 초반에는 기능 구현이 우선이라 예외 메시지, HTTP 상태 코드, 에러 JSON 포맷이 제각각으로 흩어지기 쉽다.</p>
+
+<p>하지만 시스템이 커질수록 이 파편화는 곧 협업 비용이 된다. 프론트엔드는 매번 다른 에러 형태에 맞춰 분기해야 하고, 백엔드는 로그에서 의도된 비즈니스 실패와 실제 장애를 구분하느라 시간을 낭비한다.</p>
+
+<p>견고하고 예측 가능한 API를 만들려면 세 가지를 함께 설계해야 한다.</p>
+
+<ol>
+  <li>예외를 어떤 기준으로 분류할 것인가</li>
+  <li>그 예외를 어떤 공통 응답 포맷으로 번역할 것인가</li>
+  <li>그 번역 책임을 아키텍처 어디에 둘 것인가</li>
+</ol>
+
+<p>이 시리즈는 바로 이 세 질문에 답하기 위한 글이다. 첫 글에서는 전체 그림과 연재 순서를 정리하고, 이어지는 글들에서 예외 계약, 응답 포맷, 예외 핸들러의 위치를 순서대로 다룬다.</p>
+
+<h3 id="목표">목표</h3>
+<hr />
+<p>이 시리즈가 해결하려는 핵심 목표는 아래와 같다.</p>
+
+<ul>
+  <li><strong>예외 계약 정리:</strong> 예외를 계층별로 분류하고, 상태 범주와 식별 코드를 분리한다.</li>
+  <li><strong>응답 포맷 통일:</strong> 내부 예외를 일관된 외부 API 응답으로 번역한다.</li>
+  <li><strong>아키텍처 정합성 확보:</strong> 예외 번역 책임을 헥사고날 아키텍처에 맞는 위치에 둔다.</li>
+</ul>
+
+<h3 id="연재-계획">연재 계획</h3>
+<hr />
+<ol>
+  <li><strong>[프롤로그] 왜 API 응답 설계를 별도로 다뤄야 하는가</strong><br />
+<a href="/modern-beautiful-api-response-design-prologue.html"><em>현재 글 보기</em></a></li>
+  <li><strong>[1편] 서버 내부에서 실패를 어떻게 모델링할 것인가: Internal Exception Model</strong><br />
+<a href="/modern-beautiful-api-response-design-internal-exception-model.html">modern-beautiful-api-response-design-internal-exception-model.html</a></li>
+  <li><strong>[2편] 클라이언트에게 어떤 에러 계약을 보여줄 것인가: External Error Contract</strong><br />
+<a href="/2026-03-17-modern-beautiful-api-response-design-external-error-contract.html">2026-03-17-modern-beautiful-api-response-design-external-error-contract.html</a></li>
+  <li><strong>[3편] 내부 모델과 외부 계약을 어디서 연결할 것인가: Exception Translation Layer</strong><br />
+<a href="/2026-03-18-modern-beautiful-api-response-design-exception-translation-layer.html">2026-03-18-modern-beautiful-api-response-design-exception-translation-layer.html</a></li>
+</ol>
+
+<!--
+5. **[Draft] Exception Scaffolding Draft**  
+   [/2026/03/19/modern-beautiful-api-response-design-exception-scaffolding-draft.html](/2026/03/19/modern-beautiful-api-response-design-exception-scaffolding-draft.html)
+-->
+
+<h3 id="약속-our-principle">약속 (Our Principle)</h3>
+<hr />
+<ul>
+  <li><strong>분리:</strong> 예외 분류, 응답 포맷, 번역 책임을 한 글에 모두 밀어 넣지 않는다.</li>
+  <li><strong>명확성:</strong> 클라이언트와 서버가 모두 이해할 수 있는 안정적인 계약을 지향한다.</li>
+  <li><strong>정합성:</strong> 단순한 코드 스타일이 아니라 아키텍처 책임 분리까지 함께 검토한다.</li>
+</ul>
+
+<h3 id="next-step">Next Step</h3>
+<hr />
+
+<p>다음 포스트에서는 <a href="/modern-beautiful-api-response-design-internal-exception-model.html">Modern Beautiful API Response Design: Internal Exception Model</a> 을 다룬다.
+먼저 서버 내부에서 실패를 어떻게 모델링할지부터 정리한다.</p>]]></content><author><name>HwiRyung Kim</name></author><category term="design" /><summary type="html"><![CDATA[TOC Overview 목표 연재 계획 약속 (Our Principle) Next Step]]></summary></entry><entry><title type="html">when should switch working clone to bare clone</title><link href="https://hrllk.github.io/when-should-switch-working-clone-to-bare-clone.html" rel="alternate" type="text/html" title="when should switch working clone to bare clone" /><published>2026-03-13T00:00:00+00:00</published><updated>2026-03-13T00:00:00+00:00</updated><id>https://hrllk.github.io/when-should-switch-working-clone-to-bare-clone</id><content type="html" xml:base="https://hrllk.github.io/when-should-switch-working-clone-to-bare-clone.html"><![CDATA[<h3 id="overview">Overview</h3>
+<hr />
+<p>Git 저장소를 다룰 때 우리는 습관적으로 <code class="language-plaintext highlighter-rouge">git clone</code> 결과를 작업 디렉터리까지 포함한 형태로 받아온다.
+이 방식은 익숙하고 직관적이다.
+클론이 끝나면 곧바로 소스 파일을 열어볼 수 있고, 수정도 가능하며, 빌드나 테스트도 바로 수행할 수 있다.</p>
+
+<p>그런데 모든 작업이 정말 working tree를 필요로 하는 것은 아니다.
+어떤 작업은 실제 소스 파일을 한 줄도 읽지 않고, 오직 Git metadata만으로 끝난다.
+예를 들어 변경 이력 비교, ref 조회, fetch, commit graph 탐색 같은 작업은 <code class="language-plaintext highlighter-rouge">.git</code> 내부 정보만으로도 충분히 수행할 수 있다.</p>
+
+<p>이 지점에서 자연스럽게 질문이 생긴다.</p>
+
+<blockquote>
+  <p>“working clone이 아니라 bare clone으로 바꾸면 비용을 더 줄일 수 있지 않을까?”</p>
+</blockquote>
+
+<p>이번 글은 이 질문에 대해 정리한 초안이다.
+핵심은 단순히 <code class="language-plaintext highlighter-rouge">bare clone이 더 빠르다</code> 라는 결론을 내리는 것이 아니라, 어떤 경우에는 bare clone이 맞고 어떤 경우에는 여전히 working clone이 필요하다는 점을 경계선 중심으로 설명하는 데 있다.</p>
+
+<h3 id="차이점">차이점?</h3>
+<hr />
+<blockquote>
+  <p>Working Clone과 Bare Clone은 무엇이 다를까?</p>
+</blockquote>
+
+<p><code class="language-plaintext highlighter-rouge">working clone</code> 은 우리가 가장 익숙하게 사용하는 형태의 클론이다.
+Git object database와 refs 정보가 <code class="language-plaintext highlighter-rouge">.git</code> 디렉터리 안에 저장되고, 동시에 현재 브랜치 기준의 실제 파일들도 working tree에 풀린다.
+즉, Git 내부 데이터와 사람이 보는 소스 트리가 함께 생성된다.</p>
+
+<p>반면 <code class="language-plaintext highlighter-rouge">bare clone</code> 은 working tree가 없다.
+저장소 자체가 곧 Git metadata 저장소이며, 일반적으로 ref, object, pack file 중심의 구조만 남는다.
+그래서 bare 저장소를 열어보면 Java 파일, YAML 파일, Gradle 파일이 보이지 않는다.
+대신 <code class="language-plaintext highlighter-rouge">HEAD</code>, <code class="language-plaintext highlighter-rouge">config</code>, <code class="language-plaintext highlighter-rouge">packed-refs</code>, <code class="language-plaintext highlighter-rouge">objects/pack/*.pack</code>, <code class="language-plaintext highlighter-rouge">objects/pack/*.idx</code> 같은 Git 내부 파일 위주로 구성된다.</p>
+
+<p>이 차이는 단순한 저장 형태의 차이가 아니라 비용 구조의 차이이기도 하다.
+working clone은 fetch 이후 checkout 단계까지 수행해야 하므로 파일 생성, 디렉터리 생성, metadata 기록, 권한 반영 등 추가 파일시스템 작업이 따라온다.
+bare clone은 이 checkout 단계를 생략하므로 생성 파일 수와 디스크 사용량을 눈에 띄게 줄일 수 있다.</p>
+
+<h3 id="why">Why?</h3>
+<hr />
+<blockquote>
+  <p>왜 Bare Clone이 더 가벼워 보일까?</p>
+</blockquote>
+
+<p>실제로 성능 테스트를 수행해보면 working clone과 bare clone의 결과는 꽤 다르게 보인다.
+예를 들어 한 테스트에서는 working clone 결과가 약 <code class="language-plaintext highlighter-rouge">2781</code>개의 일반 파일과 <code class="language-plaintext highlighter-rouge">160 MiB</code> 수준의 디렉터리 크기로 측정되었고, bare clone 결과는 약 <code class="language-plaintext highlighter-rouge">6</code>개의 일반 파일과 <code class="language-plaintext highlighter-rouge">66 MiB</code> 수준으로 측정되었다.</p>
+
+<p>이 수치만 보면 bare clone이 압도적으로 가볍다고 느껴진다.
+실제로도 디스크 점유량과 생성 파일 수 관점에서는 그 해석이 크게 틀리지 않다.
+다만 여기서 오해하면 안 되는 부분이 있다.</p>
+
+<p>bare 저장소의 파일 수가 작게 보이는 이유는 “저장소 데이터가 거의 없다”는 뜻이 아니라, Git 객체가 pack file 중심으로 묶여 있고 working tree가 생성되지 않았기 때문이다.
+즉, 소스 파일 수천 개가 사라진 것이 아니라 체크아웃되지 않은 상태로 <code class="language-plaintext highlighter-rouge">.pack</code> 내부에 압축되어 보관된 것이다.</p>
+
+<p>그래서 bare clone의 비용 절감은 주로 아래 두 축에서 발생한다.</p>
+
+<p>첫째, checkout 대상 파일을 만들지 않으므로 일반 파일 수가 극적으로 줄어든다.
+둘째, working tree를 유지하기 위한 추가 파일시스템 I/O가 줄어든다.</p>
+
+<p>이 두 가지는 특히 저장소 파일 수가 많거나, 동일한 작업을 반복 수행하거나, 디스크 I/O가 병목인 환경에서 의미를 가진다.</p>
+
+<h3 id="너무-많은-기대">너무 많은 기대</h3>
+<hr />
+<p>필자의 경우 “working clone은 파일을 엄청 많이 만들기 때문에 bare clone보다 훨씬 느릴 것”이라고 예상했다.
+그러나 이 직관은 절반만 맞다.</p>
+
+<p>실제 clone 시간은 checkout 비용만으로 결정되지 않는다.
+clone 전체 시간에는 원격 서버와의 통신, 인증, refs 광고, 객체 협상, pack 생성, pack 다운로드, object database 기록, 그리고 마지막 checkout까지 여러 단계가 함께 포함된다.</p>
+
+<p>이 말은 곧, working clone이 추가적인 파일시스템 비용을 가지는 것은 맞지만, 전체 시간에서 그 비중이 항상 압도적이지는 않다는 뜻이다.
+네트워크 상태가 지배적이거나, 서버 측 pack 생성 시간이 큰 경우, 또는 로컬 디스크가 충분히 빠른 경우에는 working clone과 bare clone의 시간 차이가 생각보다 작게 나타날 수 있다.</p>
+
+<p>즉, <code class="language-plaintext highlighter-rouge">파일 수 차이</code> 와 <code class="language-plaintext highlighter-rouge">시간 차이</code> 는 같은 방향으로 움직일 가능성은 높지만, 항상 같은 비율로 벌어지지는 않는다.
+실무에서 bare clone의 가치를 설명할 때도 시간만 강조하기보다, 디스크 사용량 감소와 checkout 제거라는 구조적 차이를 함께 설명하는 편이 더 설득력이 있다.</p>
+
+<h3 id="bare-clone-가능한-경우">Bare Clone 가능한 경우</h3>
+<hr />
+<p>여기서 가장 중요한 결론이 나온다.
+bare clone이 더 가벼워 보인다고 해서 모든 clone 경로를 bare로 통일하는 것은 좋은 전략이 아니다.</p>
+
+<p>기준은 단순하다.
+그 작업이 <code class="language-plaintext highlighter-rouge">working tree를 실제로 필요로 하는가</code>를 먼저 봐야 한다.</p>
+
+<p>예를 들어 다음과 같은 작업은 bare clone과 잘 맞는다.</p>
+
+<p>ref 조회나 브랜치 상태 비교처럼 Git metadata만 읽는 작업이 그렇다.
+또는 fetch 이후 commit graph를 비교하거나, 특정 브랜치 간 변경 파일 목록을 산출하는 작업도 candidate가 될 수 있다.
+이 경우 애초에 Java 소스 파일이나 YAML 파일을 실제 경로에서 열지 않기 때문에, working tree를 만드는 행위 자체가 비용만 추가할 수 있다.</p>
+
+<p>반대로 다음과 같은 작업은 bare clone으로 바꾸기 어렵다.</p>
+
+<p>소스 파일을 실제 경로로 읽어야 하는 정적 분석 작업이 그렇다.
+빌드 도구를 실행해야 하는 테스트 경로도 마찬가지다.
+클론한 디렉터리 안에서 압축을 풀거나 파일을 수정한 뒤 commit/push 하는 흐름 역시 working tree가 반드시 필요하다.</p>
+
+<p>결국 bare clone은 “더 좋은 clone”이라기보다 “특정 작업에 더 적합한 clone”이다.
+모든 곳에 적용하는 범용 최적화가 아니라, metadata 중심 작업을 분리해 적용하는 선택적 최적화에 가깝다.</p>
+
+<!-- ### 비용 절감 사례는 어떻게 정리하면 좋은가 -->
+<!-- --- -->
+<!-- 만약 팀 차원에서 "기존에는 working clone을 사용했지만, bare clone으로 전환하여 비용을 줄였다"는 내용을 정리하고 싶다면, 그 문장은 반드시 범위를 제한해서 써야 한다. -->
+<!---->
+<!-- 예를 들어 아래와 같은 서술이 더 안전하다. -->
+<!---->
+<!-- working tree가 필요하지 않은 Git metadata 중심 작업을 식별한 뒤, 해당 경로에 한해 working clone을 bare clone으로 전환하였다. -->
+<!-- 그 결과 생성 파일 수와 디스크 사용량을 크게 줄일 수 있었고, clone 소요 시간도 일부 절감할 수 있었다. -->
+<!-- 다만 소스 파일 직접 접근, 빌드, 테스트, 파일 수정이 필요한 경로는 기존 working clone을 유지하였다. -->
+<!---->
+<!-- 이 정리는 두 가지 점에서 중요하다. -->
+<!-- 하나는 bare clone의 장점을 과장하지 않는다는 점이다. -->
+<!-- 다른 하나는 시스템 기능을 깨지 않으면서도 최적화 포인트를 정확히 좁혔다는 점이다. -->
+<!---->
+<!-- 특히 비용 절감 항목은 아래 세 축으로 정리하면 좋다. -->
+<!---->
+<!-- 첫째, 결과 디렉터리 크기가 얼마나 줄었는가. -->
+<!-- 둘째, 생성 파일 수가 얼마나 줄었는가. -->
+<!-- 셋째, 전체 clone 시간이 어느 정도 줄었는가. -->
+<!---->
+<!-- 여기서 가장 안정적으로 설명 가능한 지표는 대개 크기와 파일 수다. -->
+<!-- 시간은 환경, 네트워크, 캐시의 영향을 크게 받기 때문에 "유의미한 감소가 관측되었다" 정도로 표현하는 편이 보수적이다. -->
+
+<!-- ### 정리하면서 남는 한 가지 질문 -->
+<!-- --- -->
+<!-- bare clone을 적용할 수 없는 경로가 많다면, 중간 대안은 없을까. -->
+<!---->
+<!-- 이 질문에 대한 현실적인 답 중 하나는 `no-checkout clone` 이다. -->
+<!-- 이 방식은 Git metadata는 먼저 받아두되, working tree를 즉시 만들지 않는 방식으로 접근할 수 있다. -->
+<!-- 즉, bare clone만큼 극단적이지 않으면서도 checkout 비용을 뒤로 미룰 수 있다. -->
+<!---->
+<!-- 그래서 실무에서는 `working clone` 과 `bare clone` 사이에 `no-checkout clone` 같은 완충 지점을 두고, 실제 호출부의 요구사항에 맞게 분기하는 방식이 더 현실적일 수 있다. -->
+<!-- 모든 경로를 bare로 바꾸는 것보다, 어떤 경로는 bare, 어떤 경로는 no-checkout, 어떤 경로는 기존 working clone을 유지하는 식의 다층 전략이 오히려 시스템 친화적이다. -->
+
+<h3 id="conclusion">Conclusion</h3>
+<hr />
+<!-- bare clone은 분명 매력적이다. -->
+
+<!-- 하지만 이 장점은 "모든 clone에 적용 가능한 절대 해법"으로 받아들일 때 오히려 독이 된다. -->
+<!-- 실제 시스템에서는 어떤 작업은 working tree를 반드시 필요로 하고, 어떤 작업은 `.git` 정보만으로 충분하다. -->
+<!---->
+<!-- 그래서 더 정확한 질문은 "`bare clone이 더 좋은가?`"가 아니라 "`이 작업은 working tree가 정말 필요한가?`"에 가깝다. -->
+<!-- 이 질문에 답할 수 있을 때 비로소 bare clone은 안전한 최적화가 된다. -->
+
+<p>bare clone은 working tree를 만들지 않기 때문에 생성 파일 수를 극적으로 줄일 수 있고, 디스크 사용량과 checkout 비용도 함께 낮출 수 있다.
+하지만 모든 행위에 대해 적용 가능한 절대 해법이 아니라, 어떤 행위를 수행하는지에 따라 clone 방식이 결정되어야 한다.</p>]]></content><author><name>HwiRyung Kim</name></author><category term="tools" /><summary type="html"><![CDATA[Overview Git 저장소를 다룰 때 우리는 습관적으로 git clone 결과를 작업 디렉터리까지 포함한 형태로 받아온다. 이 방식은 익숙하고 직관적이다. 클론이 끝나면 곧바로 소스 파일을 열어볼 수 있고, 수정도 가능하며, 빌드나 테스트도 바로 수행할 수 있다.]]></summary></entry></feed>
