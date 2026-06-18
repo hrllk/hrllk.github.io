@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>JVM new와 Eden: 객체가 처음 할당되는 곳</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="JVM new와 Eden: 객체가 처음 할당되는 곳" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="TOC Overview Eden이란? new와 Eden의 동작 개념 bump pointer Eden 다음에는 어디로 가는가 Conclusion Next Step" />
+<meta property="og:description" content="TOC Overview Eden이란? new와 Eden의 동작 개념 bump pointer Eden 다음에는 어디로 가는가 Conclusion Next Step" />
+<link rel="canonical" href="https://hrllk.github.io/jvm-new-and-eden.html" />
+<meta property="og:url" content="https://hrllk.github.io/jvm-new-and-eden.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-01-09T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="JVM new와 Eden: 객체가 처음 할당되는 곳" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2021-01-09T00:00:00+00:00","datePublished":"2021-01-09T00:00:00+00:00","description":"TOC Overview Eden이란? new와 Eden의 동작 개념 bump pointer Eden 다음에는 어디로 가는가 Conclusion Next Step","headline":"JVM new와 Eden: 객체가 처음 할당되는 곳","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/jvm-new-and-eden.html"},"url":"https://hrllk.github.io/jvm-new-and-eden.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2021-01-09 00:00:00 +0000">2021-01-09</time>
+  </p>
+  
+  <h1>JVM new와 Eden: 객체가 처음 할당되는 곳</h1>
+
+  <h3 id="toc">TOC</h3>
+<hr />
+<ol>
+  <li><a href="#overview">Overview</a></li>
+  <li><a href="#eden이란">Eden이란?</a></li>
+  <li><a href="#new와-eden의-동작-개념">new와 Eden의 동작 개념</a></li>
+  <li><a href="#bump-pointer">bump pointer</a></li>
+  <li><a href="#eden-다음에는-어디로-가는가">Eden 다음에는 어디로 가는가</a></li>
+  <li><a href="#conclusion">Conclusion</a></li>
+  <li><a href="#next-step">Next Step</a></li>
+</ol>
+
+<h3 id="overview">Overview</h3>
+<hr />
+<p>앞 글인 <a href="/java-object-memory-layout.html">Java 객체 생성과 메모리 배치</a>에서는 <code class="language-plaintext highlighter-rouge">new</code>를 만나면 인스턴스가 heap에 만들어지고, 참조는 stack/local variable에 저장된다는 흐름을 다뤘다.</p>
+
+<p>그다음 질문은 이것이다.</p>
+
+<p><code class="language-plaintext highlighter-rouge">new</code>로 만들어진 객체는 heap 안에서도 어디에서 처음 자리를 잡을까?</p>
+
+<p>heap의 큰 구조는 <a href="/jvm-heap-structure-and-object-placement.html">JVM heap 구조와 객체 배치</a>에서 먼저 정리했다. 이번 글에서는 그중에서도 새 객체가 처음 들어가는 <code class="language-plaintext highlighter-rouge">Eden</code>에 대해 다룬다.</p>
+
+<h3 id="eden이란">Eden이란?</h3>
+<hr />
+<p><code class="language-plaintext highlighter-rouge">Eden</code>은 <code class="language-plaintext highlighter-rouge">Young Generation</code> 안에서 새 객체가 처음 자리를 잡는 영역이다.</p>
+
+<pre><code class="language-mermaid">flowchart TB
+    Start["new"]
+
+    subgraph Heap["Heap"]
+        direction TB
+
+        subgraph Young["Young Generation"]
+            direction LR
+            Eden["Eden"]
+            S0["Survivor 0"]
+            S1["Survivor 1"]
+        end
+
+        subgraph OldGen["Old Generation"]
+            direction TB
+            Old["Old / Tenured"]
+        end
+    end
+
+    Start --&gt;|new| Eden
+    Eden --&gt;|Minor GC 후 생존| S0
+    S0 --&gt;|Aging| S1
+    S1 --&gt;|Promotion| Old
+
+    class Eden edenStyle
+
+    classDef edenStyle fill:#fff3cd,stroke:#f59e0b,stroke-width:4px,color:#111,font-weight:bold
+</code></pre>
+
+<p>일반적인 경우 새 객체는 <code class="language-plaintext highlighter-rouge">Young Generation</code> 안에서도 <code class="language-plaintext highlighter-rouge">Eden</code> 영역에서부터 시작된다.</p>
+
+<p>그래서 <code class="language-plaintext highlighter-rouge">Eden</code>은 이 글에서 <strong>새 객체의 시작점</strong>이자 <strong>빠른 할당 구역</strong>으로 정의 할 수 있다.</p>
+
+<h3 id="new와-eden의-동작-개념">new와 Eden의 동작 개념</h3>
+<hr />
+<p><code class="language-plaintext highlighter-rouge">new</code>가 실행되면 JVM은 heap 내부의 Eden에 객체를 만들 공간을 확보해야 한다.</p>
+
+<p>이때 기본 흐름은 아래처럼 생각할 수 있다.</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>new Object()
+-&gt; 객체 크기 계산
+-&gt; Young Generation의 Eden 확인
+-&gt; Eden에 공간이 있으면 객체 배치
+</code></pre></div></div>
+
+<p>중요한 점은 <code class="language-plaintext highlighter-rouge">Eden</code>이 새 객체를 받기 위한 구역이라는 것이다.</p>
+
+<p>대부분의 객체는 오래 살지 않는다. 메서드 안에서 잠깐 만들어 쓰고 버려지는 객체, 요청 하나를 처리하는 동안만 필요한 DTO, 반복문 안에서 생겼다가 바로 사라지는 임시 객체가 많다.</p>
+
+<p>이런 객체를 처음부터 오래 사는 객체와 섞어 관리하면 비용이 커진다. 그래서 JVM은 새 객체를 <code class="language-plaintext highlighter-rouge">Eden</code>에 모아두고, 이후 GC 과정에서 살아남은 객체만 다음 영역으로 이동시킨다.</p>
+
+<p><code class="language-plaintext highlighter-rouge">Eden</code>에 실제로 어떤 방식으로 공간이 잡히는지는 <a href="/jvm-tlab.html">TLAB: thread-local allocation buffer</a>에서 이어서 본다. <code class="language-plaintext highlighter-rouge">Eden</code>을 정리하는 역할과 살아 있는 객체를 <code class="language-plaintext highlighter-rouge">Survivor</code>로 옮기는 흐름은 <a href="/jvm-minor-gc-mechanism.html">JVM Minor GC: Eden을 비우고 살아남은 객체를 옮기는 과정</a>에서 이어서 본다.</p>
+
+<h3 id="bump-pointer">bump pointer</h3>
+<hr />
+<blockquote>
+  <p>bump == 밀어내다</p>
+</blockquote>
+
+<p>bump pointer 란 포인터를 미는 작업을 의미한다. (== “자원 할당 기법” 으로도 표현이 가능하다.)</p>
+
+<p>보통 객체를 할당할 때 매번 빈 공간을 탐색해서 할당하는 방식은 “탐색한다” 라는 오버헤드 비용이 존재한다.                           <br />
+할당하고자하는 공간이 정리된 연속 공간이라면, 그리고 할당 가능한 부분에 표시하는방식을 이용하면 굳이 “탐색”하는 비용을 아낄 수 있다.
+현재까지 사용한 위치를 가리키는 포인터를 하나 두고, 객체 크기만큼 앞으로 밀면 된다.                                               <br />
+이 방식을 흔히 <code class="language-plaintext highlighter-rouge">bump pointer allocation</code>이라고 한다.</p>
+
+<p><code class="language-plaintext highlighter-rouge">bump pointer</code>는 연속된 빈 공간에서 다음 할당 위치를 가리키는 포인터를 객체 크기만큼 앞으로 밀어 객체를 배치하는 방식이다.</p>
+
+<p>객체를 할당할 때마다 heap 전체에서 빈 공간을 탐색하면 비용이 크다. 반대로 <code class="language-plaintext highlighter-rouge">Eden</code> 안의 사용 가능한 공간이 연속적으로 정리되어 있다면, JVM은 현재 할당 가능한 위치만 기억하고 있으면 된다.</p>
+
+<p>예를 들어 현재 할당 포인터가 <code class="language-plaintext highlighter-rouge">1000</code>번 주소를 가리키고 있고, 새 객체 크기가 <code class="language-plaintext highlighter-rouge">40 byte</code>라면 객체를 <code class="language-plaintext highlighter-rouge">1000</code>부터 배치한 뒤 포인터를 <code class="language-plaintext highlighter-rouge">1040</code>으로 옮긴다.</p>
+
+<h3 id="eden-다음에는-어디로-가는가">Eden 다음에는 어디로 가는가</h3>
+<hr />
+<p><code class="language-plaintext highlighter-rouge">Eden</code>에 들어간 객체가 모두 오래 살아남는 것은 아니다.</p>
+
+<p>참조가 끊긴 객체는 이후 GC 대상이 된다. 반대로 아직 참조되고 있는 객체는 <code class="language-plaintext highlighter-rouge">Minor GC</code> 과정에서 <code class="language-plaintext highlighter-rouge">Survivor</code> 영역으로 이동할 수 있다. 더 오래 살아남은 객체는 나중에 <code class="language-plaintext highlighter-rouge">Old Generation</code>으로 승격될 수 있다.</p>
+
+<!-- TODO: Minor GC가 Survivor에 어떻게 이관하는지 또, S0 <-> S1 사이에서 어떻게 핑퐁시키는지 아티클이 추가되면 링크로 연결한다. -->
+
+<h3 id="conclusion">Conclusion</h3>
+<hr />
+<p><code class="language-plaintext highlighter-rouge">new</code>는 객체를 heap 안에서 Eden 에 만든다.</p>
+
+<ul>
+  <li>새 객체는 보통 <code class="language-plaintext highlighter-rouge">Young Generation</code>의 <code class="language-plaintext highlighter-rouge">Eden</code>에서부터 시작된다.</li>
+  <li><code class="language-plaintext highlighter-rouge">Eden</code>은 새 객체를 모아두는 시작점이자 빠른 할당 구역이다.</li>
+  <li><code class="language-plaintext highlighter-rouge">bump pointer</code>는 현재 할당 위치를 객체 크기만큼 앞으로 밀어 객체를 배치하는 방식이다.</li>
+  <li><code class="language-plaintext highlighter-rouge">Eden</code>에서 살아남은 객체는 이후 <code class="language-plaintext highlighter-rouge">Survivor</code>로 이동할 수 있다.</li>
+</ul>
+
+<p>더 자세한 thread-local allocation 흐름은 <a href="/jvm-tlab.html">TLAB: thread-local allocation buffer</a>에서, <code class="language-plaintext highlighter-rouge">Minor GC</code>에 의한 생존과 이동은 <a href="/jvm-young-generation.html">jvm young generation</a>에서 이어서 본다.</p>
+
+<h3 id="next-step">Next Step</h3>
+<hr />
+<p>다음 글에서는 <code class="language-plaintext highlighter-rouge">TLAB(Thread-Local Allocation Buffer)</code>을 본다.</p>
+
+<p>핵심 질문은 이것이다.</p>
+
+<p>여러 thread가 동시에 객체를 만들 때, JVM은 어떻게 할당 경합을 줄일까?</p>
+
+</article>
+      </div>
+    </main>
+    <script type="module" src="/assets/js/mermaid-init.js"></script>
+  </body>
+</html>

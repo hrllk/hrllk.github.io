@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>JVM Minor GC: Eden을 비우고 살아남은 객체를 옮기는 과정</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="JVM Minor GC: Eden을 비우고 살아남은 객체를 옮기는 과정" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="TOC Overview Minor GC란? Eden은 어떻게 정리되는가 생존 여부는 어떻게 판별하는가 살아남은 객체는 어디로 가는가 Conclusion Next Step" />
+<meta property="og:description" content="TOC Overview Minor GC란? Eden은 어떻게 정리되는가 생존 여부는 어떻게 판별하는가 살아남은 객체는 어디로 가는가 Conclusion Next Step" />
+<link rel="canonical" href="https://hrllk.github.io/jvm-minor-gc-mechanism.html" />
+<meta property="og:url" content="https://hrllk.github.io/jvm-minor-gc-mechanism.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-01-12T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="JVM Minor GC: Eden을 비우고 살아남은 객체를 옮기는 과정" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2021-01-12T00:00:00+00:00","datePublished":"2021-01-12T00:00:00+00:00","description":"TOC Overview Minor GC란? Eden은 어떻게 정리되는가 생존 여부는 어떻게 판별하는가 살아남은 객체는 어디로 가는가 Conclusion Next Step","headline":"JVM Minor GC: Eden을 비우고 살아남은 객체를 옮기는 과정","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/jvm-minor-gc-mechanism.html"},"url":"https://hrllk.github.io/jvm-minor-gc-mechanism.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2021-01-12 00:00:00 +0000">2021-01-12</time>
+  </p>
+  
+  <h1>JVM Minor GC: Eden을 비우고 살아남은 객체를 옮기는 과정</h1>
+
+  <h3 id="toc">TOC</h3>
+<hr />
+<ol>
+  <li><a href="#overview">Overview</a></li>
+  <li><a href="#minor-gc란">Minor GC란?</a></li>
+  <li><a href="#eden은-어떻게-정리되는가">Eden은 어떻게 정리되는가</a></li>
+  <li><a href="#생존-여부는-어떻게-판별하는가">생존 여부는 어떻게 판별하는가</a></li>
+  <li><a href="#살아남은-객체는-어디로-가는가">살아남은 객체는 어디로 가는가</a></li>
+  <li><a href="#conclusion">Conclusion</a></li>
+  <li><a href="#next-step">Next Step</a></li>
+</ol>
+
+<h3 id="overview">Overview</h3>
+<hr />
+<p>앞 글인 <a href="/jvm-new-and-eden.html">JVM new와 Eden: 객체가 처음 할당되는 곳</a>에서는 객체가 보통 <code class="language-plaintext highlighter-rouge">Eden</code>에서 시작한다는 흐름을 다뤘다.</p>
+
+<p>그다음 질문은 이것이다.</p>
+
+<p><code class="language-plaintext highlighter-rouge">Eden</code>에 들어간 객체들은 언제, 어떤 기준으로 <strong>누가</strong> 정리할까?</p>
+
+<p>이 글에서는 <code class="language-plaintext highlighter-rouge">Minor GC</code>가 <code class="language-plaintext highlighter-rouge">Eden</code>을 비우고, 살아남은 객체를 <code class="language-plaintext highlighter-rouge">Survivor</code>로 옮기는 기본 흐름만 짧게 정리한다.</p>
+
+<h3 id="minor-gc란">Minor GC란?</h3>
+<hr />
+<p><code class="language-plaintext highlighter-rouge">Minor GC</code>는 <code class="language-plaintext highlighter-rouge">Young Generation</code>을 대상으로 하는 가비지 컬렉션 동작이다.</p>
+
+<p>이 단계의 목적은 <code class="language-plaintext highlighter-rouge">Eden</code>에 쌓인 객체 중 더 이상 참조되지 않는 객체를 정리하고, 아직 살아 있는 객체만 다음 공간으로 옮기는 데 있다.</p>
+
+<h3 id="eden은-어떻게-정리되는가">Eden은 어떻게 정리되는가</h3>
+<hr />
+<p><code class="language-plaintext highlighter-rouge">Eden</code>이 가득 차면 <code class="language-plaintext highlighter-rouge">Minor GC</code>가 시작된다.</p>
+
+<p>이때 JVM은 살아 있는 객체와 죽은 객체를 구분한다. 더 이상 참조되지 않는 객체는 정리 대상이 되고, 여전히 참조되는 객체는 이동 대상이 된다.</p>
+
+<p>정리의 핵심은 <code class="language-plaintext highlighter-rouge">Eden</code> 전체를 개별 객체 단위로 오래 관리하는 것이 아니라, 생존 여부를 빠르게 판정한 뒤 남길 것만 남기는 것이다.</p>
+
+<h3 id="생존-여부는-어떻게-판별하는가">생존 여부는 어떻게 판별하는가</h3>
+<hr />
+<p><code class="language-plaintext highlighter-rouge">Minor GC</code>는 <code class="language-plaintext highlighter-rouge">GC Roots</code>에서 도달 가능한 객체만 살아 있는 것으로 본다.</p>
+
+<p>도달할 수 없으면 정리 대상, 도달할 수 있으면 이동 대상이다.</p>
+
+<!-- TODO: 판별 매커니즘 아티클 추가 필요 or 내용 보완 -->
+
+<h3 id="살아남은-객체는-어디로-가는가">살아남은 객체는 어디로 가는가</h3>
+<hr />
+<p><code class="language-plaintext highlighter-rouge">Eden</code>에서 살아남은 객체는 보통 <code class="language-plaintext highlighter-rouge">Survivor</code> 영역으로 이동한다.</p>
+
+<pre><code class="language-mermaid">flowchart TB
+    Start["new"]
+
+    subgraph Heap["Heap"]
+        direction TB
+
+        subgraph Young["Young Generation"]
+            direction LR
+            Eden["Eden"]
+            S0["Survivor 0"]
+            S1["Survivor 1"]
+        end
+
+        subgraph OldGen["Old Generation"]
+            direction TB
+            Old["Old / Tenured"]
+        end
+    end
+
+    Start --&gt;|new| Eden
+    Eden --&gt;|Minor GC 후 생존| S0
+    S0 --&gt;|Aging| S1
+    S1 --&gt;|Promotion| Old
+
+    class S0 survivorStyle
+
+    classDef survivorStyle fill:#fff3cd,stroke:#f59e0b,stroke-width:4px,color:#111,font-weight:bold
+</code></pre>
+
+<p><code class="language-plaintext highlighter-rouge">Survivor</code>는 아직 오래 살지는 않았지만 당장 버릴 수 없는 객체를 잠시 받아두는 공간이다. 이후 여러 번의 <code class="language-plaintext highlighter-rouge">Minor GC</code>를 거치며 더 오래 살아남으면 <code class="language-plaintext highlighter-rouge">Old Generation</code>으로 승격될 수 있다.</p>
+
+<!-- TODO: survivor 에서 Minor GC의 Responsibility, 매커니즘 아티클 추가 필요 -->
+
+<h3 id="conclusion">Conclusion</h3>
+<hr />
+<p><code class="language-plaintext highlighter-rouge">Minor GC</code>는 <code class="language-plaintext highlighter-rouge">Eden</code>을 비우고 살아 있는 객체만 옮기는 작업이다.</p>
+
+<ul>
+  <li>죽은 객체는 정리된다.</li>
+  <li>살아 있는 객체는 <code class="language-plaintext highlighter-rouge">Survivor</code>로 이동한다.</li>
+  <li>여러 번 살아남은 객체는 나중에 <code class="language-plaintext highlighter-rouge">Old Generation</code>으로 승격될 수 있다.</li>
+</ul>
+
+<p>한 줄로 정리하면 이렇다.</p>
+
+<p><code class="language-plaintext highlighter-rouge">Minor GC</code>는 <code class="language-plaintext highlighter-rouge">Eden</code>을 정리하고, 살아 있는 객체를 다음 생존 공간으로 옮기는 과정이다.</p>
+
+<h3 id="next-step">Next Step</h3>
+<hr />
+<p>다음 글에서는 <code class="language-plaintext highlighter-rouge">Survivor</code>에서 객체가 어떻게 살아남고, 언제 <code class="language-plaintext highlighter-rouge">Old Generation</code>으로 승격되는지 이어서 본다.</p>
+
+</article>
+      </div>
+    </main>
+    <script type="module" src="/assets/js/mermaid-init.js"></script>
+  </body>
+</html>
