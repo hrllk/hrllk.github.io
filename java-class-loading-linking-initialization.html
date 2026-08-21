@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>JVM Class Loading, Linking, and Initialization</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="JVM Class Loading, Linking, and Initialization" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="TOC Overview 실행 흐름 Class Loading Linking Initialization 정리 Next Step" />
+<meta property="og:description" content="TOC Overview 실행 흐름 Class Loading Linking Initialization 정리 Next Step" />
+<link rel="canonical" href="https://hrllk.github.io/java-class-loading-linking-initialization.html" />
+<meta property="og:url" content="https://hrllk.github.io/java-class-loading-linking-initialization.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-01-03T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="JVM Class Loading, Linking, and Initialization" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2021-01-03T00:00:00+00:00","datePublished":"2021-01-03T00:00:00+00:00","description":"TOC Overview 실행 흐름 Class Loading Linking Initialization 정리 Next Step","headline":"JVM Class Loading, Linking, and Initialization","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/java-class-loading-linking-initialization.html"},"url":"https://hrllk.github.io/java-class-loading-linking-initialization.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2021-01-03 00:00:00 +0000">2021-01-03</time>
+  </p>
+  
+  <h1>JVM Class Loading, Linking, and Initialization</h1>
+
+  <h3 id="toc">TOC</h3>
+<hr />
+<ol>
+  <li><a href="#overview">Overview</a></li>
+  <li><a href="#실행-흐름">실행 흐름</a></li>
+  <li><a href="#class-loading">Class Loading</a></li>
+  <li><a href="#linking">Linking</a></li>
+  <li><a href="#initialization">Initialization</a></li>
+  <li><a href="#정리">정리</a></li>
+  <li><a href="#next-step">Next Step</a></li>
+</ol>
+
+<h3 id="overview">Overview</h3>
+<hr />
+<p>이전 글에서는 <code class="language-plaintext highlighter-rouge">class</code> 파일이 어떻게 구성되는지 확인했다.</p>
+
+<p>이번 글에서는 그 <code class="language-plaintext highlighter-rouge">class</code> 파일이 JVM 안에서 어떻게 사용되는지만 짧게 다룬다.</p>
+
+<h3 id="실행-흐름">실행 흐름</h3>
+<hr />
+<blockquote>
+  <p>간단히 보면 흐름은 아래와 같다.
+```mermaid</p>
+</blockquote>
+
+<p>flowchart TD
+    A[java 명령 실행] –&gt; B[Class Loading]
+    B –&gt; C[Linking]
+    C –&gt; D[Initialization]
+    D –&gt; E[main 메서드 실행]</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+이 그림은 `java` 명령부터 `main` 실행까지의 핵심 순서를 한 번에 보는 용도다.
+세부 단계인 verification, preparation, resolution은 뒤에서 따로 설명한다.
+
+### Class Loading
+---
+JVM은 필요한 `class`를 메모리로 읽어온다.
+
+예를 들면 아래 같은 코드가 있을 때:
+
+```java
+public class Demo {
+    public static void main(String[] args) {
+        System.out.println("hi");
+    }
+}
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">Demo</code>가 처음 필요해지는 시점에 JVM은 <code class="language-plaintext highlighter-rouge">Demo.class</code>를 읽는다. 이 과정을 class loading이라고 한다.</p>
+
+<h3 id="linking">Linking</h3>
+<hr />
+<p>Loading 다음에는 linking이 이어진다.</p>
+
+<p>linking은 보통 세 단계로 생각하면 된다.</p>
+
+<ul>
+  <li>Verification: class 파일이 JVM 규칙에 맞는지 확인</li>
+  <li>Preparation: static 필드에 기본값 할당</li>
+  <li>Resolution: constant pool의 심볼 참조를 실제 대상과 연결</li>
+</ul>
+
+<p>즉, JVM은 그냥 바로 실행하지 않고 먼저 안전성과 연결 관계를 정리한다.</p>
+
+<h3 id="initialization">Initialization</h3>
+<hr />
+<p>마지막으로 initialization이 일어난다.</p>
+
+<p>이 단계에서는 static initializer와 static field 초기화가 실제로 수행된다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">InitDemo</span> <span class="o">{</span>
+    <span class="kd">static</span> <span class="nc">String</span> <span class="n">name</span> <span class="o">=</span> <span class="n">init</span><span class="o">();</span>
+
+    <span class="kd">static</span> <span class="nc">String</span> <span class="nf">init</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"init"</span><span class="o">);</span>
+        <span class="k">return</span> <span class="s">"demo"</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">InitDemo</code>가 처음 사용될 때 <code class="language-plaintext highlighter-rouge">init()</code>이 실행된다. 즉, static 코드는 클래스가 정말 필요해지는 순간에 돈다.</p>
+
+<h3 id="정리">정리</h3>
+<hr />
+<p>정리하면 이렇다.</p>
+
+<ul>
+  <li>Loading: class 파일을 읽는다.</li>
+  <li>Linking: 검증하고 연결한다.</li>
+  <li>Initialization: static 코드를 실행한다.</li>
+</ul>
+
+<h3 id="next-step">Next Step</h3>
+<hr />
+<p>다음 글에서는 <a href="/jvm-memory-structure.html"><code class="language-plaintext highlighter-rouge">JVM Memory Structure: Stack, Heap, Method Area</code></a>를 본다. stack, heap, method area를 짧게 나눠서 정리해보자.</p>
+
+</article>
+      </div>
+    </main>
+    <script type="module" src="/assets/js/mermaid-init.js"></script>
+  </body>
+</html>

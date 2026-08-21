@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>JVM Memory Structure: Stack, Heap, Method Area</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="JVM Memory Structure: Stack, Heap, Method Area" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="TOC Overview 메모리 구조 Stack Heap Method Area Conclusion Next Step" />
+<meta property="og:description" content="TOC Overview 메모리 구조 Stack Heap Method Area Conclusion Next Step" />
+<link rel="canonical" href="https://hrllk.github.io/jvm-memory-structure.html" />
+<meta property="og:url" content="https://hrllk.github.io/jvm-memory-structure.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-01-04T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="JVM Memory Structure: Stack, Heap, Method Area" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2021-01-04T00:00:00+00:00","datePublished":"2021-01-04T00:00:00+00:00","description":"TOC Overview 메모리 구조 Stack Heap Method Area Conclusion Next Step","headline":"JVM Memory Structure: Stack, Heap, Method Area","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/jvm-memory-structure.html"},"url":"https://hrllk.github.io/jvm-memory-structure.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2021-01-04 00:00:00 +0000">2021-01-04</time>
+  </p>
+  
+  <h1>JVM Memory Structure: Stack, Heap, Method Area</h1>
+
+  <h3 id="toc">TOC</h3>
+<hr />
+<ol>
+  <li><a href="#overview">Overview</a></li>
+  <li><a href="#메모리-구조">메모리 구조</a></li>
+  <li><a href="#stack">Stack</a></li>
+  <li><a href="#heap">Heap</a></li>
+  <li><a href="#method-area">Method Area</a></li>
+  <li><a href="#Conclusion">Conclusion</a></li>
+  <li><a href="#next-step">Next Step</a></li>
+</ol>
+
+<h3 id="overview">Overview</h3>
+<hr />
+<p>최근에 <a href="/java-class-loading-linking-initialization.html"><code class="language-plaintext highlighter-rouge">class</code> 파일이 JVM 안에서 어떻게 사용되는지</a> 다뤘다.</p>
+
+<p>이번 글에서는 실행 중 JVM이 쓰는 메모리 영역에 대한 내용을 다룬다.</p>
+
+<h3 id="메모리-구조">메모리 구조</h3>
+<hr />
+<p>JVM 메모리는 보통 크게 Stack, Heap, Method Area로 나눠서 이해하면 된다.</p>
+
+<pre><code class="language-mermaid">block-beta
+  columns 6
+  JVM["JVM Runtime Memory"]:6
+  Stack["Stack"]:2
+  Heap["Heap"]:2
+  MethodArea["Method Area"]:2
+  Method["Method"]:1
+  LocalVariable["LocalVariable"]:1
+  Object["Object"]:1
+  Array["Array"]:1
+  Metadata["Metadata"]:1
+  Static["Static"]:1
+</code></pre>
+
+<p>이 그림은 각 영역이 어디에 속하는지를 보여주는 최소한의 지도다.</p>
+
+<ul>
+  <li>Stack: <code class="language-plaintext highlighter-rouge">메서드호출</code>(frame), <code class="language-plaintext highlighter-rouge">지역변수</code></li>
+  <li>Heap: <code class="language-plaintext highlighter-rouge">인스턴스</code>, <code class="language-plaintext highlighter-rouge">배열</code></li>
+  <li>Method Area: <code class="language-plaintext highlighter-rouge">클래스메타데이터</code>, <code class="language-plaintext highlighter-rouge">static 정보</code></li>
+</ul>
+
+<h3 id="stack">Stack</h3>
+<hr />
+<p>스택에는 메서드 호출마다 frame이 쌓인다. frame은 호출 시 <code class="language-plaintext highlighter-rouge">push</code>되고, 메서드가 끝나면 <code class="language-plaintext highlighter-rouge">pop</code>된다. frame 안에는 지역 변수와 연산용 데이터가 들어간다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">StackDemo</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kt">int</span> <span class="n">count</span> <span class="o">=</span> <span class="mi">3</span><span class="o">;</span>
+        <span class="n">print</span><span class="o">(</span><span class="n">count</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="kd">static</span> <span class="kt">void</span> <span class="nf">print</span><span class="o">(</span><span class="kt">int</span> <span class="n">value</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">value</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">count</code>와 <code class="language-plaintext highlighter-rouge">value</code> 같은 지역 변수는 스택 쪽에서 다룬다. 메서드가 끝나면 frame도 같이 사라진다.</p>
+
+<h4 id="before">before</h4>
+<ul>
+  <li>call main method -&gt; push</li>
+  <li>call a method -&gt; push</li>
+</ul>
+
+<pre><code class="language-mermaid">block-beta
+  columns 1
+  Stack["Stack"]
+  MainFrame["main frame"]
+  MethodFrame["method frame"]
+</code></pre>
+
+<h4 id="after">after</h4>
+<ul>
+  <li>end a method -&gt; pop</li>
+  <li>end main method -&gt; pop</li>
+</ul>
+
+<pre><code class="language-mermaid">block-beta
+  columns 1
+  Stack["Stack"]
+  MainFrame["main frame"]
+</code></pre>
+
+<p>이런 식으로 메서드가 호출되면 frame이 <code class="language-plaintext highlighter-rouge">push</code>되어 stack에 쌓이고, 메서드가 종료되면 가장 위 frame이 <code class="language-plaintext highlighter-rouge">pop</code>되면서 사라진다. 즉, 스택은 위로 쌓이고 위에서 빠지는 구조다.</p>
+
+<h3 id="heap">Heap</h3>
+<hr />
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">HeapDemo</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">Person</span> <span class="n">person</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Person</span><span class="o">(</span><span class="s">"kim"</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="kd">class</span> <span class="nc">Person</span> <span class="o">{</span>
+    <span class="nc">String</span> <span class="n">name</span><span class="o">;</span>
+    <span class="nc">Person</span><span class="o">(</span><span class="nc">String</span> <span class="n">name</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">person</code> 변수는 참조고, 실제 <code class="language-plaintext highlighter-rouge">Person</code> 인스턴스는 heap에 있다.</p>
+
+<pre><code class="language-mermaid">flowchart LR
+  subgraph STACK["Stack"]
+    direction TB
+    REF["person reference"]
+  end
+
+  subgraph HEAP["Heap"]
+    direction TB
+    OBJ["Person instance"]
+    FIELD["name: kim"]
+    OBJ --&gt; FIELD
+  end
+
+  REF --&gt;|points to| OBJ
+</code></pre>
+
+<p><code class="language-plaintext highlighter-rouge">Heap</code>에는 <code class="language-plaintext highlighter-rouge">"Person"</code> 인스턴스가 있고, <code class="language-plaintext highlighter-rouge">Stack</code>에는 그 인스턴스를 가리키는 <code class="language-plaintext highlighter-rouge">참조(reference)</code>가 들어있다.</p>
+
+<h3 id="method-area">Method Area</h3>
+<hr />
+<p><code class="language-plaintext highlighter-rouge">클래스 정보</code>와 <code class="language-plaintext highlighter-rouge">static 관련 정보</code>는 method area 쪽으로 생각하면 된다.</p>
+
+<!-- 예를 들면 클래스 이름, 메서드 정보, static field 같은 것들이다. HotSpot에서는 클래스 메타데이터가 주로 Metaspace 쪽 구현으로 관리된다. -->
+<p>예를 들면 메타데이터(클래스 이름, 메서드 정보)와 static field로 구성된다.</p>
+
+<pre><code class="language-mermaid">block-beta
+  columns 2 
+  MethodArea["Method Area"]:2
+  Metadata["Metadata"]:1
+  Static["Static"]:1
+</code></pre>
+
+<p>즉, 여기에는 인스턴스 자체보다 클래스의 뼈대와 static 관련 정보가 들어간다고 보면 된다.</p>
+
+<h3 id="conclusion">Conclusion</h3>
+<hr />
+<p>아주 단순하게 정리하면 이렇다.</p>
+
+<ul>
+  <li>Stack: 메서드 호출과 지역 변수</li>
+  <li>Heap: 인스턴스</li>
+  <li>Method Area: 클래스와 static 정보</li>
+</ul>
+
+<h3 id="next-step">Next Step</h3>
+<hr />
+<p>다음 아티클에서는 <a href="/java-object-allocation-memory-layout.html"><code class="language-plaintext highlighter-rouge">Java 객체 생성과 메모리 배치: new, reference, object header</code></a>를 본다. <code class="language-plaintext highlighter-rouge">new</code>가 인스턴스를 어떻게 만들고, 참조가 무엇을 가리키는지 이어서 보자.</p>
+
+</article>
+      </div>
+    </main>
+    <script type="module" src="/assets/js/mermaid-init.js"></script>
+  </body>
+</html>

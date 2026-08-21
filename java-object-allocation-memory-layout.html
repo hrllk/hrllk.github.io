@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Java 객체 생성과 메모리 배치: new, reference, object header</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Java 객체 생성과 메모리 배치: new, reference, object header" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="TOC Overview new를 만나면 무엇이 생기나 참조 != 인스턴스 인스턴스는 어떻게 구성되나 Object Header에는 무엇이 들어가나 인스턴스는 어떻게 GC 대상이 되나 Conclusion" />
+<meta property="og:description" content="TOC Overview new를 만나면 무엇이 생기나 참조 != 인스턴스 인스턴스는 어떻게 구성되나 Object Header에는 무엇이 들어가나 인스턴스는 어떻게 GC 대상이 되나 Conclusion" />
+<link rel="canonical" href="https://hrllk.github.io/java-object-allocation-memory-layout.html" />
+<meta property="og:url" content="https://hrllk.github.io/java-object-allocation-memory-layout.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-01-05T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Java 객체 생성과 메모리 배치: new, reference, object header" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2021-01-05T00:00:00+00:00","datePublished":"2021-01-05T00:00:00+00:00","description":"TOC Overview new를 만나면 무엇이 생기나 참조 != 인스턴스 인스턴스는 어떻게 구성되나 Object Header에는 무엇이 들어가나 인스턴스는 어떻게 GC 대상이 되나 Conclusion","headline":"Java 객체 생성과 메모리 배치: new, reference, object header","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/java-object-allocation-memory-layout.html"},"url":"https://hrllk.github.io/java-object-allocation-memory-layout.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2021-01-05 00:00:00 +0000">2021-01-05</time>
+  </p>
+  
+  <h1>Java 객체 생성과 메모리 배치: new, reference, object header</h1>
+
+  <h3 id="toc">TOC</h3>
+<hr />
+<ol>
+  <li><a href="#overview">Overview</a></li>
+  <li><a href="#new를-만나면-무엇이-생기나">new를 만나면 무엇이 생기나</a></li>
+  <li><a href="#참조--인스턴스">참조 != 인스턴스</a></li>
+  <li><a href="#인스턴스는-어떻게-구성되나">인스턴스는 어떻게 구성되나</a></li>
+  <li><a href="#object-header에는-무엇이-들어가나">Object Header에는 무엇이 들어가나</a></li>
+  <li><a href="#인스턴스는-어떻게-gc-대상이-되나">인스턴스는 어떻게 GC 대상이 되나</a>
+<!-- 7. [흔한 오해와 정리 포인트](#흔한-오해와-정리-포인트) --></li>
+  <li><a href="#conclusion">Conclusion</a>
+<!-- 9. [Next Step](#next-step) --></li>
+</ol>
+
+<h3 id="overview">Overview</h3>
+<hr />
+<p>앞 글에서는 <a href="/java-memory-structure.html"><code class="language-plaintext highlighter-rouge">JVM Memory Structure: Stack, Heap, Method Area</code></a>에서 JVM 메모리 영역을 먼저 봤다.</p>
+
+<p>이번 글에서는 한 단계 더 들어가서, <code class="language-plaintext highlighter-rouge">new</code>를 실행했을 때 실제로 어떤 일이 일어나는지 정리한다.</p>
+
+<p>핵심 질문은 세 가지다.</p>
+
+<ol>
+  <li><code class="language-plaintext highlighter-rouge">new</code>를 만나면 인스턴스가 어디에 생기는가?</li>
+  <li><code class="language-plaintext highlighter-rouge">person</code> 같은 변수는 무엇을 들고 있는가?</li>
+  <li>인스턴스 본체에는 어떤 메타 정보가 붙는가?</li>
+</ol>
+
+<h3 id="new를-만나면-무엇이-생기나">new를 만나면 무엇이 생기나</h3>
+<hr />
+<p>아래 코드가 있다고 하자.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ObjectAllocationDemo</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">Person</span> <span class="n">person</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Person</span><span class="o">(</span><span class="s">"kim"</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="kd">class</span> <span class="nc">Person</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">String</span> <span class="n">name</span><span class="o">;</span>
+
+    <span class="nc">Person</span><span class="o">(</span><span class="nc">String</span> <span class="n">name</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>이 코드에서 <code class="language-plaintext highlighter-rouge">new Person("kim")</code>를 만나면 JVM은 단순히 “변수 하나를 만드는 것”으로 끝내지 않는다.</p>
+
+<p>대략 이런 순서로 진행된다.</p>
+
+<ol>
+  <li>인스턴스를 담을 메모리 공간을 확보한다.</li>
+  <li>인스턴스 헤더를 채운다.</li>
+  <li>인스턴스 필드를 초기화한다.</li>
+  <li>생성자를 실행한다.</li>
+  <li>참조를 지역 변수 <code class="language-plaintext highlighter-rouge">person</code>에 저장한다. (Stack)</li>
+</ol>
+
+<p>즉, <code class="language-plaintext highlighter-rouge">new</code>는 “인스턴스를 heap에 만들고, 그 인스턴스를 가리키는 참조를 돌려주는 동작”으로 보면 된다.</p>
+
+<h3 id="참조--인스턴스">참조 != 인스턴스</h3>
+<hr />
+<p>이 부분이 가장 자주 헷갈린다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">Person</span> <span class="n">person</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Person</span><span class="o">(</span><span class="s">"kim"</span><span class="o">);</span>
+</code></pre></div></div>
+
+<p>여기서 <code class="language-plaintext highlighter-rouge">person</code>은 인스턴스 자체가 아니다. <code class="language-plaintext highlighter-rouge">person</code>은 <strong>참조(reference)</strong> 이다.<br />
+실제 <code class="language-plaintext highlighter-rouge">Person</code> 인스턴스는 heap에 있고, <code class="language-plaintext highlighter-rouge">person</code>은 그 인스턴스를 가리킨다.</p>
+
+<p>시각적으로 보면 이렇다.</p>
+
+<pre><code class="language-mermaid">flowchart LR
+  subgraph STACK["Stack"]
+    direction TB
+    REF["person reference"]
+  end
+
+  subgraph HEAP["Heap"]
+    direction TB
+    OBJ["Person instance"]
+    FIELD["name: kim"]
+    OBJ --&gt; FIELD
+  end
+
+  REF --&gt;|points to| OBJ
+</code></pre>
+
+<p>이 구조를 기억해야 하는 이유는 단순하다.</p>
+
+<ul>
+  <li>참조 변수는 메서드 호출이 끝나면 사라질 수 있다.</li>
+  <li>인스턴스는 참조가 남아 있는 동안 heap에 남는다.</li>
+  <li>참조가 끊긴 인스턴스는 GC의 회수대상이 된다.</li>
+</ul>
+
+<p>여기서 중요한 문장은 이거다.</p>
+
+<p><code class="language-plaintext highlighter-rouge">person</code> 변수는 참조고, 실제 <code class="language-plaintext highlighter-rouge">Person</code> 인스턴스는 heap에 있다.</p>
+
+<h3 id="인스턴스는-어떻게-구성되나">인스턴스는 어떻게 구성되나</h3>
+<hr />
+<p>인스턴스는 필드 값만으로 구성되지 않는다. heap에 있는 <code class="language-plaintext highlighter-rouge">Person</code> 인스턴스는 크게 두 부분으로 보면 된다.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>구성 요소</th>
+      <th>쉽게 보는 의미</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Object Header</code></td>
+      <td>인스턴스를 JVM이 관리하기 위해 붙는 추가 정보</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Instance fields</code></td>
+      <td><code class="language-plaintext highlighter-rouge">name</code> 같은 실제 값</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>아주 단순하게는 아래처럼 보면 된다.</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Person instance
+├── Object Header
+└── Instance fields
+</code></pre></div></div>
+
+<h3 id="object-header에는-무엇이-들어가나">Object Header에는 무엇이 들어가나</h3>
+<hr />
+<p><code class="language-plaintext highlighter-rouge">Object Header</code> 안에서 아래 정보들이 들어간다.</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">mark word</code>: 락 상태, hash code 같은 간단한 관리 정보</li>
+  <li><code class="language-plaintext highlighter-rouge">klass pointer</code>: 이 인스턴스가 <code class="language-plaintext highlighter-rouge">Person</code> 같은 어떤 class에 속하는지 알려주는 정보</li>
+</ul>
+
+<p>예시 코드는 아래와 같다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Person</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">String</span> <span class="n">name</span><span class="o">;</span>
+
+    <span class="kd">public</span> <span class="nf">Person</span><span class="o">(</span><span class="nc">String</span> <span class="n">name</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<pre><code class="language-mermaid">flowchart LR
+  OBJ["Person instance"] --&gt; HEADER["Object Header"]
+  OBJ --&gt; FIELDS["Instance fields"]
+  HEADER --&gt; MARK["mark word"]
+  HEADER --&gt; KLASS["klass pointer"]
+</code></pre>
+
+<p><code class="language-plaintext highlighter-rouge">new Person("kim")</code>로 인스턴스가 만들어질 때, heap에 올라가는 <code class="language-plaintext highlighter-rouge">Person</code> 인스턴스는 <code class="language-plaintext highlighter-rouge">Object Header</code>와 <code class="language-plaintext highlighter-rouge">Instance fields</code>를 함께 가진다.</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">Object Header</code>는 인스턴스를 위한 관리 정보다.</li>
+  <li><code class="language-plaintext highlighter-rouge">Instance fields</code>는 실제 데이터다.</li>
+</ul>
+
+<p>개념적으로는 아래처럼 보면 된다.</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Person instance
+├── Object Header
+│   ├── mark word
+│   └── klass pointer
+└── Instance fields
+    └── name = "kim"
+</code></pre></div></div>
+
+<p>다만 이 구조는 JVM 구현 세부다. 즉, Java 언어의 문법적 보장이라기보다 JVM 구현에서 흔히 설명하는 모델이다.</p>
+
+<h3 id="인스턴스는-어떻게-gc-대상이-되나">인스턴스는 어떻게 GC 대상이 되나</h3>
+<hr />
+<p>인스턴스는 heap에 만들어진 뒤 바로 사라지지 않는다. 참조가 남아 있는 동안은 JVM이 그 인스턴스를 살아 있는 상태로 본다.</p>
+
+<p>쉽게 말하면 이렇다.</p>
+
+<ol>
+  <li><code class="language-plaintext highlighter-rouge">new</code>로 인스턴스가 만들어진다.</li>
+  <li>stack의 참조가 그 인스턴스를 가리킨다.</li>
+  <li>참조가 남아 있으면 인스턴스는 살아 있다.</li>
+  <li>참조가 끊기면 GC 대상이 된다.</li>
+  <li>GC가 필요한 시점에 회수된다.</li>
+</ol>
+
+<p>즉, 인스턴스의 생명주기는 <code class="language-plaintext highlighter-rouge">생성 -&gt; 참조 유지 -&gt; GC 대상 -&gt; 회수</code>로 이해하면 된다.<br />
+여기서 중요한 점은, 참조가 끊겼다고 바로 사라지는 것이 아니라는 점이다. 회수는 GC가 돌 때 일어난다.</p>
+
+<!-- ### 흔한 오해와 정리 포인트 -->
+<!-- --- -->
+<!-- 자주 생기는 오해를 정리하면 이렇다. -->
+<!---->
+<!-- 1. `person` 변수가 인스턴스 그 자체는 아니다. -->
+<!-- 2. `new`는 참조를 만들지 않고, 인스턴스를 만들고 참조를 돌려준다. -->
+<!-- 3. object header는 인스턴스 값과 별개로 붙는 메타 정보다. -->
+<!-- 4. `new`가 보였다고 해서 항상 같은 방식으로 인스턴스가 만들어진다고 단정하면 안 된다. -->
+<!-- 5. 참조가 끊겼다고 바로 회수되는 것은 아니다. GC가 돌 때 회수된다. -->
+<!---->
+<!-- 한 줄로 정리하면 이렇다. -->
+<!---->
+<!-- - 참조는 stack/local variable 쪽에서 다루고 -->
+<!-- - 인스턴스 본체는 heap에 있으며 -->
+<!-- - object header는 그 인스턴스를 설명하는 메타 정보다. -->
+
+<h3 id="conclusion">Conclusion</h3>
+<hr />
+<p><code class="language-plaintext highlighter-rouge">new</code>는 단순한 생성 문법이 아니다.</p>
+
+<p>인스턴스를 heap에 배치하고, object header와 instance field를 만들고, 참조를 stack/local variable에 연결하는 흐름이다.</p>
+
+<!-- 실무에서는 TLAB, escape analysis, scalar replacement 같은 용어도 같이 보게 되지만, 먼저 `참조`, `heap`, `object header`, `GC 대상` 정도만 확실히 잡아도 충분하다. -->
+
+<!-- 다음 글에서는 `new` 이후에 인스턴스가 GC 관점에서 어떻게 생존하고 소멸하는지 본다. -->
+
+<!-- ### Next Step -->
+<!-- --- -->
+<!-- 다음 글에서는 인스턴스 생존과 GC 대상 판단을 다룬다. 참조가 끊기는 시점과 GC가 실제로 인스턴스를 회수하는 시점을 구분해서 보자. -->
+
+</article>
+      </div>
+    </main>
+    <script type="module" src="/assets/js/mermaid-init.js"></script>
+  </body>
+</html>
