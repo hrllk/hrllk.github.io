@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>모던 GitHub Actions CI Flow: 프롤로그 CI 개요</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="모던 GitHub Actions CI Flow: 프롤로그 CI 개요" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="TOC" />
+<meta property="og:description" content="TOC" />
+<link rel="canonical" href="https://hrllk.github.io/github-standard-ci-flow.html" />
+<meta property="og:url" content="https://hrllk.github.io/github-standard-ci-flow.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-08-21T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="모던 GitHub Actions CI Flow: 프롤로그 CI 개요" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2026-08-21T00:00:00+00:00","datePublished":"2026-08-21T00:00:00+00:00","description":"TOC","headline":"모던 GitHub Actions CI Flow: 프롤로그 CI 개요","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/github-standard-ci-flow.html"},"url":"https://hrllk.github.io/github-standard-ci-flow.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2026-08-21 00:00:00 +0000">2026-08-21</time>
+  </p>
+  
+  <h1>모던 GitHub Actions CI Flow: 프롤로그 CI 개요</h1>
+
+  <h3 id="toc">TOC</h3>
+<hr />
+
+<ol>
+  <li><a href="#overview">Overview</a></li>
+  <li><a href="#시리즈-구성">시리즈 구성</a></li>
+  <li><a href="#사전지식">사전지식</a>
+    <ol>
+      <li><a href="#github-actions-용어">GitHub Actions 용어</a></li>
+      <li><a href="#jenkins-개념과-비교">Jenkins 개념과 비교</a></li>
+    </ol>
+  </li>
+  <li><a href="#ci-flow">CI Flow</a>
+    <ol>
+      <li><a href="#pr-flow">PR Flow</a>
+        <ol>
+          <li><a href="#특징">특징</a></li>
+          <li><a href="#draft-pr-의미">Draft PR 의미</a></li>
+          <li><a href="#pr-상태전이">PR 상태전이</a></li>
+        </ol>
+      </li>
+      <li><a href="#push-flow">Push Flow</a>
+        <ol>
+          <li><a href="#특징-1">특징</a></li>
+        </ol>
+      </li>
+      <li><a href="#workflow-dispatch-flow">Workflow Dispatch Flow</a>
+        <ol>
+          <li><a href="#특징-2">특징</a></li>
+        </ol>
+      </li>
+    </ol>
+  </li>
+  <li><a href="#conclusion">Conclusion</a></li>
+</ol>
+
+<h3 id="overview">Overview</h3>
+<hr />
+
+<p>이 글에서는 GitHub Actions를 통해 CI를 진행할 때의 모던한 CI Flow를 설명한다.</p>
+
+<p>Jenkins에서는 보통 Job 또는 Pipeline을 만들고, SCM 변경을 감지한 뒤 Agent에서 빌드와 테스트를 실행한다. 
+GitHub Actions에서는 이 흐름을 저장소 안의 Workflow YAML로 정의하고, 정의된 Workflow는 Event에 의해 Runner 내부에서 실행된다. 
+본문에서는 Github Actions의 용어와 개념을 설명한다.</p>
+
+<ul>
+  <li><a href="https://docs.github.com/en/actions/get-started/understand-github-actions">GitHub Actions의 핵심 개념</a></li>
+</ul>
+
+<h3 id="시리즈-구성">시리즈 구성</h3>
+<hr />
+
+<blockquote>
+  <p>본문은 전체 CI Flow를 설명하는 1편이다. 여기서 정리한 흐름을 실제 Workflow YAML로 옮기는 방법은 2편에서 설명한다.</p>
+</blockquote>
+
+<ul>
+  <li>1편 (본문) 모던 GitHub Actions CI Flow
+    <ul>
+      <li>Event별로 CI를 어떤 식으로 사용하는지 이해한다.</li>
+    </ul>
+  </li>
+  <li>2편 <a href="/github-actions-workflow-writing.html">GitHub Actions Workflow 작성하기</a>
+    <ul>
+      <li>그 흐름을 Workflow YAML로 어떻게 작성하는지 이해한다.</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="사전지식">사전지식</h3>
+<hr />
+
+<h4 id="github-actions-용어">GitHub Actions 용어</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>용어</th>
+      <th>의미</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Workflow</td>
+      <td>하나의 자동화 흐름을 정의한 YAML 파일</td>
+    </tr>
+    <tr>
+      <td>Event</td>
+      <td>Workflow를 실행시키는 트리거 (저장소 활동 or 수동·예약 요청)</td>
+    </tr>
+    <tr>
+      <td>Job</td>
+      <td>같은 Runner에서 실행되는 Step들의 묶음</td>
+    </tr>
+    <tr>
+      <td>Runner</td>
+      <td>Job을 실행하는 실행 환경</td>
+    </tr>
+    <tr>
+      <td>Step</td>
+      <td>셸 명령을 실행하거나 Action을 호출하는 작업 단위</td>
+    </tr>
+    <tr>
+      <td>Action</td>
+      <td>Workflow에서 재사용할 수 있는 자동화 단위</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Workflow는 저장소의 <code class="language-plaintext highlighter-rouge">.github/workflows</code> 디렉터리에 위치한다. 하나의 Workflow에는 하나 이상의 Job이 있고, Job은 여러 Step을 순서대로 실행한다. <a href="https://docs.github.com/en/actions/concepts/workflows-and-actions/workflows">GitHub Workflows 문서</a></p>
+
+<h4 id="jenkins-개념과-비교">Jenkins 개념과 비교</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Jenkins</th>
+      <th>GitHub Actions</th>
+      <th>차이점</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Job 또는 Pipeline</td>
+      <td>Workflow</td>
+      <td>GitHub Actions Workflow는 저장소에 YAML 관리</td>
+    </tr>
+    <tr>
+      <td>Trigger 또는 SCM Polling/Webhook</td>
+      <td>Event</td>
+      <td><code class="language-plaintext highlighter-rouge">on</code> 키에 실행 조건 선언</td>
+    </tr>
+    <tr>
+      <td>Agent</td>
+      <td>Runner</td>
+      <td>GitHub 호스팅 Runner 또는 자체 호스팅 Runner를 선택</td>
+    </tr>
+    <tr>
+      <td>Stage</td>
+      <td>Job 또는 Step</td>
+      <td>병렬 실행과 의존 관계를 Job 단위로 표현할 수 있다.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>이 표는 이해를 위한 비교이며, 두 시스템의 설정 단위가 완전히 같은 것은 아니다.</p>
+
+<h3 id="ci-flow">CI Flow</h3>
+<hr />
+<p>이벤트별 CI 방식을 설명한다.</p>
+
+<h4 id="pr-flow">PR Flow</h4>
+
+<p>예를 들어 <code class="language-plaintext highlighter-rouge">feature</code> 브랜치에서 <code class="language-plaintext highlighter-rouge">develop</code> 브랜치로 PR을 생성한다고 하자. <code class="language-plaintext highlighter-rouge">feature</code>는 변경을 제공하는 source 또는 head branch이고, <code class="language-plaintext highlighter-rouge">develop</code>은 변경을 반영하는 target 또는 base branch다.</p>
+
+<p>PR CI는 GitHub가 source와 target을 Merge한 테스트 결과를 Runner에서 검증하는 흐름이다. 충돌이 없는 경우 GitHub는 테스트용 Merge ref를 제공하고, Runner는 이를 기준으로 Build와 Test를 실행한다. 실제 target 브랜치는 이 과정에서 변경되지 않는다. <a href="https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows">Pull Request Event 문서</a></p>
+
+<pre><code class="language-mermaid">sequenceDiagram
+    participant C as Client
+    participant G as GitHub
+    participant R as Runner
+
+    Note over C,R: PR Event
+    C-&gt;&gt;G: commit push 및 Pull Request 생성 또는 갱신
+    G-&gt;&gt;R: Workflow 실행
+    R&lt;&lt;-&gt;&gt;G: fetch merge ref
+    R-&gt;&gt;R: Build, Unit Test, Integration Test
+    R--&gt;&gt;G: CI 결과 전달
+
+    alt CI 실패
+        C-&gt;&gt;C: 코드 수정
+        C-&gt;&gt;G: 새 commit push
+        Note over G,R: synchronize Event로 CI 재실행
+    else CI 성공
+        C-&gt;&gt;G: Review 및 Merge
+    end
+</code></pre>
+
+<h5 id="특징">특징</h5>
+
+<ul>
+  <li>Build, Test, Lint, 분석을 주로 수행</li>
+  <li>CI 실패 시 <code class="language-plaintext highlighter-rouge">Re-run failed jobs</code>로 재실행하거나 코드를 수정해 새 commit을 Push한다. 새 commit에는 <code class="language-plaintext highlighter-rouge">synchronize</code>가 발생한다.</li>
+</ul>
+
+<h5 id="draft-pr-의미">Draft PR 의미</h5>
+
+<blockquote>
+  <p>PR 상태 중 1을 의미</p>
+</blockquote>
+
+<p>Draft PR은 아직 정식 Review와 Merge 준비가 끝난 변경임을 표시하는 상태다.
+Draft는 Merge할 수 없고, Code Owners에 대한 자동 Review 요청도 발생하지 않는다. 준비가 끝나면 <code class="language-plaintext highlighter-rouge">Ready for review</code>로 전환한다. <a href="https://docs.github.com/en/pull-requests/how-tos/create-pull-requests/changing-the-stage-of-a-pull-request">Pull Request 상태 변경</a></p>
+
+<h5 id="pr-상태전이">PR 상태전이</h5>
+<pre><code class="language-mermaid">stateDiagram-v2
+    state "Draft" as PR_DRAFT
+    state "Ready" as PR_READY
+    state "Merged" as PR_MERGED
+    state "Closed" as PR_CLOSED
+
+    [*] --&gt; PR_DRAFT: 초안 생성
+
+    PR_DRAFT --&gt; PR_READY: 리뷰 요청
+    PR_READY --&gt; PR_DRAFT: 초안 전환
+
+    PR_DRAFT --&gt; PR_CLOSED: 병합 없이 종료
+    PR_READY --&gt; PR_CLOSED: 병합 없이 종료
+    PR_READY --&gt; PR_MERGED: 병합
+
+    PR_CLOSED --&gt; PR_DRAFT: 초안으로 재개
+    PR_CLOSED --&gt; PR_READY: 리뷰 상태로 재개
+
+    PR_MERGED --&gt; [*]
+</code></pre>
+
+<h4 id="push-flow">Push Flow</h4>
+
+<p>PR을 통해 <code class="language-plaintext highlighter-rouge">source</code>의 내용이 <code class="language-plaintext highlighter-rouge">target</code>에 병합되면 <code class="language-plaintext highlighter-rouge">push</code> 이벤트를 통해 CI를 발동시킬 수 있다.
+대개 대상은 <code class="language-plaintext highlighter-rouge">develop</code>이며, feature 내용이 PR승인되었을때 개발계에 자동배포를 위한 용도로 사용된다.</p>
+
+<pre><code class="language-mermaid">sequenceDiagram
+    participant C as Client
+    participant G as GitHub
+    participant R as Runner
+
+    Note over C,R: Push Event
+    G-&gt;&gt;R: 기본 브랜치 반영 후 Workflow 실행
+    R&lt;&lt;-&gt;&gt;G: fetch develop
+    R-&gt;&gt;R: Build 및 Test 실행
+    R-&gt;&gt;R: Artifact 또는 Image 생성
+    R-&gt;&gt;G: Artifact 또는 Image Push
+    R--&gt;&gt;G: CI 결과 전달
+</code></pre>
+
+<h5 id="특징-1">특징</h5>
+
+<ul>
+  <li>Build 후 개발계 자동배포 (Production X)</li>
+</ul>
+
+<h4 id="workflow-dispatch-flow">Workflow Dispatch Flow</h4>
+
+<p><code class="language-plaintext highlighter-rouge">workflow_dispatch</code>는 GitHub UI나 API를 통해 사용자가 Workflow를 <code class="language-plaintext highlighter-rouge">수동</code>으로 트리거하는 Event다.</p>
+
+<pre><code class="language-mermaid">sequenceDiagram
+    participant C as Client
+    participant G as GitHub
+    participant R as Runner
+
+    Note over C,R: workflow_dispatch Event
+    C-&gt;&gt;G: Workflow와 입력값, 대상 Ref 선택
+    G-&gt;&gt;R: Workflow 실행
+    R&lt;&lt;-&gt;&gt;G: fetch 대상 Ref
+    R-&gt;&gt;R: 수동 작업 실행
+    R--&gt;&gt;G: 실행 결과 전달
+    G--&gt;&gt;C: 결과 표시
+</code></pre>
+
+<h5 id="특징-2">특징</h5>
+
+<ul>
+  <li>특정 릴리즈를 생성하거나 Production을 수동으로 배포하거나, 실패한 운영 작업을 재처리하는 데 사용한다.</li>
+</ul>
+
+<p>CI Flow를 Workflow YAML로 작성하는 방법은 <a href="/github-actions-workflow-writing.html">GitHub Actions Workflow 작성하기</a>에서 다룬다.</p>
+
+<!-- ### 운영 기준 -->
+<!-- --- -->
+<!---->
+<!-- - **실행 조건**: Pull Request에서 필요한 Check가 빠지지 않는지 확인한다. 경로 필터 때문에 필수 Check가 실행되지 않는 상태를 만들지 않는다. -->
+<!-- - **재현성**: 런타임 버전과 의존성 설치 명령을 명시한다. Lock file이 있다면 `npm ci`처럼 Lock file을 기준으로 설치하는 명령을 사용한다. -->
+<!-- - **책임 분리**: Build는 산출물 생성 가능 여부를, Test는 동작 검증을 담당한다. 한 명령에 모든 책임을 숨기지 않는다. -->
+<!-- - **Merge 기준**: CI 성공만으로 품질 검증이 끝나는 것은 아니다. 저장소의 Review 규칙과 필수 Check를 함께 충족해야 한다. -->
+<!-- - **Action 관리**: 사용하는 Action의 버전과 권한을 검토한다. 외부 Action은 변경될 수 있으므로 업데이트도 Workflow 변경으로 취급한다. -->
+<!-- - **중복 실행**: Pull Request와 기본 브랜치의 `push`가 같은 Job을 실행하면 검증이 중복될 수 있다. Event별 목적과 비용을 확인한다. -->
+
+<h3 id="conclusion">Conclusion</h3>
+<hr />
+
+<p>모던한 GitHub Actions CI Flow는 Pull Request 변경을 Event로 받아 Runner에서 일관된 환경을 준비하고, Build와 Test를 실행한 뒤 Check 결과를 Review와 Merge 판단에 제공한다.</p>
+
+<h3 id="references">References</h3>
+<hr />
+
+<ul>
+  <li><a href="https://docs.github.com/en/actions/get-started/understand-github-actions">Understanding GitHub Actions</a></li>
+  <li><a href="https://docs.github.com/en/actions/concepts/workflows-and-actions/workflows">Workflows</a></li>
+  <li><a href="https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows">Events that trigger workflows</a></li>
+  <li><a href="https://docs.github.com/en/actions/tutorials/create-an-example-workflow">Creating an example workflow</a></li>
+  <li><a href="https://docs.github.com/en/pull-requests/how-tos/create-pull-requests/changing-the-stage-of-a-pull-request">Changing the stage of a pull request</a></li>
+</ul>
+
+</article>
+      </div>
+    </main>
+    <script type="module" src="/assets/js/mermaid-init.js"></script>
+  </body>
+</html>

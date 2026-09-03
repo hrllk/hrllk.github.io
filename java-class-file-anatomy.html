@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Java class 파일의 구조: constant pool부터 attribute까지</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Java class 파일의 구조: constant pool부터 attribute까지" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="TOC Overview class 파일은 왜 필요한가 class 파일의 주요 구성요소 javap로 보는 class 파일 Conclusion Next Step" />
+<meta property="og:description" content="TOC Overview class 파일은 왜 필요한가 class 파일의 주요 구성요소 javap로 보는 class 파일 Conclusion Next Step" />
+<link rel="canonical" href="https://hrllk.github.io/java-class-file-anatomy.html" />
+<meta property="og:url" content="https://hrllk.github.io/java-class-file-anatomy.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-01-02T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Java class 파일의 구조: constant pool부터 attribute까지" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2021-01-02T00:00:00+00:00","datePublished":"2021-01-02T00:00:00+00:00","description":"TOC Overview class 파일은 왜 필요한가 class 파일의 주요 구성요소 javap로 보는 class 파일 Conclusion Next Step","headline":"Java class 파일의 구조: constant pool부터 attribute까지","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/java-class-file-anatomy.html"},"url":"https://hrllk.github.io/java-class-file-anatomy.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2021-01-02 00:00:00 +0000">2021-01-02</time>
+  </p>
+  
+  <h1>Java class 파일의 구조: constant pool부터 attribute까지</h1>
+
+  <h3 id="toc">TOC</h3>
+<hr />
+<ol>
+  <li><a href="#overview">Overview</a></li>
+  <li><a href="#class-파일은-왜-필요한가">class 파일은 왜 필요한가</a></li>
+  <li><a href="#class-파일의-주요-구성요소">class 파일의 주요 구성요소</a></li>
+  <li><a href="#javap로-보는-class-파일">javap로 보는 class 파일</a></li>
+  <li><a href="#conclusion">Conclusion</a></li>
+  <li><a href="#next-step">Next Step</a></li>
+</ol>
+
+<h3 id="overview">Overview</h3>
+<hr />
+<p>앞 글에서는 <a href="/java-source-to-class-file.html">Java 소스 코드에서 class 파일까지</a> 흐름을 봤다.</p>
+
+<p>이번 글에서는 <code class="language-plaintext highlighter-rouge">class</code> 파일 안에 무엇이 들어가는지만 간단히 본다.</p>
+
+<h3 id="class-파일은-왜-필요한가">class 파일은 왜 필요한가</h3>
+<hr />
+<p>Java는 소스 코드를 바로 실행하지 않는다. 먼저 <code class="language-plaintext highlighter-rouge">class</code> 파일을 만들고, JVM은 그 파일을 읽어서 실행한다.</p>
+
+<p>즉, <code class="language-plaintext highlighter-rouge">class</code> 파일은 Java 실행의 중간 결과물이고, JVM이 프로그램을 이해하는 기본 단위다.</p>
+
+<p>예를 들어 아래 코드를 보자.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Sample</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">String</span> <span class="n">name</span><span class="o">;</span>
+
+    <span class="kd">public</span> <span class="nf">Sample</span><span class="o">(</span><span class="nc">String</span> <span class="n">name</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">greet</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="s">"hello "</span> <span class="o">+</span> <span class="n">name</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>이 파일이 <code class="language-plaintext highlighter-rouge">class</code>로 바뀌면 JVM은 <code class="language-plaintext highlighter-rouge">Sample</code>이라는 이름, 생성자, <code class="language-plaintext highlighter-rouge">greet()</code> 메서드, <code class="language-plaintext highlighter-rouge">name</code> 필드를 따로 읽는다.</p>
+
+<h3 id="class-파일의-주요-구성요소">class 파일의 주요 구성요소</h3>
+<hr />
+<p><code class="language-plaintext highlighter-rouge">class</code> 파일은 아래와같은 항목으로 구성되어있다.</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">magic number</code>와 <code class="language-plaintext highlighter-rouge">version</code>: 파일 형식과 호환 버전</li>
+  <li><code class="language-plaintext highlighter-rouge">constant pool</code>: 문자열, 클래스명, 메서드/필드 참조</li>
+  <li>클래스 정보: 이름, 상속 관계, 접근 제한자</li>
+  <li>field / method: 어떤 멤버가 있는지와 그 구현</li>
+  <li>attribute: 부가 정보와 디버그 정보</li>
+</ul>
+
+<p>특히 <code class="language-plaintext highlighter-rouge">constant pool</code>과 <code class="language-plaintext highlighter-rouge">method</code>가 중요하다. <code class="language-plaintext highlighter-rouge">constant pool</code>은 실행에 필요한 참조를 모아두고, <code class="language-plaintext highlighter-rouge">method</code>에는 실제 bytecode가 들어간다.</p>
+
+<p><code class="language-plaintext highlighter-rouge">Sample</code> 예제로 보면 이렇게 나뉜다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// source</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Sample</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">String</span> <span class="n">name</span><span class="o">;</span>
+
+    <span class="kd">public</span> <span class="nf">Sample</span><span class="o">(</span><span class="nc">String</span> <span class="n">name</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">greet</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="s">"hello "</span> <span class="o">+</span> <span class="n">name</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>// class file에서 읽히는 정보
+class name: Sample
+super class: java/lang/Object
+field: name:Ljava/lang/String;
+method: &lt;init&gt;(Ljava/lang/String;)V
+method: greet()Ljava/lang/String;
+constant pool: "hello ", Sample, name, java/lang/Object
+</code></pre></div></div>
+
+<p>사람이 읽는 문장과 JVM이 읽는 정보는 같은 모양이 아니다.</p>
+<h3 id="javap로-보는-class-파일">javap로 보는 class 파일</h3>
+<hr />
+<p><code class="language-plaintext highlighter-rouge">javap</code>는 <code class="language-plaintext highlighter-rouge">class</code> 파일을 볼 때 가장 쉬운 도구다.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>javac Sample.java
+javap <span class="nt">-c</span> <span class="nt">-v</span> Sample
+</code></pre></div></div>
+
+<p>이 명령을 실행하면 크게 세 부분을 본다.</p>
+
+<h4 id="class-metadata">Class Metadata</h4>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Classfile .../Sample.class
+  minor version: 0
+  major version: 61
+  this_class: #8 // Sample
+  super_class: #2 // java/lang/Object
+  interfaces: 0, fields: 1, methods: 3, attributes: 3
+</code></pre></div></div>
+
+<p>이 블록은 클래스 이름, 상속 관계, 필드/메서드 수처럼 파일의 뼈대를 보여준다.</p>
+
+<h4 id="constant-pool">Constant Pool</h4>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Constant pool:
+  #7  = Fieldref      #8.#9   // Sample.name:Ljava/lang/String;
+  #13 = InvokeDynamic #0:#14  // makeConcatWithConstants
+  #17 = Fieldref      #18.#19 // java/lang/System.out:Ljava/io/PrintStream;
+  #23 = String        #24     // kim
+  #25 = Methodref     #8.#26  // Sample."&lt;init&gt;":(Ljava/lang/String;)V
+  #28 = Methodref     #8.#29  // Sample.greet:()Ljava/lang/String;
+  #32 = Methodref     #33.#34 // java/io/PrintStream.println:(Ljava/lang/String;)V
+</code></pre></div></div>
+
+<p>이 블록은 문자열과 메서드/필드 참조 같은 실행용 참조를 보여준다.</p>
+
+<h4 id="method-bytecode">Method Bytecode</h4>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public Sample(java.lang.String);
+  0: aload_0
+  1: invokespecial #1   // Object.&lt;init&gt;()
+  4: aload_0
+  5: aload_1
+  6: putfield      #7   // name
+
+public java.lang.String greet();
+  0: aload_0
+  1: getfield      #7   // name
+  4: invokedynamic #13
+  9: areturn
+
+public static void main(java.lang.String[]);
+  0: getstatic     #17  // System.out
+  3: new           #8   // Sample
+  7: ldc           #23  // "kim"
+  9: invokespecial #25  // &lt;init&gt;
+ 12: invokevirtual #28  // greet
+ 15: invokevirtual #32  // println
+ 18: return
+</code></pre></div></div>
+
+<p>이 블록은 각 메서드가 실제로 어떤 bytecode로 풀리는지 보여준다.</p>
+
+<p>보는 순서는 간단하다.</p>
+
+<ol>
+  <li>header에서 클래스 버전과 상속 관계를 본다.</li>
+  <li><code class="language-plaintext highlighter-rouge">Constant pool</code>에서 문자열과 참조를 본다.</li>
+  <li>각 <code class="language-plaintext highlighter-rouge">method</code>의 <code class="language-plaintext highlighter-rouge">Code</code>에서 bytecode 흐름을 본다.</li>
+</ol>
+
+<p>이렇게 보면 <code class="language-plaintext highlighter-rouge">Sample</code> 소스의 각 부분이 <code class="language-plaintext highlighter-rouge">class</code> 파일 안에서 어디로 갔는지 바로 연결된다.</p>
+
+<h3 id="conclusion">Conclusion</h3>
+<hr />
+<p><code class="language-plaintext highlighter-rouge">class</code> 파일은 소스 코드를 직접 담는 파일이 아니라, JVM이 읽을 메타데이터와 bytecode 묶음이다.</p>
+
+<p>이 구조를 이해하면 <code class="language-plaintext highlighter-rouge">javac</code>가 무엇을 만들고, <code class="language-plaintext highlighter-rouge">java</code>가 무엇을 읽는지 훨씬 분명해진다.</p>
+
+<h3 id="next-step">Next Step</h3>
+<hr />
+<p>다음 글에서는 <a href="/java-class-loading-linking-initialization.html"><code class="language-plaintext highlighter-rouge">class</code> 로딩, 링킹, 초기화</a>를 본다.</p>
+
+</article>
+      </div>
+    </main>
+    <script type="module" src="/assets/js/mermaid-init.js"></script>
+  </body>
+</html>

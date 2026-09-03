@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>모던 GitHub Actions CI Flow: Workflow Quick Started</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="모던 GitHub Actions CI Flow: Workflow Quick Started" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="TOC" />
+<meta property="og:description" content="TOC" />
+<link rel="canonical" href="https://hrllk.github.io/github-actions-workflow-writing.html" />
+<meta property="og:url" content="https://hrllk.github.io/github-actions-workflow-writing.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-08-21T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="모던 GitHub Actions CI Flow: Workflow Quick Started" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2026-08-21T00:00:00+00:00","datePublished":"2026-08-21T00:00:00+00:00","description":"TOC","headline":"모던 GitHub Actions CI Flow: Workflow Quick Started","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/github-actions-workflow-writing.html"},"url":"https://hrllk.github.io/github-actions-workflow-writing.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2026-08-21 00:00:00 +0000">2026-08-21</time>
+  </p>
+  
+  <h1>모던 GitHub Actions CI Flow: Workflow Quick Started</h1>
+
+  <h3 id="toc">TOC</h3>
+<hr />
+
+<ol>
+  <li><a href="#overview">Overview</a></li>
+  <li><a href="#workflow-기본-구조">Workflow 기본 구조</a></li>
+  <li><a href="#event별-workflow-작성">Event별 Workflow 작성</a>
+    <ol>
+      <li><a href="#pull_request">pull_request</a></li>
+      <li><a href="#push">push</a></li>
+      <li><a href="#workflow_dispatch">workflow_dispatch</a></li>
+    </ol>
+  </li>
+  <li><a href="#step-작성">Step 작성</a>
+    <ol>
+      <li><a href="#run과-uses">run과 uses</a></li>
+    </ol>
+  </li>
+  <li><a href="#최소-workflow-이벤트별-예시">최소 Workflow 이벤트별 예시</a></li>
+  <li><a href="#conclusion">Conclusion</a></li>
+</ol>
+
+<h3 id="overview">Overview</h3>
+<hr />
+
+<p>이 글은 GitHub Actions CI 시리즈의 2편이다. 1편 <a href="/github-standard-ci-flow.html">모던 GitHub Actions CI Flow</a>에서 설명한 흐름을 Workflow YAML로 작성한다. Jenkins의 Pipeline이 실행할 작업을 정의하듯, GitHub Actions Workflow는 Event, Job, Step을 저장소 안에 선언한다.</p>
+
+<p>이 글에서는 <code class="language-plaintext highlighter-rouge">pull_request</code>, <code class="language-plaintext highlighter-rouge">push</code>, <code class="language-plaintext highlighter-rouge">workflow_dispatch</code>를 기준으로 실행 조건을 작성하고, Step에서 <code class="language-plaintext highlighter-rouge">run</code>과 <code class="language-plaintext highlighter-rouge">uses</code>를 사용하는 방법을 설명한다.</p>
+
+<h3 id="workflow-기본-구조">Workflow 기본 구조</h3>
+<hr />
+
+<p>Workflow 파일은 저장소의 <code class="language-plaintext highlighter-rouge">.github/workflows</code> 디렉터리에 둔다. 기본 구조는 <code class="language-plaintext highlighter-rouge">name</code>, <code class="language-plaintext highlighter-rouge">on</code>, <code class="language-plaintext highlighter-rouge">jobs</code>로 구성한다.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">name</span><span class="pi">:</span> <span class="s">CI</span>
+
+<span class="c1">######</span>
+<span class="c1">## 이벤트 선언</span>
+<span class="c1">######</span>
+<span class="na">on</span><span class="pi">:</span>
+  <span class="na">pull_request</span><span class="pi">:</span>
+  <span class="c1"># or</span>
+  <span class="na">push</span><span class="pi">:</span>
+  <span class="c1"># or</span>
+  <span class="na">workflow_dispatch</span><span class="pi">:</span>
+
+<span class="c1">######</span>
+<span class="c1">## 작업 선언</span>
+<span class="c1">######</span>
+<span class="na">jobs</span><span class="pi">:</span>
+  <span class="na">build-and-test</span><span class="pi">:</span>
+    <span class="na">runs-on</span><span class="pi">:</span> <span class="s">ubuntu-latest</span>
+    <span class="na">steps</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">run</span><span class="pi">:</span> <span class="s">npm test</span>
+</code></pre></div></div>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">name</code>: GitHub Actions 화면에 표시할 Workflow 이름</li>
+  <li><code class="language-plaintext highlighter-rouge">on</code>: Workflow를 실행할 Event 필터</li>
+  <li><code class="language-plaintext highlighter-rouge">jobs</code>: Runner에서 실행할 Job과 실행 순서</li>
+  <li><code class="language-plaintext highlighter-rouge">steps</code>: Job 안에서 순서대로 실행할 작업</li>
+</ul>
+
+<h3 id="event별-workflow-작성">Event별 Workflow 작성</h3>
+<hr />
+
+<p>Event는 Jenkins의 Trigger와 비슷한 역할을 한다. 하나의 Workflow에 여러 Event를 선언하면 선언된 Event 중 하나가 발생할 때 Workflow가 실행된다. <a href="https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows">GitHub Actions Event 문서</a></p>
+
+<h4 id="pull_request">pull_request</h4>
+
+<p>PR 생성, 새 commit Push, 재오픈을 대상으로 CI를 실행</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">on</span><span class="pi">:</span>
+  <span class="na">pull_request</span><span class="pi">:</span>
+    <span class="na">types</span><span class="pi">:</span> <span class="pi">[</span><span class="nv">opened</span><span class="pi">,</span> <span class="nv">synchronize</span><span class="pi">,</span> <span class="nv">reopened</span><span class="pi">]</span>
+</code></pre></div></div>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">opened</code>: PR 생성될 때</li>
+  <li><code class="language-plaintext highlighter-rouge">synchronize</code>: PR source branch에 새 커밋이 반영될때</li>
+  <li><code class="language-plaintext highlighter-rouge">reopened</code>: 닫힌 PR 재오픈될 때</li>
+</ul>
+
+<h4 id="push">push</h4>
+
+<p>지정한 브랜치에 commit이 반영될 때 실행 
+PR Merge 후 <code class="language-plaintext highlighter-rouge">develop</code>의 상태를 검증 or 개발 환경에 배포할 때 사용할 수 있다.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">on</span><span class="pi">:</span>
+  <span class="na">push</span><span class="pi">:</span>
+    <span class="na">branches</span><span class="pi">:</span> <span class="pi">[</span><span class="nv">develop</span><span class="pi">]</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">branches</code>를 생략하면 모든 브랜치의 Push가 대상이 됨.
+운영 배포처럼 영향 범위가 큰 작업은 대상 브랜치를 명시</p>
+
+<h4 id="workflow_dispatch">workflow_dispatch</h4>
+
+<p>GitHub UI나 API에서 Workflow를 수동 실행 
+특정 Ref나 입력값을 받아 배포와 운영 작업을 실행할 수 있다.
+이때inputs 하위의 custom 인자를 함께 받아 사용할 수 있다.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">on</span><span class="pi">:</span>
+  <span class="na">workflow_dispatch</span><span class="pi">:</span>
+    <span class="na">inputs</span><span class="pi">:</span>
+</code></pre></div></div>
+
+<h3 id="step-작성">Step 작성</h3>
+<hr />
+
+<p>Step은 Runner에서 직접 명령을 구성하거나,  이미 정의된 자동화 단위를 호출</p>
+
+<h4 id="run과-uses">run과 uses</h4>
+
+<p><code class="language-plaintext highlighter-rouge">run</code>은 Runner의 셸에서 명령을 실행하고, <code class="language-plaintext highlighter-rouge">uses</code>는 Action 또는 재사용 Workflow를 호출</p>
+
+<p><code class="language-plaintext highlighter-rouge">uses</code>는 미리 정의된 동작을 가져와 사용하는 방식이다. 직접 실행 명령을 작성하는 대신, 반복해서 사용할 수 있는 Action을 조합한다는 점에서 동작 템플릿처럼 이해할 수 있다.</p>
+
+<p>Step 수준의 <code class="language-plaintext highlighter-rouge">uses</code>는 Action을 호출한다. 재사용 Workflow는 Job 수준에서 별도의 <code class="language-plaintext highlighter-rouge">uses</code> 문법으로 호출한다.</p>
+
+<h4 id="예시-uses">예시: uses</h4>
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">...</span> 
+
+<span class="na">steps</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">uses</span><span class="pi">:</span> <span class="s">actions/setup-node@v7</span>
+    <span class="na">with</span><span class="pi">:</span>
+      <span class="na">node-version</span><span class="pi">:</span> <span class="m">24</span>
+</code></pre></div></div>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">actions/setup-node</code>: 지정한 Node.js 실행 환경을 준비한다.</li>
+  <li><code class="language-plaintext highlighter-rouge">with</code>: Action에 입력값을 전달한다.</li>
+  <li><code class="language-plaintext highlighter-rouge">@v6</code>, <code class="language-plaintext highlighter-rouge">@v7</code>: Action의 Ref다. Tag, Branch, Commit SHA를 사용할 수 있다.</li>
+</ul>
+
+<h4 id="예시-run">예시: run</h4>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">steps</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">run</span><span class="pi">:</span> <span class="s">npm test</span>
+</code></pre></div></div>
+
+<h3 id="최소-workflow-이벤트별-예시">최소 Workflow 이벤트별 예시</h3>
+<hr />
+
+<h4 id="pr">pr</h4>
+<div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">name</span><span class="pi">:</span> <span class="s">pr test</span>
+
+<span class="na">on</span><span class="pi">:</span>
+  <span class="na">pull_request</span><span class="pi">:</span>
+    <span class="na">types</span><span class="pi">:</span> <span class="pi">[</span><span class="nv">opened</span><span class="pi">,</span> <span class="nv">synchronize</span><span class="pi">,</span> <span class="nv">reopened</span><span class="pi">]</span>
+
+<span class="na">jobs</span><span class="pi">:</span>
+  <span class="na">pr-test</span><span class="pi">:</span> 
+    <span class="na">runs-on</span><span class="pi">:</span> <span class="s">ubuntu-latest</span>
+    <span class="na">steps</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">uses</span><span class="pi">:</span> <span class="s">actions/checkout@v6</span>
+
+</code></pre></div></div>
+
+<h4 id="push-1">push</h4>
+<div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">name</span><span class="pi">:</span> <span class="s">push test</span>
+
+<span class="na">on</span><span class="pi">:</span>
+  <span class="na">push</span><span class="pi">:</span>
+    <span class="na">branches</span><span class="pi">:</span> <span class="pi">[</span><span class="nv">develop</span><span class="pi">]</span>
+
+<span class="na">jobs</span><span class="pi">:</span>
+  <span class="na">push-test</span><span class="pi">:</span> 
+    <span class="na">runs-on</span><span class="pi">:</span> <span class="s">ubuntu-latest</span>
+    <span class="na">steps</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">uses</span><span class="pi">:</span> <span class="s">actions/checkout@v6</span>
+
+</code></pre></div></div>
+
+<h4 id="workflow_dispatch-1">workflow_dispatch</h4>
+<div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">name</span><span class="pi">:</span> <span class="s">manual test</span>
+
+<span class="na">on</span><span class="pi">:</span>
+  <span class="na">workflow_dispatch</span><span class="pi">:</span>
+    <span class="na">inputs</span><span class="pi">:</span>
+      <span class="na">msg</span><span class="pi">:</span>
+        <span class="na">description</span><span class="pi">:</span> <span class="s">메세지</span>
+        <span class="na">required</span><span class="pi">:</span> <span class="no">false</span>
+        <span class="na">type</span><span class="pi">:</span> <span class="s">string</span>
+
+<span class="na">jobs</span><span class="pi">:</span>
+  <span class="na">manual-test</span><span class="pi">:</span> 
+    <span class="na">runs-on</span><span class="pi">:</span> <span class="s">ubuntu-latest</span>
+    <span class="na">steps</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">run</span><span class="pi">:</span> <span class="s">echo $</span>
+
+</code></pre></div></div>
+
+<h3 id="conclusion">Conclusion</h3>
+<hr />
+
+<p>GitHub Actions Workflow는 Event로 실행 시점을 정의하고, Job과 Step으로 실행할 작업을 구성한다.</p>
+
+</article>
+      </div>
+    </main>
+    <script type="module" src="/assets/js/mermaid-init.js"></script>
+  </body>
+</html>

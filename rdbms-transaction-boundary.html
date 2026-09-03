@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>RDBMS 트랜잭션 경계: 어디서 시작하고 종료해야 하는가</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="RDBMS 트랜잭션 경계: 어디서 시작하고 종료해야 하는가" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="TOC Overview 트랜잭션 경계란 무엇인가 업무 단위와 트랜잭션 경계 트랜잭션 경계 주의사항 계좌 이체의 트랜잭션 경계 경계를 정할 때 확인할 것 Conclusion Reference" />
+<meta property="og:description" content="TOC Overview 트랜잭션 경계란 무엇인가 업무 단위와 트랜잭션 경계 트랜잭션 경계 주의사항 계좌 이체의 트랜잭션 경계 경계를 정할 때 확인할 것 Conclusion Reference" />
+<link rel="canonical" href="https://hrllk.github.io/rdbms-transaction-boundary.html" />
+<meta property="og:url" content="https://hrllk.github.io/rdbms-transaction-boundary.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-01-15T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="RDBMS 트랜잭션 경계: 어디서 시작하고 종료해야 하는가" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2021-01-15T00:00:00+00:00","datePublished":"2021-01-15T00:00:00+00:00","description":"TOC Overview 트랜잭션 경계란 무엇인가 업무 단위와 트랜잭션 경계 트랜잭션 경계 주의사항 계좌 이체의 트랜잭션 경계 경계를 정할 때 확인할 것 Conclusion Reference","headline":"RDBMS 트랜잭션 경계: 어디서 시작하고 종료해야 하는가","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/rdbms-transaction-boundary.html"},"url":"https://hrllk.github.io/rdbms-transaction-boundary.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2021-01-15 00:00:00 +0000">2021-01-15</time>
+  </p>
+  
+  <h1>RDBMS 트랜잭션 경계: 어디서 시작하고 종료해야 하는가</h1>
+
+  <h3 id="toc">TOC</h3>
+<hr />
+<ol>
+  <li><a href="#overview">Overview</a></li>
+  <li><a href="#트랜잭션-경계란-무엇인가">트랜잭션 경계란 무엇인가</a></li>
+  <li><a href="#업무-단위와-트랜잭션-경계">업무 단위와 트랜잭션 경계</a></li>
+  <li><a href="#트랜잭션-경계-주의사항">트랜잭션 경계 주의사항</a></li>
+  <li><a href="#계좌-이체의-트랜잭션-경계">계좌 이체의 트랜잭션 경계</a></li>
+  <li><a href="#경계를-정할-때-확인할-것">경계를 정할 때 확인할 것</a></li>
+  <li><a href="#conclusion">Conclusion</a></li>
+  <li><a href="#reference">Reference</a></li>
+</ol>
+
+<h3 id="overview">Overview</h3>
+<hr />
+<p>앞 글에서는 Auto Commit이 SQL마다 트랜잭션을 자동으로 끝내는 방식을 살펴봤다.</p>
+
+<p>이번 글의 질문은 조금 다르다.</p>
+
+<blockquote>
+  <p>여러 SQL이 하나의 업무를 구성할 때, 어디서 트랜잭션을 시작하고 어디서 끝내야 하는가?</p>
+</blockquote>
+
+<p>트랜잭션을 사용한다는 것만으로 충분하지 않다. 경계를 잘못 잡으면 데이터 정합성이 깨지거나 락을 오래 점유하게 된다.</p>
+
+<h3 id="트랜잭션-경계란-무엇인가">트랜잭션 경계란 무엇인가</h3>
+<hr />
+<p>트랜잭션 경계는 하나의 트랜잭션에 포함할 작업의 시작점과 종료점이다.</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>BEGIN
+├─ 데이터 조회
+├─ 데이터 변경
+└─ 데이터 변경
+COMMIT 또는 ROLLBACK
+</code></pre></div></div>
+
+<p>경계 안의 작업은 하나의 성공 또는 하나의 실패로 처리된다. 따라서 경계 안에는 서로 성공 여부가 연결된 데이터베이스 작업이 들어가야 한다.</p>
+
+<h3 id="업무-단위와-트랜잭션-경계">업무 단위와 트랜잭션 경계</h3>
+<hr />
+<p>트랜잭션 경계는 SQL 개수가 아니라 <strong>업무 단위</strong>를 기준으로 정한다.</p>
+
+<p>계좌 이체는 다음 세 작업이 모두 성공해야 완료된다.</p>
+
+<ol>
+  <li>출금 계좌 잔액 차감</li>
+  <li>입금 계좌 잔액 증가</li>
+  <li>이체 이력 저장</li>
+</ol>
+
+<p>이 세 작업은 하나의 이체라는 업무를 구성하므로 하나의 트랜잭션으로 묶는 것이 자연스럽다.</p>
+
+<p>반면 사용자에게 알림을 보내는 작업은 데이터베이스 변경과 실행 조건이 다르다. 네트워크 지연이나 외부 서비스 장애 때문에 DB 트랜잭션을 계속 열어두면 안 된다.</p>
+
+<h3 id="트랜잭션-경계-주의사항">트랜잭션 경계 주의사항</h3>
+<hr />
+<h4 id="너무-짧게-잡으면">너무 짧게 잡으면</h4>
+<p>각 SQL을 별도의 트랜잭션으로 실행하면 일부 작업만 커밋될 수 있다.</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>트랜잭션 1: 출금 성공 → COMMIT
+트랜잭션 2: 입금 실패 → ROLLBACK
+</code></pre></div></div>
+
+<p>이 경우 출금만 처리되고 입금은 처리되지 않는다. 업무 전체는 실패했지만 데이터베이스에는 일부 결과가 남는다.</p>
+
+<p>트랜잭션 경계가 업무 단위보다 짧으면 원자성을 잃는다.</p>
+
+<h4 id="너무-길게-잡으면">너무 길게 잡으면</h4>
+<p>반대로 트랜잭션 안에 불필요한 작업을 많이 넣으면 문제가 생긴다.</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>BEGIN
+├─ 데이터 조회
+├─ 외부 API 호출
+├─ 사용자 입력 대기
+├─ 복잡한 계산
+└─ 데이터 변경
+COMMIT
+</code></pre></div></div>
+
+<p>이런 구조에서는 외부 API가 느리거나 사용자의 응답이 늦을 때 트랜잭션이 계속 열린다. 그동안 변경된 데이터의 <strong>레코드 락과 커넥션을 점유</strong>하므로 다른 요청이 대기할 수 있다.</p>
+
+<p>트랜잭션에는 정합성을 위해 꼭 필요한 데이터베이스 작업만 포함하는 것이 좋다.</p>
+
+<h3 id="계좌-이체의-트랜잭션-경계">계좌 이체의 트랜잭션 경계</h3>
+<hr />
+<p>계좌 이체는 다음처럼 데이터 변경 구간만 트랜잭션으로 묶을 수 있다.</p>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">START</span> <span class="n">TRANSACTION</span><span class="p">;</span>
+
+<span class="k">UPDATE</span> <span class="n">account</span>
+<span class="k">SET</span> <span class="n">balance</span> <span class="o">=</span> <span class="n">balance</span> <span class="o">-</span> <span class="mi">10000</span>
+<span class="k">WHERE</span> <span class="n">account_id</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+
+<span class="k">UPDATE</span> <span class="n">account</span>
+<span class="k">SET</span> <span class="n">balance</span> <span class="o">=</span> <span class="n">balance</span> <span class="o">+</span> <span class="mi">10000</span>
+<span class="k">WHERE</span> <span class="n">account_id</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+
+<span class="k">INSERT</span> <span class="k">INTO</span> <span class="n">transfer_history</span><span class="p">(</span><span class="n">from_account_id</span><span class="p">,</span> <span class="n">to_account_id</span><span class="p">,</span> <span class="n">amount</span><span class="p">)</span>
+<span class="k">VALUES</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">10000</span><span class="p">);</span>
+
+<span class="k">COMMIT</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>잔액 차감, 잔액 증가, 이력 저장 중 하나라도 실패하면 <code class="language-plaintext highlighter-rouge">ROLLBACK</code>한다.</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>입력 검증
+→ 트랜잭션 시작
+→ 계좌와 이체 이력 변경
+→ 트랜잭션 종료
+→ 외부 알림 발송
+</code></pre></div></div>
+
+<p>외부 알림은 커밋 이후 별도의 처리로 분리한다. 알림까지 반드시 같은 성공 단위로 보장해야 한다면 Outbox나 이벤트 기반 처리가 필요하며, 이는 별도의 글에서 다룬다.</p>
+
+<h3 id="경계를-정할-때-확인할-것">경계를 정할 때 확인할 것</h3>
+<hr />
+<p>트랜잭션을 설계할 때 다음 질문을 확인한다.</p>
+
+<ul>
+  <li>이 작업들은 업무적으로 함께 성공하거나 실패해야 하는가?</li>
+  <li>일부만 커밋되면 데이터가 잘못된 상태가 되는가?</li>
+  <li>트랜잭션 안에 외부 API 호출이나 사용자 입력 대기가 들어가지는 않는가?</li>
+  <li>트랜잭션이 불필요하게 많은 row를 잠그고 있지는 않은가?</li>
+  <li>실패했을 때 전체를 롤백할지, 일부를 별도로 재처리할지 정했는가?</li>
+</ul>
+
+<h3 id="conclusion">Conclusion</h3>
+<hr />
+<p>트랜잭션 경계는 SQL의 시작과 끝이 아니라 업무의 시작과 끝을 기준으로 정한다.</p>
+
+<ul>
+  <li>업무적으로 함께 성공해야 하는 DB 변경은 하나의 트랜잭션으로 묶는다.</li>
+  <li>외부 호출, 사용자 입력, 오래 걸리는 계산은 트랜잭션 밖으로 분리한다.</li>
+  <li>경계가 너무 짧으면 부분 커밋이 발생하고, 너무 길면 락과 커넥션 점유가 늘어난다.</li>
+</ul>
+
+<blockquote>
+  <p>좋은 트랜잭션 경계는 정합성을 지키면서도 필요한 만큼만 짧다.</p>
+</blockquote>
+
+<h3 id="reference">Reference</h3>
+<hr />
+<ul>
+  <li><a href="https://mariadb.com/docs/server/reference/sql-statements/transactions/start-transaction">MariaDB START TRANSACTION</a></li>
+</ul>
+
+</article>
+      </div>
+    </main>
+    <script type="module" src="/assets/js/mermaid-init.js"></script>
+  </body>
+</html>
