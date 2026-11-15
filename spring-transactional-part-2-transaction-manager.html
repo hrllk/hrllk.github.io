@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Spring @Transactional 2: TransactionInterceptor와 TransactionManager</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Spring @Transactional 2: TransactionInterceptor와 TransactionManager" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="TOC Overview 두 구성 요소의 역할 트랜잭션 실행 흐름 TransactionManager가 하는 일 Conclusion" />
+<meta property="og:description" content="TOC Overview 두 구성 요소의 역할 트랜잭션 실행 흐름 TransactionManager가 하는 일 Conclusion" />
+<link rel="canonical" href="https://hrllk.github.io/spring-transactional-part-2-transaction-manager.html" />
+<meta property="og:url" content="https://hrllk.github.io/spring-transactional-part-2-transaction-manager.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2022-01-17T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Spring @Transactional 2: TransactionInterceptor와 TransactionManager" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2022-01-17T00:00:00+00:00","datePublished":"2022-01-17T00:00:00+00:00","description":"TOC Overview 두 구성 요소의 역할 트랜잭션 실행 흐름 TransactionManager가 하는 일 Conclusion","headline":"Spring @Transactional 2: TransactionInterceptor와 TransactionManager","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/spring-transactional-part-2-transaction-manager.html"},"url":"https://hrllk.github.io/spring-transactional-part-2-transaction-manager.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2022-01-17 00:00:00 +0000">2022-01-17</time>
+  </p>
+  
+  <h1>Spring @Transactional 2: TransactionInterceptor와 TransactionManager</h1>
+
+  <h3 id="toc">TOC</h3>
+<hr />
+<ol>
+  <li><a href="#overview">Overview</a></li>
+  <li><a href="#두-구성-요소의-역할">두 구성 요소의 역할</a></li>
+  <li><a href="#트랜잭션-실행-흐름">트랜잭션 실행 흐름</a></li>
+  <li><a href="#transactionmanager가-하는-일">TransactionManager가 하는 일</a></li>
+  <li><a href="#conclusion">Conclusion</a></li>
+</ol>
+
+<h3 id="overview">Overview</h3>
+<hr />
+<p>파트 1에서는 <code class="language-plaintext highlighter-rouge">@Transactional</code>이 런타임에 Spring AOP 프록시와 <code class="language-plaintext highlighter-rouge">TransactionInterceptor</code>를 통해 동작한다는 점을 살펴봤다.</p>
+
+<p>이번 글의 질문은 간단하다.</p>
+
+<blockquote>
+  <p>인터셉터는 실제 트랜잭션을 어떻게 시작하고 끝내는가?</p>
+</blockquote>
+
+<p>인터셉터는 데이터베이스 API를 직접 호출하지 않는다. <code class="language-plaintext highlighter-rouge">PlatformTransactionManager</code>에 트랜잭션 처리를 위임한다.</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>클라이언트
+  → AOP 프록시
+  → TransactionInterceptor
+  → PlatformTransactionManager
+  → 트랜잭션 리소스
+</code></pre></div></div>
+
+<h3 id="두-구성-요소의-역할">두 구성 요소의 역할</h3>
+<hr />
+<p>| 구성 요소 | 역할 |
+| — | — |
+| <code class="language-plaintext highlighter-rouge">TransactionInterceptor</code> | 메소드 호출 전후에 트랜잭션 경계를 적용한다. |
+| <code class="language-plaintext highlighter-rouge">PlatformTransactionManager</code> | 트랜잭션 리소스를 시작·커밋·롤백한다. |</p>
+
+<p>Spring은 사용하는 기술에 따라 매니저 구현체를 선택한다.</p>
+
+<ul>
+  <li>JDBC: <code class="language-plaintext highlighter-rouge">DataSourceTransactionManager</code></li>
+  <li>JPA: <code class="language-plaintext highlighter-rouge">JpaTransactionManager</code></li>
+  <li>여러 리소스: JTA 기반 매니저</li>
+</ul>
+
+<p>구현체는 달라도 인터셉터가 매니저에 같은 추상화된 작업을 요청한다는 점은 같다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">PlatformTransactionManager</span> <span class="o">{</span>
+    <span class="nc">TransactionStatus</span> <span class="nf">getTransaction</span><span class="o">(</span><span class="nc">TransactionDefinition</span> <span class="n">definition</span><span class="o">);</span>
+    <span class="kt">void</span> <span class="nf">commit</span><span class="o">(</span><span class="nc">TransactionStatus</span> <span class="n">status</span><span class="o">);</span>
+    <span class="kt">void</span> <span class="nf">rollback</span><span class="o">(</span><span class="nc">TransactionStatus</span> <span class="n">status</span><span class="o">);</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="트랜잭션-실행-흐름">트랜잭션 실행 흐름</h3>
+<hr />
+<p>인터셉터의 동작을 단순화하면 다음과 같다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 실제 Spring 구현을 단순화한 의사 코드</span>
+<span class="kd">public</span> <span class="nc">Object</span> <span class="nf">invoke</span><span class="o">(</span><span class="nc">MethodInvocation</span> <span class="n">invocation</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Throwable</span> <span class="o">{</span>
+    <span class="nc">TransactionStatus</span> <span class="n">status</span> <span class="o">=</span>
+            <span class="n">transactionManager</span><span class="o">.</span><span class="na">getTransaction</span><span class="o">(</span><span class="n">transactionDefinition</span><span class="o">);</span>
+
+    <span class="k">try</span> <span class="o">{</span>
+        <span class="nc">Object</span> <span class="n">result</span> <span class="o">=</span> <span class="n">invocation</span><span class="o">.</span><span class="na">proceed</span><span class="o">();</span>
+        <span class="n">transactionManager</span><span class="o">.</span><span class="na">commit</span><span class="o">(</span><span class="n">status</span><span class="o">);</span>
+        <span class="k">return</span> <span class="n">result</span><span class="o">;</span>
+    <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Throwable</span> <span class="n">exception</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">rollbackOn</span><span class="o">(</span><span class="n">exception</span><span class="o">))</span> <span class="o">{</span>
+            <span class="n">transactionManager</span><span class="o">.</span><span class="na">rollback</span><span class="o">(</span><span class="n">status</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+            <span class="n">transactionManager</span><span class="o">.</span><span class="na">commit</span><span class="o">(</span><span class="n">status</span><span class="o">);</span>
+        <span class="o">}</span>
+        <span class="k">throw</span> <span class="n">exception</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>호출 순서는 다음과 같다.</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>1. @Transactional 속성 확인
+2. TransactionManager.getTransaction()
+3. 원본 메소드 실행
+4. 정상 반환이면 commit()
+5. 롤백 대상 예외면 rollback()
+6. 예외를 호출자에게 전달
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">invocation.proceed()</code>가 프록시 다음에 있는 원본 객체의 메소드를 실행하는 부분이다.</p>
+
+<h3 id="transactionmanager가-하는-일">TransactionManager가 하는 일</h3>
+<hr />
+<p><code class="language-plaintext highlighter-rouge">TransactionManager</code>는 데이터 접근 기술에 맞는 트랜잭션 리소스를 준비한다.</p>
+
+<ul>
+  <li>JDBC에서는 커넥션을 확보하고 트랜잭션을 시작한다.</li>
+  <li>JPA에서는 <code class="language-plaintext highlighter-rouge">EntityManager</code>와 영속성 컨텍스트를 트랜잭션에 연결한다.</li>
+  <li>기존 트랜잭션이 있으면 전파 속성에 따라 참여하거나 새로 시작한다.</li>
+</ul>
+
+<p>이 리소스는 현재 실행 컨텍스트에 연결되므로 Repository나 Mapper가 매번 커넥션을 전달받지 않아도 같은 트랜잭션에 참여할 수 있다.</p>
+
+<p>대상 메소드가 정상적으로 끝나면 매니저는 커밋을 수행하고, 롤백 대상 예외가 발생하면 변경 사항을 취소한다. 이후 커넥션이나 영속성 컨텍스트 같은 리소스를 정리한다.</p>
+
+<h3 id="conclusion">Conclusion</h3>
+<hr />
+<p><code class="language-plaintext highlighter-rouge">@Transactional</code> 실행에서 두 구성 요소의 책임은 명확히 나뉜다.</p>
+
+<blockquote>
+  <p><code class="language-plaintext highlighter-rouge">TransactionInterceptor</code>는 트랜잭션 경계를 감싸고, <code class="language-plaintext highlighter-rouge">PlatformTransactionManager</code>는 실제 트랜잭션 리소스를 관리한다.</p>
+</blockquote>
+
+<p><a href="/spring-transactional-part-1-proxy-and-aop.html">이전 글: 프록시와 AOP</a><br />
+<a href="/spring-transactional-part-3-proxy-caveats.html">다음 글: 프록시 방식의 주의사항</a></p>
+
+</article>
+      </div>
+    </main>
+    <script type="module" src="/assets/js/mermaid-init.js"></script>
+  </body>
+</html>

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Transactional Outbox in Practice: Operating in Production</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Transactional Outbox in Practice: Operating in Production" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="TOC Overview 멀티 인스턴스와 중복 발행 운영 설정 예시 관측 지점 DLT 정책 Conclusion" />
+<meta property="og:description" content="TOC Overview 멀티 인스턴스와 중복 발행 운영 설정 예시 관측 지점 DLT 정책 Conclusion" />
+<link rel="canonical" href="https://hrllk.github.io/transactional-outbox-in-practice-operating-in-production.html" />
+<meta property="og:url" content="https://hrllk.github.io/transactional-outbox-in-practice-operating-in-production.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-04-27T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Transactional Outbox in Practice: Operating in Production" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2026-04-27T00:00:00+00:00","datePublished":"2026-04-27T00:00:00+00:00","description":"TOC Overview 멀티 인스턴스와 중복 발행 운영 설정 예시 관측 지점 DLT 정책 Conclusion","headline":"Transactional Outbox in Practice: Operating in Production","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/transactional-outbox-in-practice-operating-in-production.html"},"url":"https://hrllk.github.io/transactional-outbox-in-practice-operating-in-production.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2026-04-27 00:00:00 +0000">2026-04-27</time>
+  </p>
+  
+  <h1>Transactional Outbox in Practice: Operating in Production</h1>
+
+  <h3 id="toc">TOC</h3>
+<hr />
+<ol>
+  <li><a href="#overview">Overview</a></li>
+  <li><a href="#멀티-인스턴스와-중복-발행">멀티 인스턴스와 중복 발행</a></li>
+  <li><a href="#운영-설정-예시">운영 설정 예시</a></li>
+  <li><a href="#관측-지점">관측 지점</a></li>
+  <li><a href="#dlt-정책">DLT 정책</a></li>
+  <li><a href="#conclusion">Conclusion</a></li>
+</ol>
+
+<h3 id="overview">Overview</h3>
+<hr />
+<p>앞선 글들에서 producer, poller, consumer의 기본 책임을 나눴다. 운영 환경에서는 여기에 멀티 인스턴스, 오래 쌓인 row, 컨슈머 실패 같은 현실 문제가 더해진다.</p>
+
+<p>이번 글은 Outbox를 운영할 때 반드시 정해야 하는 몇 가지 기준을 짧게 정리한다.</p>
+
+<h3 id="멀티-인스턴스와-중복-발행">멀티 인스턴스와 중복 발행</h3>
+<hr />
+<p>애플리케이션 인스턴스가 다중화되면 각 인스턴스의 폴러가 같은 PENDING row를 동시에 읽을 수 있다.</p>
+
+<p>우리는 폴 쿼리에 <code class="language-plaintext highlighter-rouge">SELECT ... FOR UPDATE SKIP LOCKED</code>를 기본으로 둬 경합을 방지한다. 그래도 PROCESSING 도중 인스턴스가 죽는 시나리오는 남기 때문에, 발행 중복 자체를 0으로 만들기보다 멱등 컨슈머가 흡수하는 모델을 유지한다.</p>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- Outbox 폴러가 PENDING row를 클레임하는 쿼리 패턴</span>
+<span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">TB_TRB_OX_001</span>
+ <span class="k">WHERE</span> <span class="n">STATUS</span> <span class="o">=</span> <span class="s1">'PENDING'</span>
+ <span class="k">ORDER</span> <span class="k">BY</span> <span class="n">CREATED_AT</span>
+ <span class="k">LIMIT</span> <span class="mi">50</span>
+   <span class="k">FOR</span> <span class="k">UPDATE</span> <span class="n">SKIP</span> <span class="n">LOCKED</span><span class="p">;</span>
+<span class="c1">-- SKIP LOCKED: 다른 인스턴스가 이미 잠근 row는 자동으로 건너뜀</span>
+</code></pre></div></div>
+
+<h3 id="운영-설정-예시">운영 설정 예시</h3>
+<hr />
+<p>message-lib이 제공하는 주요 설정값을 정리한다. 폴러 동작 튜닝과 SENT row 보관 정책이 핵심이다.</p>
+
+<p>SENT row를 무한히 보관하면 폴링 쿼리와 테이블 관리 비용이 커진다. PENDING/PROCESSING/DEAD row는 정리 대상에서 제외하는 것이 원칙이다. 발행되지 않은 row는 아직 시스템이 처리해야 할 의도이고, DEAD는 운영자가 들여다봐야 할 신호이기 때문이다.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">outbox</span><span class="pi">:</span>
+  <span class="c1"># 폴러 동작</span>
+  <span class="na">poll-interval-ms</span><span class="pi">:</span> <span class="m">500</span>         <span class="c1"># 발행 latency 상한 (ms)</span>
+  <span class="na">batch-size</span><span class="pi">:</span> <span class="m">50</span>                <span class="c1"># 한 폴 사이클에 처리할 최대 PENDING row 수</span>
+  <span class="na">max-retries</span><span class="pi">:</span> <span class="m">3</span>                <span class="c1"># 재시도 초과 시 DEAD 전환</span>
+
+  <span class="c1"># Row 보관</span>
+  <span class="na">cleanup-retention-days</span><span class="pi">:</span> <span class="m">30</span>    <span class="c1"># SENT row 보관 기간 (이후 삭제)</span>
+  <span class="na">cleanup-cron</span><span class="pi">:</span> <span class="s2">"</span><span class="s">0</span><span class="nv"> </span><span class="s">0</span><span class="nv"> </span><span class="s">3</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*"</span>   <span class="c1"># 매일 새벽 3시 실행</span>
+  <span class="c1"># PENDING / PROCESSING / DEAD 는 정리 대상에서 제외</span>
+</code></pre></div></div>
+
+<h3 id="관측-지점">관측 지점</h3>
+<hr />
+<p>Outbox가 정상 동작하는지는 코드만으로는 알 수 없다. 발행 파이프라인이 살아 있는지는 메트릭으로 확인해야 한다.</p>
+
+<p>이 시리즈에서 Outbox 폴러·발행을 담당하는 공용 SDK인 <code class="language-plaintext highlighter-rouge">message-lib</code>은 폴링·재시도·DEAD 전환을 내부에서 처리하며, 4개 메트릭을 기본으로 노출한다.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>메트릭</th>
+      <th>타입</th>
+      <th>의미</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">outbox.events.published</code></td>
+      <td>Counter</td>
+      <td>Kafka 발행 성공 횟수</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">outbox.events.failed</code></td>
+      <td>Counter</td>
+      <td>Kafka 발행 실패 횟수</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">outbox.events.dead</code></td>
+      <td>Counter</td>
+      <td>DEAD 상태 전환 횟수</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">outbox.queue.pending</code></td>
+      <td>Gauge</td>
+      <td>현재 미발행 PENDING row 수</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>운영에서 먼저 봐야 하는 두 값은 <code class="language-plaintext highlighter-rouge">outbox.queue.pending</code>과 <code class="language-plaintext highlighter-rouge">outbox.events.dead</code>다. <code class="language-plaintext highlighter-rouge">pending</code>이 늘어나면 폴러가 처리 속도를 따라가지 못하거나 멈췄다는 신호다. <code class="language-plaintext highlighter-rouge">dead</code>가 발생하면 Consumer가 끝내 처리하지 못한 메시지가 있다는 뜻이며, 이는 다음 섹션의 DLT 정책과 직접 연결된다.</p>
+
+<h3 id="dlt-정책">DLT 정책</h3>
+<hr />
+<p>재시도를 모두 소진한 메시지가 DLT에 도착했을 때의 정책도 미리 정해야 한다.</p>
+
+<p>대부분의 경우 상세 상태를 <code class="language-plaintext highlighter-rouge">FAIL</code>로 마감하고 운영자 알림을 보내는 방식이 적합하다. 로깅만 하고 상태를 남겨두면 사용자 입장에서는 작업이 영원히 진행 중인 것처럼 보일 수 있다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@DltHandler</span>
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">onDlt</span><span class="o">(</span><span class="nc">ConsumerRecord</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">UserRegistrationEventAvro</span><span class="o">&gt;</span> <span class="n">record</span><span class="o">)</span> <span class="o">{</span>
+    <span class="nc">UserRegistrationEventAvro</span> <span class="n">event</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="na">value</span><span class="o">();</span>
+    <span class="nc">String</span> <span class="n">dtlId</span> <span class="o">=</span> <span class="n">event</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">?</span> <span class="n">event</span><span class="o">.</span><span class="na">getUserRegDmndDtlId</span><span class="o">().</span><span class="na">toString</span><span class="o">()</span> <span class="o">:</span> <span class="s">"&lt;unknown&gt;"</span><span class="o">;</span>
+    <span class="n">log</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="s">"[UserRegistration] DLT received: dtlId={}"</span><span class="o">,</span> <span class="n">dtlId</span><span class="o">);</span>
+
+    <span class="c1">// ① 상세 상태를 FAIL로 마감 — 사용자에게 "처리 실패"로 노출</span>
+    <span class="n">consumeUseCase</span><span class="o">.</span><span class="na">markAsDeadLetter</span><span class="o">(</span><span class="n">dtlId</span><span class="o">,</span> <span class="s">"max retries exhausted"</span><span class="o">);</span>
+
+    <span class="c1">// ② 운영자 알림 (Slack / Email 등) — 알림 채널은 팀 인프라에 맞게 연결</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="conclusion">Conclusion</h3>
+<hr />
+<p>Transactional Outbox는 exactly-once를 공짜로 주는 패턴이 아니다. 분산 트랜잭션의 부담을 <strong>발행 재시도, 멱등 소비, 운영 관측</strong>이라는 더 다루기 쉬운 책임으로 나누는 패턴이다.</p>
+
+<p>이 시리즈의 결론은 단순하다. 저장과 발행 의도를 원자적으로 묶고, 발행은 at-least-once로 받아들이며, 컨슈머와 운영 도구가 중복과 누락을 흡수하게 만든다.</p>
+
+</article>
+      </div>
+    </main>
+    <script type="module" src="/assets/js/mermaid-init.js"></script>
+  </body>
+</html>

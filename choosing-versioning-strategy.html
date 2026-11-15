@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Choosing a Versioning Scheme: SemVer and CalVer</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Choosing a Versioning Scheme: SemVer and CalVer" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="TOC Overview 버전 체계가 표현해야 하는 것 SemVer CalVer 프로젝트에 맞는 방식 선택하기 Git tag와 배포 정보 연결하기 정리" />
+<meta property="og:description" content="TOC Overview 버전 체계가 표현해야 하는 것 SemVer CalVer 프로젝트에 맞는 방식 선택하기 Git tag와 배포 정보 연결하기 정리" />
+<link rel="canonical" href="https://hrllk.github.io/choosing-versioning-strategy.html" />
+<meta property="og:url" content="https://hrllk.github.io/choosing-versioning-strategy.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2025-12-02T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Choosing a Versioning Scheme: SemVer and CalVer" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2025-12-02T00:00:00+00:00","datePublished":"2025-12-02T00:00:00+00:00","description":"TOC Overview 버전 체계가 표현해야 하는 것 SemVer CalVer 프로젝트에 맞는 방식 선택하기 Git tag와 배포 정보 연결하기 정리","headline":"Choosing a Versioning Scheme: SemVer and CalVer","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/choosing-versioning-strategy.html"},"url":"https://hrllk.github.io/choosing-versioning-strategy.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2025-12-02 00:00:00 +0000">2025-12-02</time>
+  </p>
+  
+  <h1>Choosing a Versioning Scheme: SemVer and CalVer</h1>
+
+  <h3 id="toc">TOC</h3>
+<hr />
+<ol>
+  <li><a href="#overview">Overview</a></li>
+  <li><a href="#버전-체계가-표현해야-하는-것">버전 체계가 표현해야 하는 것</a></li>
+  <li><a href="#semver">SemVer</a></li>
+  <li><a href="#calver">CalVer</a></li>
+  <li><a href="#프로젝트에-맞는-방식-선택하기">프로젝트에 맞는 방식 선택하기</a></li>
+  <li><a href="#git-tag와-배포-정보-연결하기">Git tag와 배포 정보 연결하기</a></li>
+  <li><a href="#정리">정리</a></li>
+</ol>
+
+<h3 id="overview">Overview</h3>
+<hr />
+<p>버전 번호를 정하기 전에 프로젝트가 사용자에게 어떤 정보를 전달해야 하는지 정해야 한다.</p>
+
+<p>이 글에서는 SemVer와 CalVer를 비교하고, 프로젝트에 맞는 버전 체계를 선택할 때 고려할 항목을 정리한다.</p>
+
+<h3 id="버전-체계가-표현해야-하는-것">버전 체계가 표현해야 하는 것</h3>
+<hr />
+<p>버전 체계를 선택할 때 다음 항목을 확인한다.</p>
+
+<ul>
+  <li>변경 시점을 알 수 있는가</li>
+  <li>호환성 변화를 표현할 수 있는가</li>
+  <li>릴리스를 쉽게 식별할 수 있는가</li>
+  <li>다음 버전의 의미를 예측할 수 있는가</li>
+</ul>
+
+<p>버전 번호만 정하고 변경 기준을 문서화하지 않으면 같은 번호 체계도 프로젝트마다 다르게 해석된다.</p>
+
+<h3 id="semver">SemVer</h3>
+<hr />
+<blockquote>
+  <p><strong>SemVer란?</strong> <code class="language-plaintext highlighter-rouge">Semantic Versioning</code>의 약자다. <code class="language-plaintext highlighter-rouge">Semantic</code>은 각 숫자에 의미를 부여한다는 뜻이며, 공개 인터페이스의 호환성 변화를 버전에 반영한다.</p>
+</blockquote>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>MAJOR.MINOR.PATCH
+</code></pre></div></div>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">MAJOR</code>: 호환되지 않는 변경</li>
+  <li><code class="language-plaintext highlighter-rouge">MINOR</code>: 하위 호환 가능한 기능 추가</li>
+  <li><code class="language-plaintext highlighter-rouge">PATCH</code>: 하위 호환 가능한 버그 수정</li>
+</ul>
+
+<p>공개 API를 제공하는 라이브러리, 패키지, CLI, 서비스 계약 등에 적용할 수 있다. <code class="language-plaintext highlighter-rouge">0.x</code>, pre-release, 실제 변경의 버전 판정 기준은 별도로 정의해야 한다.</p>
+
+<h3 id="calver">CalVer</h3>
+<hr />
+<blockquote>
+  <p><strong>CalVer란?</strong> <code class="language-plaintext highlighter-rouge">Calendar Versioning</code>의 약자다. <code class="language-plaintext highlighter-rouge">Calendar</code>는 달력을 의미하며, 릴리스 연도나 월처럼 배포 시점을 버전에 포함하는 방식이다.</p>
+</blockquote>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>2025.12
+2025.12.1
+</code></pre></div></div>
+
+<p>위 형식은 예시이며 구체적인 표기 형식은 프로젝트마다 다를 수 있다. 릴리스 날짜나 주기를 사용자에게 바로 전달할 수 있어 정기적으로 릴리스하는 배포판이나 제품에서 사용할 수 있다.</p>
+
+<p>날짜만으로는 호환성 변화를 알 수 없다. 호환성 정보가 필요하면 별도의 정책이나 API 버전을 함께 제공해야 한다.</p>
+
+<h3 id="프로젝트에-맞는-방식-선택하기">프로젝트에 맞는 방식 선택하기</h3>
+<hr />
+<p>| 상황 | 고려할 방식 |
+|—|—|
+| 외부 API와 라이브러리 호환성이 중요함 | SemVer |
+| 릴리스 시점과 주기가 중요함 | CalVer |
+| 여러 구성요소가 독립적으로 배포됨 | 구성요소별 규칙 |
+| 이미 사용하는 규칙이 있음 | 기존 규칙을 문서화하고 유지 |</p>
+
+<p>방식을 선택한 뒤에는 버전 변경 기준, pre-release 표기, 지원 기간, 폐기 정책을 문서로 남긴다.</p>
+
+<h3 id="git-tag와-배포-정보-연결하기">Git tag와 배포 정보 연결하기</h3>
+<hr />
+<p>버전 체계와 Git tag는 다음처럼 연결할 수 있다.</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Version
+  → Git tag
+  → Commit
+  → Build
+  → Artifact
+</code></pre></div></div>
+
+<p>버전 번호나 tag는 사람이 읽는 릴리스 식별자다. commit hash와 artifact 식별자는 실제 소스와 배포 결과물을 추적하기 위해 사용한다.</p>
+
+<h3 id="정리">정리</h3>
+<hr />
+<p>SemVer와 CalVer 중 항상 정답인 방식은 없다. 프로젝트가 사용자에게 전달해야 하는 정보와 릴리스 방식을 기준으로 선택해야 한다.</p>
+
+<p>다음 글에서는 SemVer를 선택했을 때 <code class="language-plaintext highlighter-rouge">MAJOR</code>, <code class="language-plaintext highlighter-rouge">MINOR</code>, <code class="language-plaintext highlighter-rouge">PATCH</code>를 실제 변경에 적용하는 기준을 다룬다.</p>
+
+<h3 id="참고-자료">참고 자료</h3>
+<hr />
+<ul>
+  <li><a href="https://semver.org/">Semantic Versioning 2.0.0</a></li>
+  <li><a href="https://calver.org/">Calendar Versioning</a></li>
+</ul>
+
+</article>
+      </div>
+    </main>
+    <script type="module" src="/assets/js/mermaid-init.js"></script>
+  </body>
+</html>

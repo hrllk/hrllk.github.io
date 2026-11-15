@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Spring WebFlux: WebClient를 활용한 Non-Blocking HTTP 요청</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Spring WebFlux: WebClient를 활용한 Non-Blocking HTTP 요청" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="1. Non-Blocking I/O란?" />
+<meta property="og:description" content="1. Non-Blocking I/O란?" />
+<link rel="canonical" href="https://hrllk.github.io/non-blocking-http-request.html" />
+<meta property="og:url" content="https://hrllk.github.io/non-blocking-http-request.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2024-03-20T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Spring WebFlux: WebClient를 활용한 Non-Blocking HTTP 요청" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2024-03-20T00:00:00+00:00","datePublished":"2024-03-20T00:00:00+00:00","description":"1. Non-Blocking I/O란?","headline":"Spring WebFlux: WebClient를 활용한 Non-Blocking HTTP 요청","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/non-blocking-http-request.html"},"url":"https://hrllk.github.io/non-blocking-http-request.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2024-03-20 00:00:00 +0000">2024-03-20</time>
+  </p>
+  
+  <h1>Spring WebFlux: WebClient를 활용한 Non-Blocking HTTP 요청</h1>
+
+  <h2 id="1-non-blocking-io란">1. Non-Blocking I/O란?</h2>
+
+<p>전통적인 <strong>Blocking I/O</strong> 방식에서는 쓰레드가 HTTP 요청을 보내면 응답이 올 때까지 아무 일도 하지 못하고 기다려야 합니다.</p>
+
+<p>반면 <strong>Non-Blocking I/O</strong>는 요청을 보낸 후 응답을 기다리지 않고 즉시 다음 작업을 수행할 수 있는 비동기 통신 방식입니다. 이는 쓰레드 가동률을 극대화하여 더 적은 자원으로 대규모 요청을 효율적으로 처리할 수 있게 해줍니다.</p>
+
+<h2 id="2-spring-webclient-활용-예제">2. Spring WebClient 활용 예제</h2>
+
+<p>스프링 5부터 도입된 <strong>WebFlux</strong>의 <strong>WebClient</strong>를 사용하면 선언적인 방식으로 비동기 요청을 처리할 수 있습니다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 의존성: spring-boot-starter-webflux</span>
+<span class="kd">public</span> <span class="nc">Mono</span><span class="o">&lt;</span><span class="nc">User</span><span class="o">&gt;</span> <span class="nf">getUserInfo</span><span class="o">(</span><span class="nc">String</span> <span class="n">userId</span><span class="o">)</span> <span class="o">{</span>
+    <span class="nc">WebClient</span> <span class="n">client</span> <span class="o">=</span> <span class="nc">WebClient</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="s">"https://api.example.com"</span><span class="o">);</span>
+
+    <span class="k">return</span> <span class="n">client</span><span class="o">.</span><span class="na">get</span><span class="o">()</span>
+            <span class="o">.</span><span class="na">uri</span><span class="o">(</span><span class="n">uriBuilder</span> <span class="o">-&gt;</span> <span class="n">uriBuilder</span><span class="o">.</span><span class="na">path</span><span class="o">(</span><span class="s">"/users/{id}"</span><span class="o">)</span>
+                    <span class="o">.</span><span class="na">build</span><span class="o">(</span><span class="n">userId</span><span class="o">))</span>
+            <span class="o">.</span><span class="na">retrieve</span><span class="o">()</span>
+            <span class="o">.</span><span class="na">bodyToMono</span><span class="o">(</span><span class="nc">User</span><span class="o">.</span><span class="na">class</span><span class="o">);</span> <span class="c1">// 결과를 비동기 래퍼인 Mono로 반환</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="3-요약">3. 요약</h2>
+
+<ul>
+  <li><strong>적용 대상:</strong> 대규모 트래픽이 발생하거나 외부 API 서비스와의 연동이 잦은 마이크로서비스 환경.</li>
+  <li><strong>핵심 이점:</strong> 쓰레드 대기 시간을 없애 서비스의 전체적인 응답 속도와 처리량(Throughput)을 향상시킵니다.</li>
+</ul>
+
+<hr data-content="참고" />
+
+<p>WebClient는 기존의 <code class="language-plaintext highlighter-rouge">RestTemplate</code>을 대체하는 현대적인 권장 라이브러리입니다.</p>
+
+</article>
+      </div>
+    </main>
+    <script type="module" src="/assets/js/mermaid-init.js"></script>
+  </body>
+</html>

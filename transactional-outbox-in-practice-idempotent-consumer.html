@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Transactional Outbox in Practice: Idempotent Consumer</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Transactional Outbox in Practice: Idempotent Consumer" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="TOC Overview Consumer의 위치 멱등 상태 머신 Race Condition 대응 외부 API와 상태 전이 분리 Conclusion Next Step" />
+<meta property="og:description" content="TOC Overview Consumer의 위치 멱등 상태 머신 Race Condition 대응 외부 API와 상태 전이 분리 Conclusion Next Step" />
+<link rel="canonical" href="https://hrllk.github.io/transactional-outbox-in-practice-idempotent-consumer.html" />
+<meta property="og:url" content="https://hrllk.github.io/transactional-outbox-in-practice-idempotent-consumer.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-04-25T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Transactional Outbox in Practice: Idempotent Consumer" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2026-04-25T00:00:00+00:00","datePublished":"2026-04-25T00:00:00+00:00","description":"TOC Overview Consumer의 위치 멱등 상태 머신 Race Condition 대응 외부 API와 상태 전이 분리 Conclusion Next Step","headline":"Transactional Outbox in Practice: Idempotent Consumer","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/transactional-outbox-in-practice-idempotent-consumer.html"},"url":"https://hrllk.github.io/transactional-outbox-in-practice-idempotent-consumer.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2026-04-25 00:00:00 +0000">2026-04-25</time>
+  </p>
+  
+  <h1>Transactional Outbox in Practice: Idempotent Consumer</h1>
+
+  <h3 id="toc">TOC</h3>
+<hr />
+<ol>
+  <li><a href="#overview">Overview</a></li>
+  <li><a href="#consumer의-위치">Consumer의 위치</a></li>
+  <li><a href="#멱등-상태-머신">멱등 상태 머신</a></li>
+  <li><a href="#race-condition-대응">Race Condition 대응</a></li>
+  <li><a href="#외부-api와-상태-전이-분리">외부 API와 상태 전이 분리</a></li>
+  <li><a href="#conclusion">Conclusion</a></li>
+  <li><a href="#next-step">Next Step</a></li>
+</ol>
+
+<h3 id="overview">Overview</h3>
+<hr />
+<p>이전 글에서 Outbox 발행은 at-least-once라고 정리했다. 즉, 같은 메시지가 두 번 도착할 수 있고 컨슈머는 이를 정상 상황으로 받아들여야 한다.</p>
+
+<p>이번 글에서는 중복 메시지가 와도 비즈니스 상태가 흔들리지 않도록 만드는 <strong>멱등 컨슈머</strong>의 기준을 정리한다.</p>
+
+<h3 id="consumer의-위치">Consumer의 위치</h3>
+<hr />
+<p>Kafka consumer는 외부 시스템에서 들어오는 입력을 application use case로 전달하는 inbound adapter다 — 외부 메시지를 내부 유스케이스 호출로 변환하는 역할.</p>
+
+<p>메시지를 역직렬화하고 use case를 호출하되, 상태 전이와 정합성 판단은 application/domain 쪽에 둔다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Component</span>
+<span class="nd">@RequiredArgsConstructor</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">GitLabUserRegistrationConsumer</span> <span class="o">{</span>
+
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">GitLabUserRegistrationConsumeUseCase</span> <span class="n">consumeUseCase</span><span class="o">;</span>
+
+    <span class="nd">@RetryableTopic</span><span class="o">(</span><span class="n">attempts</span> <span class="o">=</span> <span class="s">"3"</span><span class="o">,</span> <span class="n">backoff</span> <span class="o">=</span> <span class="nd">@Backoff</span><span class="o">(</span><span class="n">delay</span> <span class="o">=</span> <span class="mi">1000</span><span class="o">,</span> <span class="n">multiplier</span> <span class="o">=</span> <span class="mf">2.0</span><span class="o">))</span>
+    <span class="nd">@KafkaListener</span><span class="o">(</span><span class="n">topics</span> <span class="o">=</span> <span class="s">"#{T(Topics).GITLAB_USER_REG_COMMAND.getValue()}"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onMessage</span><span class="o">(</span><span class="nd">@Payload</span> <span class="nc">UserRegistrationEventAvro</span> <span class="n">event</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">consumeUseCase</span><span class="o">.</span><span class="na">processRegistrationEvent</span><span class="o">(</span><span class="n">event</span><span class="o">);</span>   <span class="c1">// 상태 전이 책임은 UseCase에</span>
+    <span class="o">}</span>
+
+    <span class="nd">@DltHandler</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onDlt</span><span class="o">(</span><span class="nc">ConsumerRecord</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">UserRegistrationEventAvro</span><span class="o">&gt;</span> <span class="n">record</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">String</span> <span class="n">dtlId</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="na">value</span><span class="o">().</span><span class="na">getUserRegDmndDtlId</span><span class="o">().</span><span class="na">toString</span><span class="o">();</span>
+        <span class="n">consumeUseCase</span><span class="o">.</span><span class="na">markAsDeadLetter</span><span class="o">(</span><span class="n">dtlId</span><span class="o">,</span> <span class="s">"max retries exhausted"</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="멱등-상태-머신">멱등 상태 머신</h3>
+<hr />
+<p>상세 처리 상태를 <code class="language-plaintext highlighter-rouge">WAIT → EXCN → SCS/FAIL</code>처럼 명확한 상태 머신으로 둔다.</p>
+
+<p>핵심 규칙은 단순하다. <code class="language-plaintext highlighter-rouge">SCS</code>와 <code class="language-plaintext highlighter-rouge">FAIL</code>은 종결 상태이며, 종결된 row는 같은 메시지가 다시 와도 더 이상 상태를 바꾸지 않는다. 상태 전이 메서드(<code class="language-plaintext highlighter-rouge">markInProgress</code>, <code class="language-plaintext highlighter-rouge">markSuccess</code>, <code class="language-plaintext highlighter-rouge">markFailure</code>)는 모두 종결 상태에서 들어온 호출을 silent skip하도록 짠다. 컨슈머 진입 직후 <code class="language-plaintext highlighter-rouge">isTerminated</code> early skip까지 더하면 같은 메시지의 재처리는 자연스럽게 흡수된다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 상세 처리 상태 enum</span>
+<span class="kd">public</span> <span class="kd">enum</span> <span class="nc">GitLabUserRegistrationDetailStatus</span> <span class="o">{</span>
+    <span class="no">WAIT</span><span class="o">,</span> <span class="no">EXCN</span><span class="o">,</span> <span class="no">SCS</span><span class="o">,</span> <span class="no">FAIL</span><span class="o">;</span>
+
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">isTerminated</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="k">this</span> <span class="o">==</span> <span class="no">SCS</span> <span class="o">||</span> <span class="k">this</span> <span class="o">==</span> <span class="no">FAIL</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="c1">// 엔티티 도메인 메서드 — 종결 상태에서 재전이는 silent skip</span>
+<span class="kd">public</span> <span class="nc">GitLabUserRegistrationDetailStatus</span> <span class="nf">current</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="nc">GitLabUserRegistrationDetailStatus</span><span class="o">.</span><span class="na">from</span><span class="o">(</span><span class="k">this</span><span class="o">.</span><span class="na">prgrsSttsCd</span><span class="o">);</span>
+<span class="o">}</span>
+
+<span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">isTerminated</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="nf">current</span><span class="o">().</span><span class="na">isTerminated</span><span class="o">();</span>
+<span class="o">}</span>
+
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">markInProgress</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">isTerminated</span><span class="o">()</span> <span class="o">||</span> <span class="n">current</span><span class="o">()</span> <span class="o">==</span> <span class="no">EXCN</span><span class="o">)</span> <span class="k">return</span><span class="o">;</span>
+    <span class="k">this</span><span class="o">.</span><span class="na">prgrsSttsCd</span> <span class="o">=</span> <span class="no">EXCN</span><span class="o">.</span><span class="na">getCode</span><span class="o">();</span>
+    <span class="k">this</span><span class="o">.</span><span class="na">rsn</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+<span class="o">}</span>
+
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">markSuccess</span><span class="o">(</span><span class="nc">String</span> <span class="n">msg</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">isTerminated</span><span class="o">())</span> <span class="k">return</span><span class="o">;</span>
+    <span class="k">this</span><span class="o">.</span><span class="na">prgrsSttsCd</span> <span class="o">=</span> <span class="no">SCS</span><span class="o">.</span><span class="na">getCode</span><span class="o">();</span>
+    <span class="k">this</span><span class="o">.</span><span class="na">rsn</span> <span class="o">=</span> <span class="n">msg</span><span class="o">;</span>
+<span class="o">}</span>
+
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">markFailure</span><span class="o">(</span><span class="nc">String</span> <span class="n">msg</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">isTerminated</span><span class="o">())</span> <span class="k">return</span><span class="o">;</span>
+    <span class="k">this</span><span class="o">.</span><span class="na">prgrsSttsCd</span> <span class="o">=</span> <span class="no">FAIL</span><span class="o">.</span><span class="na">getCode</span><span class="o">();</span>
+    <span class="k">this</span><span class="o">.</span><span class="na">rsn</span> <span class="o">=</span> <span class="n">msg</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="race-condition-대응">Race Condition 대응</h3>
+<hr />
+<p>중복 메시지가 거의 동시에 도착할 수 있는데, 우리는 <code class="language-plaintext highlighter-rouge">@Version</code> 같은 낙관락을 따로 두지 않는다. 운영 중인 테이블에 컬럼을 추가하는 DDL ALTER 비용을 피하고, 대신 다음 세 가지로 race를 흡수한다.</p>
+
+<ol>
+  <li>Kafka 파티션 정합성 — 메시지 key를 상세 ID로 고정하면 같은 상세는 항상 같은 파티션, 같은 컨슈머 스레드에서 직렬로 처리된다.</li>
+  <li>컨슈머 진입 시 <code class="language-plaintext highlighter-rouge">isTerminated</code> early skip — 종결된 건은 비즈니스 로직 자체에 들어가지 않는다.</li>
+  <li>멱등한 상태 전이 메서드 — 들어왔다 하더라도 종결 상태에서는 no-op.</li>
+</ol>
+
+<p>다중 인스턴스 리밸런싱 도중 짧게 겹치는 시나리오는 위 3중 가드로 흡수된다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Override</span>
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">processRegistrationEvent</span><span class="o">(</span><span class="nc">UserRegistrationEventAvro</span> <span class="n">event</span><span class="o">)</span> <span class="o">{</span>
+    <span class="nc">GitLabUserRegistrationDetailId</span> <span class="n">id</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">GitLabUserRegistrationDetailId</span><span class="o">(</span>
+            <span class="n">event</span><span class="o">.</span><span class="na">getUserRegDmndId</span><span class="o">().</span><span class="na">toString</span><span class="o">(),</span>
+            <span class="n">event</span><span class="o">.</span><span class="na">getUserRegDmndDtlId</span><span class="o">().</span><span class="na">toString</span><span class="o">());</span>
+
+    <span class="c1">// ① 멱등 가드 — 이미 종결된 건은 여기서 끊는다</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">queryPort</span><span class="o">.</span><span class="na">isTerminated</span><span class="o">(</span><span class="n">id</span><span class="o">))</span> <span class="o">{</span>
+        <span class="k">return</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="c1">// ② EXCN 으로 전이 (REQUIRES_NEW — 짧은 트랜잭션)</span>
+    <span class="n">commandPort</span><span class="o">.</span><span class="na">markInProgress</span><span class="o">(</span><span class="n">id</span><span class="o">);</span>
+
+    <span class="k">try</span> <span class="o">{</span>
+        <span class="c1">// ③ 외부 API 호출 (트랜잭션 밖)</span>
+        <span class="n">provisionPort</span><span class="o">.</span><span class="na">registerUser</span><span class="o">(</span><span class="n">event</span><span class="o">.</span><span class="na">getToolId</span><span class="o">().</span><span class="na">toString</span><span class="o">(),</span> <span class="n">event</span><span class="o">.</span><span class="na">getTargetUserId</span><span class="o">().</span><span class="na">toString</span><span class="o">());</span>
+        <span class="n">commandPort</span><span class="o">.</span><span class="na">markSuccess</span><span class="o">(</span><span class="n">id</span><span class="o">,</span> <span class="s">"정상 등록 완료"</span><span class="o">);</span>    <span class="c1">// REQUIRES_NEW</span>
+    <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">commandPort</span><span class="o">.</span><span class="na">markFailure</span><span class="o">(</span><span class="n">id</span><span class="o">,</span> <span class="n">e</span><span class="o">.</span><span class="na">getMessage</span><span class="o">());</span>      <span class="c1">// REQUIRES_NEW</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="외부-api와-상태-전이-분리">외부 API와 상태 전이 분리</h3>
+<hr />
+<p>외부 API 호출이 오래 걸리는 동안 DB 트랜잭션을 붙잡고 있으면 진행 상태가 보이지 않고 락 유지 시간도 길어진다.</p>
+
+<p><code class="language-plaintext highlighter-rouge">markInProgress</code>, <code class="language-plaintext highlighter-rouge">markSuccess</code>, <code class="language-plaintext highlighter-rouge">markFailure</code> 같은 상태 전이는 짧은 트랜잭션으로 분리하는 편이 운영상 유리하다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 영속 어댑터 — 상태 전이마다 REQUIRES_NEW로 별도 커밋</span>
+<span class="nd">@Override</span>
+<span class="nd">@Transactional</span><span class="o">(</span><span class="n">propagation</span> <span class="o">=</span> <span class="nc">Propagation</span><span class="o">.</span><span class="na">REQUIRES_NEW</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">markInProgress</span><span class="o">(</span><span class="nc">GitLabUserRegistrationDetailId</span> <span class="n">id</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">loadDetail</span><span class="o">(</span><span class="n">id</span><span class="o">).</span><span class="na">markInProgress</span><span class="o">();</span>         <span class="c1">// findById → 도메인 메서드 → dirty checking flush</span>
+    <span class="n">refreshMasterStatus</span><span class="o">(</span><span class="n">id</span><span class="o">.</span><span class="na">getUserRegDmndId</span><span class="o">());</span>
+<span class="o">}</span>
+
+<span class="nd">@Override</span>
+<span class="nd">@Transactional</span><span class="o">(</span><span class="n">propagation</span> <span class="o">=</span> <span class="nc">Propagation</span><span class="o">.</span><span class="na">REQUIRES_NEW</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">markSuccess</span><span class="o">(</span><span class="nc">GitLabUserRegistrationDetailId</span> <span class="n">id</span><span class="o">,</span> <span class="nc">String</span> <span class="n">msg</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">loadDetail</span><span class="o">(</span><span class="n">id</span><span class="o">).</span><span class="na">markSuccess</span><span class="o">(</span><span class="n">msg</span><span class="o">);</span>
+    <span class="n">refreshMasterStatus</span><span class="o">(</span><span class="n">id</span><span class="o">.</span><span class="na">getUserRegDmndId</span><span class="o">());</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="conclusion">Conclusion</h3>
+<hr />
+<p>멱등 컨슈머의 목적은 중복을 막는 것이 아니라 <strong>중복이 와도 결과가 같게 만드는 것</strong>이다. 이 원칙이 있어야 Outbox의 at-least-once 발행을 현실적인 설계로 받아들일 수 있다.</p>
+
+<h3 id="next-step">Next Step</h3>
+<hr />
+<p>다음 포스트에서는 <strong><a href="/transactional-outbox-in-practice-operating-in-production.html">Operating in Production</a></strong>을 다룬다. 멀티 인스턴스, row retention, DLT 같은 운영 이슈를 정리한다.</p>
+
+</article>
+      </div>
+    </main>
+    <script type="module" src="/assets/js/mermaid-init.js"></script>
+  </body>
+</html>

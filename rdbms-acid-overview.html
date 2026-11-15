@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>RDBMS ACID 개요: 데이터베이스의 트랜잭션 보장 범위</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="RDBMS ACID 개요: 데이터베이스의 트랜잭션 보장 범위" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="TOC Overview ACID란 무엇인가 데이터베이스가 보장하는 범위 데이터베이스가 보장하지 않는 범위 Conclusion" />
+<meta property="og:description" content="TOC Overview ACID란 무엇인가 데이터베이스가 보장하는 범위 데이터베이스가 보장하지 않는 범위 Conclusion" />
+<link rel="canonical" href="https://hrllk.github.io/rdbms-acid-overview.html" />
+<meta property="og:url" content="https://hrllk.github.io/rdbms-acid-overview.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-01-16T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="RDBMS ACID 개요: 데이터베이스의 트랜잭션 보장 범위" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2021-01-16T00:00:00+00:00","datePublished":"2021-01-16T00:00:00+00:00","description":"TOC Overview ACID란 무엇인가 데이터베이스가 보장하는 범위 데이터베이스가 보장하지 않는 범위 Conclusion","headline":"RDBMS ACID 개요: 데이터베이스의 트랜잭션 보장 범위","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/rdbms-acid-overview.html"},"url":"https://hrllk.github.io/rdbms-acid-overview.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2021-01-16 00:00:00 +0000">2021-01-16</time>
+  </p>
+  
+  <h1>RDBMS ACID 개요: 데이터베이스의 트랜잭션 보장 범위</h1>
+
+  <h3 id="toc">TOC</h3>
+<hr />
+<ol>
+  <li><a href="#overview">Overview</a></li>
+  <li><a href="#acid란-무엇인가">ACID란 무엇인가</a></li>
+  <li><a href="#데이터베이스가-보장하는-범위">데이터베이스가 보장하는 범위</a></li>
+  <li><a href="#데이터베이스가-보장하지-않는-범위">데이터베이스가 보장하지 않는 범위</a></li>
+  <li><a href="#conclusion">Conclusion</a></li>
+</ol>
+
+<h3 id="overview">Overview</h3>
+<hr />
+
+<p>앞선 글에서는 트랜잭션의 필요성, Auto Commit, 트랜잭션 경계, Spring의 <code class="language-plaintext highlighter-rouge">@Transactional</code> 동작을 살펴봤다.</p>
+
+<p>이번 글에서는 ACID의 의미와 데이터베이스 트랜잭션의 보장 범위를 간단히 정리한다.</p>
+
+<h3 id="acid란-무엇인가">ACID란 무엇인가</h3>
+<hr />
+
+<p>ACID는 트랜잭션이 가져야 할 네 가지 성질의 앞 글자를 따서 만든 이름이다.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>속성</th>
+      <th>의미</th>
+      <th>대표 상황</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Atomicity</td>
+      <td>변경을 모두 성공시키거나 모두 취소한다.</td>
+      <td>계좌 이체 중 입금이 실패한다.</td>
+    </tr>
+    <tr>
+      <td>Consistency</td>
+      <td>허용된 데이터 상태를 유지한다.</td>
+      <td>잔액이 음수가 된다.</td>
+    </tr>
+    <tr>
+      <td>Isolation</td>
+      <td>동시 실행되는 트랜잭션의 간섭을 조절한다.</td>
+      <td>두 요청이 같은 잔액을 변경한다.</td>
+    </tr>
+    <tr>
+      <td>Durability</td>
+      <td>커밋된 변경을 보존한다.</td>
+      <td>커밋 직후 애플리케이션이 종료된다.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>ACID는 데이터베이스가 모든 업무 규칙을 알아서 처리한다는 뜻은 아니다.</p>
+
+<h3 id="데이터베이스가-보장하는-범위">데이터베이스가 보장하는 범위</h3>
+<hr />
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>트랜잭션 시작
+  ├─ 데이터 변경
+  └─ 데이터 변경
+트랜잭션 종료
+  └─ COMMIT 또는 ROLLBACK
+</code></pre></div></div>
+
+<p>트랜잭션에 포함된 변경은 하나의 단위로 처리된다. 어떤 작업을 트랜잭션에 포함할지는 애플리케이션이 결정한다.</p>
+
+<h3 id="데이터베이스가-보장하지-않는-범위">데이터베이스가 보장하지 않는 범위</h3>
+<hr />
+
+<p>DB 커밋과 애플리케이션 기능의 완료는 같은 의미가 아니다.</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>DB 잔액 변경 및 COMMIT 성공
+  ↓
+메시지 발행 실패
+  ↓
+정산 시스템이 상환 사실을 전달받지 못함
+</code></pre></div></div>
+
+<p>다음 작업은 DB 트랜잭션만으로 보장되지 않는다.</p>
+
+<ul>
+  <li>외부 API 호출의 롤백</li>
+  <li>메시지 브로커로의 이벤트 발행</li>
+  <li>중복 요청의 방지</li>
+  <li>애플리케이션 업무 규칙의 검증</li>
+  <li>여러 시스템 사이의 데이터 동기화</li>
+</ul>
+
+<p>이 문제는 Outbox, 재처리, Unique Constraint, Idempotency Key 같은 별도 설계가 필요하다.</p>
+
+<h3 id="conclusion">Conclusion</h3>
+<hr />
+
+<p>ACID는 데이터베이스 트랜잭션의 보장 범위를 설명한다. 애플리케이션의 업무 전체나 외부 시스템까지 자동으로 보호하지는 않는다.</p>
+
+<blockquote>
+  <p>ACID는 데이터베이스 트랜잭션의 신뢰성을 보장하지만, 애플리케이션의 업무 전체를 자동으로 안전하게 만들어주지는 않는다.</p>
+</blockquote>
+
+</article>
+      </div>
+    </main>
+    <script type="module" src="/assets/js/mermaid-init.js"></script>
+  </body>
+</html>

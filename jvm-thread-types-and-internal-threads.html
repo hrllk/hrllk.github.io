@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>JVM이 부팅될때 JVM을 구성하는 threads</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="JVM이 부팅될때 JVM을 구성하는 threads" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="TOC Overview JVM 내 threads main thread는 무엇인가 daemon과 non-daemon JVM 내부 스레드 Conclusion" />
+<meta property="og:description" content="TOC Overview JVM 내 threads main thread는 무엇인가 daemon과 non-daemon JVM 내부 스레드 Conclusion" />
+<link rel="canonical" href="https://hrllk.github.io/jvm-thread-types-and-internal-threads.html" />
+<meta property="og:url" content="https://hrllk.github.io/jvm-thread-types-and-internal-threads.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-01-07T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="JVM이 부팅될때 JVM을 구성하는 threads" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2021-01-07T00:00:00+00:00","datePublished":"2021-01-07T00:00:00+00:00","description":"TOC Overview JVM 내 threads main thread는 무엇인가 daemon과 non-daemon JVM 내부 스레드 Conclusion","headline":"JVM이 부팅될때 JVM을 구성하는 threads","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/jvm-thread-types-and-internal-threads.html"},"url":"https://hrllk.github.io/jvm-thread-types-and-internal-threads.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2021-01-07 00:00:00 +0000">2021-01-07</time>
+  </p>
+  
+  <h1>JVM이 부팅될때 JVM을 구성하는 threads</h1>
+
+  <h3 id="toc">TOC</h3>
+<hr />
+<ol>
+  <li><a href="#overview">Overview</a></li>
+  <li><a href="#jvm-내-threads">JVM 내 threads</a></li>
+  <li><a href="#main-thread는-무엇인가">main thread는 무엇인가</a></li>
+  <li><a href="#daemon과-non-daemon">daemon과 non-daemon</a></li>
+  <li><a href="#jvm-내부-스레드">JVM 내부 스레드</a></li>
+  <li><a href="#conclusion">Conclusion</a></li>
+</ol>
+
+<h3 id="overview">Overview</h3>
+<hr />
+<p>본문에서는 JVM이 올라온 뒤 어떤 스레드가 구성되는지, 각 스레드가 어떤 역할을 갖는지에 대해 다룬다.
+상세 설명은 <code class="language-plaintext highlighter-rouge">main thread</code>, <code class="language-plaintext highlighter-rouge">user thread</code>, <code class="language-plaintext highlighter-rouge">daemon thread</code>, JVM 내부 스레드로 나눠서 본다.
+앞 글에서는 JVM이 뜨고 <code class="language-plaintext highlighter-rouge">main</code>이 시작되는 큰 흐름을 봤다.
+이 글은 그 시점에 어떤 종류의 스레드가 보이는지를 정리한다.</p>
+
+<h3 id="jvm-내-threads">JVM 내 threads</h3>
+<hr />
+
+<table>
+  <thead>
+    <tr>
+      <th>종류</th>
+      <th>의미</th>
+      <th style="text-align: right">JVM 종료 영향</th>
+      <th>예시</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">main thread</code></td>
+      <td>애플리케이션 시작점</td>
+      <td style="text-align: right">보통 영향 있음</td>
+      <td><code class="language-plaintext highlighter-rouge">public static void main(...)</code></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">user thread</code></td>
+      <td>애플리케이션 작업을 수행하는 일반 스레드</td>
+      <td style="text-align: right">있음</td>
+      <td>요청 처리, 작업자 스레드</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">daemon thread</code></td>
+      <td>백그라운드 보조 역할의 스레드</td>
+      <td style="text-align: right">없음</td>
+      <td>보조 작업, 모니터링, 정리 작업</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">JVM internal thread</code></td>
+      <td>JVM이 내부적으로 쓰는 스레드</td>
+      <td style="text-align: right">구현에 따라 다름</td>
+      <td>GC, JIT, Reference Handler</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><code class="language-plaintext highlighter-rouge">main thread</code>와 <code class="language-plaintext highlighter-rouge">user thread</code>는 애플리케이션 쪽에 가깝고, <code class="language-plaintext highlighter-rouge">daemon thread</code>는 종료를 막지 않는 보조 성격의 스레드다. <code class="language-plaintext highlighter-rouge">JVM internal thread</code>는 JVM이 자기 자신을 유지하기 위해 사용하는 별도 범주로 보면 된다.</p>
+
+<h3 id="main-thread는-무엇인가">main thread는 무엇인가</h3>
+<hr />
+<p><code class="language-plaintext highlighter-rouge">main thread</code>는 JVM이 애플리케이션의 <code class="language-plaintext highlighter-rouge">main</code> 메서드를 실행하는 기본 진입 스레드다.</p>
+
+<p>Java를 실행하면 JVM은 <code class="language-plaintext highlighter-rouge">public static void main(String[] args)</code>를 호출할 실행 흐름을 만든다. 그 실행 흐름의 중심이 보통 <code class="language-plaintext highlighter-rouge">main</code>이라는 이름으로 보이는 스레드다.</p>
+
+<!-- - 보통 이름은 `main`이다. -->
+<!-- - 애플리케이션 코드의 시작점이 된다. -->
+<!-- - thread dump에서 가장 먼저 확인할 기준점이 된다. -->
+
+<h3 id="daemon과-non-daemon">daemon과 non-daemon</h3>
+<hr />
+<p><code class="language-plaintext highlighter-rouge">non-daemon thread</code>는 JVM을 계속 살아 있게 만드는 스레드다.
+<code class="language-plaintext highlighter-rouge">daemon thread</code>는 백그라운드 보조 역할을 하는 스레드다.</p>
+
+<p>여기서 <code class="language-plaintext highlighter-rouge">non-daemon</code>은 <code class="language-plaintext highlighter-rouge">main thread</code>와 <code class="language-plaintext highlighter-rouge">user thread</code>를 의미한다. <code class="language-plaintext highlighter-rouge">JVM internal thread</code>는 별도 범주다.</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">non-daemon thread</code>: JVM을 계속 살아 있게 만드는 일반 실행 스레드</li>
+  <li><code class="language-plaintext highlighter-rouge">daemon thread</code>: JVM 뒤에서 보조 역할을 하는 스레드</li>
+</ul>
+
+<p>추가로 애플리케이션 코드에서 <code class="language-plaintext highlighter-rouge">Thread</code> 를 다룰때 daemon 여부를 정할 수 있다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">Thread</span> <span class="n">t</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Thread</span><span class="o">(()</span> <span class="o">-&gt;</span> <span class="o">{</span>
+    <span class="n">doWork</span><span class="o">();</span>
+<span class="o">});</span>
+<span class="n">t</span><span class="o">.</span><span class="na">setDaemon</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
+<span class="n">t</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">non-daemon thread</code>가 하나라도 살아 있으면 JVM은 계속 실행된다.
+반대로 <code class="language-plaintext highlighter-rouge">non-daemon thread</code>가 모두 종료되면 JVM은 종료를 준비한다.</p>
+
+<h3 id="jvm-내부-스레드">JVM 내부 스레드</h3>
+<hr />
+<p>JVM은 애플리케이션 코드가 직접 만든 스레드 외에도 내부 작업용 스레드를 가진다.</p>
+
+<p>이 스레드들은 GC, JIT 컴파일, 참조 처리, 신호 처리처럼 런타임이 자기 자신을 유지하기 위해 쓴다. 구현체와 버전에 따라 이름과 구성은 달라질 수 있지만, 핵심 역할은 비슷하다.</p>
+
+<p>자주 보이는 범주는 아래와 같다.</p>
+
+<ul>
+  <li>GC 관련 스레드: 가비지 컬렉션 작업을 수행한다.</li>
+  <li>Compiler/JIT 관련 스레드: 자주 실행되는 코드를 최적화한다.</li>
+  <li>Reference Handler 계열: <code class="language-plaintext highlighter-rouge">Reference</code> 객체 처리를 돕는다.</li>
+  <li>Signal/Attach 계열: JVM 외부 도구와의 상호작용을 지원한다.</li>
+</ul>
+
+<h3 id="conclusion">Conclusion</h3>
+<hr />
+<p>JVM에서 thread는 역할과 종료 정책으로 나눠서 보면 된다.</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">main thread</code>와 <code class="language-plaintext highlighter-rouge">user thread</code>는 애플리케이션 실행을 담당한다.</li>
+  <li><code class="language-plaintext highlighter-rouge">daemon thread</code>는 JVM 종료를 막지 않는 보조 스레드다.</li>
+  <li><code class="language-plaintext highlighter-rouge">JVM internal thread</code>는 JVM이 런타임 동작을 위해 내부적으로 사용하는 스레드다.</li>
+</ul>
+
+</article>
+      </div>
+    </main>
+    <script type="module" src="/assets/js/mermaid-init.js"></script>
+  </body>
+</html>

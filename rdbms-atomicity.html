@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>RDBMS Atomicity: 여러 변경을 하나의 결과로 처리하기</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="RDBMS Atomicity: 여러 변경을 하나의 결과로 처리하기" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="TOC Overview Atomicity란 무엇인가 트랜잭션 경계와 Atomicity 예시: 대출 상환이 중간에 실패한다면 트랜잭션 밖의 작업 Conclusion" />
+<meta property="og:description" content="TOC Overview Atomicity란 무엇인가 트랜잭션 경계와 Atomicity 예시: 대출 상환이 중간에 실패한다면 트랜잭션 밖의 작업 Conclusion" />
+<link rel="canonical" href="https://hrllk.github.io/rdbms-atomicity.html" />
+<meta property="og:url" content="https://hrllk.github.io/rdbms-atomicity.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-01-17T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="RDBMS Atomicity: 여러 변경을 하나의 결과로 처리하기" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2021-01-17T00:00:00+00:00","datePublished":"2021-01-17T00:00:00+00:00","description":"TOC Overview Atomicity란 무엇인가 트랜잭션 경계와 Atomicity 예시: 대출 상환이 중간에 실패한다면 트랜잭션 밖의 작업 Conclusion","headline":"RDBMS Atomicity: 여러 변경을 하나의 결과로 처리하기","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/rdbms-atomicity.html"},"url":"https://hrllk.github.io/rdbms-atomicity.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2021-01-17 00:00:00 +0000">2021-01-17</time>
+  </p>
+  
+  <h1>RDBMS Atomicity: 여러 변경을 하나의 결과로 처리하기</h1>
+
+  <h3 id="toc">TOC</h3>
+<hr />
+<ol>
+  <li><a href="#overview">Overview</a></li>
+  <li><a href="#atomicity란-무엇인가">Atomicity란 무엇인가</a></li>
+  <li><a href="#트랜잭션-경계와-atomicity">트랜잭션 경계와 Atomicity</a></li>
+  <li><a href="#예시-대출-상환이-중간에-실패한다면">예시: 대출 상환이 중간에 실패한다면</a></li>
+  <li><a href="#트랜잭션-밖의-작업">트랜잭션 밖의 작업</a></li>
+  <li><a href="#conclusion">Conclusion</a></li>
+</ol>
+
+<h3 id="overview">Overview</h3>
+<hr />
+
+<p>앞선 글에서는 ACID가 데이터베이스 트랜잭션의 보장 범위를 설명하는 기준이라는 점을 살펴봤다.</p>
+
+<p>이번 글에서는 ACID의 첫 번째 속성인 <strong>Atomicity</strong>를 다룬다. Atomicity는 여러 데이터 변경을 하나의 작업 단위로 묶어 하나의 결과로 처리하는 성질이다.</p>
+
+<h3 id="atomicity란-무엇인가">Atomicity란 무엇인가</h3>
+<hr />
+
+<p>Atomicity는 트랜잭션 안의 변경을 부분적으로 남기지 않는 성질이다.</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>트랜잭션 시작
+  ├─ 변경 1
+  ├─ 변경 2
+  └─ 변경 3
+트랜잭션 종료
+  ├─ COMMIT → 변경 1, 2, 3 확정
+  └─ ROLLBACK → 변경 1, 2, 3 취소
+</code></pre></div></div>
+
+<p>변경 3에서 오류가 발생했다고 DB가 자동으로 전체 롤백하는 것은 아니다. 트랜잭션이 계속 유지된다면 클라이언트는 앞선 변경을 <code class="language-plaintext highlighter-rouge">COMMIT</code>할 수도 있고, 전체를 <code class="language-plaintext highlighter-rouge">ROLLBACK</code>할 수도 있다.</p>
+
+<p>Atomicity는 SQL 하나가 항상 성공하거나 실패한다는 의미가 아니다. <strong>여러 SQL을 하나의 트랜잭션으로 묶고, 클라이언트가 선택한 종료 결과를 그 변경 전체에 적용한다는 의미</strong>다.</p>
+
+<p>업무적으로 하나의 작업으로 묶은 변경이라면, 애플리케이션은 일부만 남기지 않도록 오류를 판단한 뒤 <code class="language-plaintext highlighter-rouge">ROLLBACK</code>을 요청해야 한다.</p>
+
+<h3 id="트랜잭션-경계와-atomicity">트랜잭션 경계와 Atomicity</h3>
+<hr />
+
+<p>Atomicity를 얻으려면 서로 성공 여부가 연결된 변경을 같은 트랜잭션에 포함해야 한다.</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>입력 검증
+  ↓
+트랜잭션 시작
+  ├─ 대출 잔액 차감
+  └─ 상환 이력 저장
+트랜잭션 종료
+  ↓
+외부 시스템 처리
+</code></pre></div></div>
+
+<p>대출 잔액 차감과 상환 이력 저장은 상환이라는 하나의 업무를 구성한다. 따라서 둘 중 하나만 성공하면 안 되고 같은 트랜잭션으로 처리해야 한다.</p>
+
+<p>반대로 입력 검증이나 외부 시스템 호출을 반드시 같은 트랜잭션에 넣을 필요는 없다. 사용자 입력을 기다리거나 외부 API를 호출하는 동안 트랜잭션을 열어두면 커넥션과 락을 불필요하게 점유할 수 있다.</p>
+
+<h3 id="예시-대출-상환이-중간에-실패한다면">예시: 대출 상환이 중간에 실패한다면</h3>
+<hr />
+
+<p>각 변경을 별도의 트랜잭션으로 처리하면 다음과 같은 문제가 발생할 수 있다.</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>1. 대출 잔액 10,000원 차감 성공
+2. 상환 이력 저장 실패
+3. 잔액은 줄었지만 상환 근거가 없음
+</code></pre></div></div>
+
+<p>잔액과 이력을 각각 별도의 트랜잭션으로 처리했기 때문에 일부 변경만 커밋된 것이다.</p>
+
+<p>반면 두 변경을 하나의 트랜잭션으로 묶으면 이력 저장이 실패할 때 잔액 차감도 취소된다.</p>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">START</span> <span class="n">TRANSACTION</span><span class="p">;</span>
+
+<span class="k">UPDATE</span> <span class="n">loan</span>
+<span class="k">SET</span> <span class="n">remaining_amount</span> <span class="o">=</span> <span class="n">remaining_amount</span> <span class="o">-</span> <span class="mi">10000</span>
+<span class="k">WHERE</span> <span class="n">loan_id</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+
+<span class="k">INSERT</span> <span class="k">INTO</span> <span class="n">repayment_history</span><span class="p">(</span><span class="n">loan_id</span><span class="p">,</span> <span class="n">amount</span><span class="p">)</span>
+<span class="k">VALUES</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10000</span><span class="p">);</span>
+
+<span class="k">COMMIT</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>두 번째 SQL에서 오류가 발생하고 전체 상환을 실패로 판단하면 <code class="language-plaintext highlighter-rouge">COMMIT</code> 대신 <code class="language-plaintext highlighter-rouge">ROLLBACK</code>을 수행한다.</p>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">ROLLBACK</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>그러면 대출 잔액은 차감 전 상태로 돌아간다. 상환 처리가 실패했는데 잔액만 변경된 상태를 방지할 수 있다.</p>
+
+<h3 id="트랜잭션-밖의-작업">트랜잭션 밖의 작업</h3>
+<hr />
+
+<p>Atomicity는 하나의 데이터베이스 트랜잭션 안에서만 적용된다.</p>
+
+<p>DB 변경과 외부 API 호출을 하나의 트랜잭션처럼 묶을 수는 없다. DB를 롤백하더라도 이미 외부 시스템에 전달된 요청까지 자동으로 되돌아가지는 않는다.</p>
+
+<p>DB 저장과 메시지 발행을 함께 보장해야 하는 경우에는 Outbox나 재시도 같은 별도 설계가 필요하다.</p>
+
+<h3 id="conclusion">Conclusion</h3>
+<hr />
+
+<p>Atomicity는 하나의 업무를 구성하는 데이터베이스 변경을 모두 성공시키거나 모두 취소하는 성질이다.</p>
+
+<ul>
+  <li>서로 성공 여부가 연결된 변경은 같은 트랜잭션에 포함한다.</li>
+  <li>일부 변경만 커밋되면 업무의 정합성이 깨질 수 있다.</li>
+  <li>외부 API와 메시지 발행은 DB 트랜잭션만으로 함께 롤백할 수 없다.</li>
+</ul>
+
+<blockquote>
+  <p>Atomicity는 트랜잭션 안의 변경을 하나의 결과로 처리하지만, 트랜잭션 밖의 작업까지 원자적으로 만들어주지는 않는다.</p>
+</blockquote>
+
+</article>
+      </div>
+    </main>
+    <script type="module" src="/assets/js/mermaid-init.js"></script>
+  </body>
+</html>

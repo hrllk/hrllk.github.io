@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Spring @Transactional 1: 프록시와 AOP</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Spring @Transactional 1: 프록시와 AOP" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="TOC Overview @Transactional은 메소드를 직접 바꾸지 않는다 인터셉터에서 TransactionManager 호출하기 Lombok과는 무엇이 다른가 Conclusion" />
+<meta property="og:description" content="TOC Overview @Transactional은 메소드를 직접 바꾸지 않는다 인터셉터에서 TransactionManager 호출하기 Lombok과는 무엇이 다른가 Conclusion" />
+<link rel="canonical" href="https://hrllk.github.io/spring-transactional-part-1-proxy-and-aop.html" />
+<meta property="og:url" content="https://hrllk.github.io/spring-transactional-part-1-proxy-and-aop.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2022-01-16T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Spring @Transactional 1: 프록시와 AOP" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2022-01-16T00:00:00+00:00","datePublished":"2022-01-16T00:00:00+00:00","description":"TOC Overview @Transactional은 메소드를 직접 바꾸지 않는다 인터셉터에서 TransactionManager 호출하기 Lombok과는 무엇이 다른가 Conclusion","headline":"Spring @Transactional 1: 프록시와 AOP","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/spring-transactional-part-1-proxy-and-aop.html"},"url":"https://hrllk.github.io/spring-transactional-part-1-proxy-and-aop.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2022-01-16 00:00:00 +0000">2022-01-16</time>
+  </p>
+  
+  <h1>Spring @Transactional 1: 프록시와 AOP</h1>
+
+  <h3 id="toc">TOC</h3>
+<hr />
+<ol>
+  <li><a href="#overview">Overview</a></li>
+  <li><a href="#transactional은-메소드를-직접-바꾸지-않는다">@Transactional은 메소드를 직접 바꾸지 않는다</a></li>
+  <li><a href="#인터셉터에서-transactionmanager-호출하기">인터셉터에서 TransactionManager 호출하기</a></li>
+  <li><a href="#lombok과는-무엇이-다른가">Lombok과는 무엇이 다른가</a></li>
+  <li><a href="#conclusion">Conclusion</a></li>
+</ol>
+
+<h3 id="overview">Overview</h3>
+<hr />
+<p>앞선 글에서 트랜잭션은 여러 데이터베이스 작업을 하나의 논리적 작업 단위로 묶는 장치라고 정리했다.</p>
+
+<p>이번에는 Spring에서 <code class="language-plaintext highlighter-rouge">@Transactional</code>이 실제로 어떻게 동작하는지 살펴본다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Transactional</span>
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">transfer</span><span class="o">(</span><span class="nc">Long</span> <span class="n">fromId</span><span class="o">,</span> <span class="nc">Long</span> <span class="n">toId</span><span class="o">,</span> <span class="kt">long</span> <span class="n">amount</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">accountRepository</span><span class="o">.</span><span class="na">withdraw</span><span class="o">(</span><span class="n">fromId</span><span class="o">,</span> <span class="n">amount</span><span class="o">);</span>
+    <span class="n">accountRepository</span><span class="o">.</span><span class="na">deposit</span><span class="o">(</span><span class="n">toId</span><span class="o">,</span> <span class="n">amount</span><span class="o">);</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>메소드 본문에는 트랜잭션을 시작하거나 커밋하는 코드가 없다. <code class="language-plaintext highlighter-rouge">@Transactional</code>은 컴파일 시 메소드 본문을 변경하는 방식이 아니라, <strong>런타임에 Spring이 빈을 프록시로 감싸고 메소드 호출 전후에 AOP 로직을 적용하는 방식</strong>으로 동작한다.</p>
+
+<h3 id="transactional은-메소드를-직접-바꾸지-않는다">@Transactional은 메소드를 직접 바꾸지 않는다</h3>
+<hr />
+<p><code class="language-plaintext highlighter-rouge">@Transactional</code>은 메소드 내부에 코드를 삽입하는 어노테이션이 아니다. Spring은 애플리케이션 컨텍스트를 구성할 때 어노테이션을 트랜잭션 메타데이터로 읽고, 해당 빈에 트랜잭션 어드바이스를 연결한다.</p>
+
+<p>클라이언트가 주입받는 객체는 다음처럼 원본 객체를 감싼 프록시일 수 있다.</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>AccountService bean
+├─ Spring AOP 프록시
+│  └─ 원본 AccountService
+</code></pre></div></div>
+
+<p>따라서 호출 흐름은 원본 메소드로 바로 진입하는 것이 아니라 다음과 같다.</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>클라이언트
+  → Spring AOP 프록시
+  → TransactionInterceptor
+  → 원본 메소드
+</code></pre></div></div>
+
+<p>런타임 환경에서 <code class="language-plaintext highlighter-rouge">@Transactional</code>이 붙은 메소드가 프록시를 통해 호출되면, <code class="language-plaintext highlighter-rouge">TransactionInterceptor</code>는 해당 메소드의 트랜잭션 속성을 확인한다. 그 후 실제 메소드가 실행되기 <strong>전(before invocation)</strong>에 트랜잭션을 시작하고, 메소드 실행이 <strong>후(after invocation)</strong>에 결과에 따라 커밋 또는 롤백을 처리한다.</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>런타임 메소드 호출
+  → TransactionInterceptor가 @Transactional 속성 확인
+  → 메소드 실행 전: 트랜잭션 시작
+  → 실제 메소드 실행
+  → 메소드 실행 후: 커밋 또는 롤백
+</code></pre></div></div>
+
+<h3 id="인터셉터에서-transactionmanager-호출하기">인터셉터에서 TransactionManager 호출하기</h3>
+<hr />
+<p>프록시를 통해 메소드가 호출되면 AOP 호출 체인에 등록된 <code class="language-plaintext highlighter-rouge">TransactionInterceptor</code>의 <code class="language-plaintext highlighter-rouge">invoke</code>가 실행된다. 인터셉터는 <code class="language-plaintext highlighter-rouge">TransactionManager</code>를 의존하고 있으며, <code class="language-plaintext highlighter-rouge">invoke</code> 내부에서 실제 트랜잭션 시작과 종료를 요청한다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 실제 Spring 구현을 단순화한 의사 코드</span>
+<span class="kd">public</span> <span class="nc">Object</span> <span class="nf">invoke</span><span class="o">(</span><span class="nc">MethodInvocation</span> <span class="n">invocation</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Throwable</span> <span class="o">{</span>
+    <span class="nc">TransactionStatus</span> <span class="n">status</span> <span class="o">=</span> <span class="n">transactionManager</span><span class="o">.</span><span class="na">getTransaction</span><span class="o">(</span><span class="n">transactionDefinition</span><span class="o">);</span>
+
+    <span class="k">try</span> <span class="o">{</span>
+        <span class="c1">// 프록시 다음에 있는 원본 객체의 메소드를 실행한다.</span>
+        <span class="nc">Object</span> <span class="n">result</span> <span class="o">=</span> <span class="n">invocation</span><span class="o">.</span><span class="na">proceed</span><span class="o">();</span>
+        <span class="n">transactionManager</span><span class="o">.</span><span class="na">commit</span><span class="o">(</span><span class="n">status</span><span class="o">);</span>
+        <span class="k">return</span> <span class="n">result</span><span class="o">;</span>
+    <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Throwable</span> <span class="n">exception</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">transactionManager</span><span class="o">.</span><span class="na">rollback</span><span class="o">(</span><span class="n">status</span><span class="o">);</span>
+        <span class="k">throw</span> <span class="n">exception</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>호출 관계를 정리하면 다음과 같다.</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>클라이언트
+  → 프록시의 호출 체인
+  → TransactionInterceptor.invoke()
+  → TransactionManager.getTransaction()
+  → invocation.proceed()
+  → 원본 메소드 실행
+  → TransactionManager.commit() 또는 rollback()
+</code></pre></div></div>
+
+<p>위 코드는 이해를 위한 단순화된 형태다. 실제 Spring은 예외의 롤백 규칙, 기존 트랜잭션 참여 여부, 전파 속성, 리소스 정리와 동기화 콜백 등을 함께 처리한다. 하지만 <strong>인터셉터가 <code class="language-plaintext highlighter-rouge">TransactionManager</code>를 호출한 뒤 <code class="language-plaintext highlighter-rouge">proceed()</code>로 원본 메소드를 실행한다</strong>는 구조는 동일하다.</p>
+
+<h3 id="lombok과는-무엇이-다른가">Lombok과는 무엇이 다른가</h3>
+<hr />
+<p>Spring의 <code class="language-plaintext highlighter-rouge">@Transactional</code>과 Lombok 모두 어노테이션을 사용하지만 동작 시점이 다르다.</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">@Transactional</code>: 런타임에 프록시와 AOP 인터셉터로 동작한다.</li>
+  <li>Lombok: 컴파일 시 annotation processor가 생성자, getter, builder 등의 코드를 만든다.</li>
+</ul>
+
+<p>예를 들어 <code class="language-plaintext highlighter-rouge">@RequiredArgsConstructor</code>는 실행 시 프록시를 만드는 것이 아니라 컴파일 전에 생성자를 추가한다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@RequiredArgsConstructor</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">UserService</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">UserRepository</span> <span class="n">userRepository</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>결국 <code class="language-plaintext highlighter-rouge">@Transactional</code>은 런타임 동작을 연결하고, Lombok은 컴파일 시 코드를 생성한다.</p>
+
+<h3 id="conclusion">Conclusion</h3>
+<hr />
+<p><code class="language-plaintext highlighter-rouge">@Transactional</code>의 핵심은 메소드 안에 트랜잭션 코드를 작성하는 것이 아니다. Spring이 원본 빈을 프록시로 감싸고, 프록시가 메소드 호출을 가로채 트랜잭션 경계를 적용하는 것이다.</p>
+
+<blockquote>
+  <p><code class="language-plaintext highlighter-rouge">@Transactional</code>은 어노테이션 하나로 끝나는 기능이 아니라, 프록시와 AOP를 통해 메소드 호출 전후에 동작을 추가하는 기능이다.</p>
+</blockquote>
+
+<p>다음 글에서는 <code class="language-plaintext highlighter-rouge">TransactionInterceptor</code>가 <code class="language-plaintext highlighter-rouge">TransactionManager</code>를 통해 트랜잭션을 시작하고 종료하는 과정을 살펴본다.</p>
+
+<p><a href="/spring-transactional-part-2-transaction-manager.html">다음 글: TransactionManager의 시작과 종료</a></p>
+
+</article>
+      </div>
+    </main>
+    <script type="module" src="/assets/js/mermaid-init.js"></script>
+  </body>
+</html>

@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Java 소스 코드에서 class 파일까지: javac와 bytecode</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Java 소스 코드에서 class 파일까지: javac와 bytecode" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="TOC Overview Java는 어떻게 실행되는가 javac는 무엇을 하는가 class 파일에는 무엇이 들어가는가 java 명령은 무엇을 시작하는가 javap로 bytecode를 확인하는 법 흔한 오해와 정리 포인트 Conclusion Next Step" />
+<meta property="og:description" content="TOC Overview Java는 어떻게 실행되는가 javac는 무엇을 하는가 class 파일에는 무엇이 들어가는가 java 명령은 무엇을 시작하는가 javap로 bytecode를 확인하는 법 흔한 오해와 정리 포인트 Conclusion Next Step" />
+<link rel="canonical" href="https://hrllk.github.io/java-source-to-class-file.html" />
+<meta property="og:url" content="https://hrllk.github.io/java-source-to-class-file.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-01-01T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Java 소스 코드에서 class 파일까지: javac와 bytecode" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2021-01-01T00:00:00+00:00","datePublished":"2021-01-01T00:00:00+00:00","description":"TOC Overview Java는 어떻게 실행되는가 javac는 무엇을 하는가 class 파일에는 무엇이 들어가는가 java 명령은 무엇을 시작하는가 javap로 bytecode를 확인하는 법 흔한 오해와 정리 포인트 Conclusion Next Step","headline":"Java 소스 코드에서 class 파일까지: javac와 bytecode","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/java-source-to-class-file.html"},"url":"https://hrllk.github.io/java-source-to-class-file.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2021-01-01 00:00:00 +0000">2021-01-01</time>
+  </p>
+  
+  <h1>Java 소스 코드에서 class 파일까지: javac와 bytecode</h1>
+
+  <h3 id="toc">TOC</h3>
+<hr />
+<ol>
+  <li><a href="#overview">Overview</a></li>
+  <li><a href="#java는-어떻게-실행되는가">Java는 어떻게 실행되는가</a></li>
+  <li><a href="#javac는-무엇을-하는가">javac는 무엇을 하는가</a></li>
+  <li><a href="#class-파일에는-무엇이-들어가는가">class 파일에는 무엇이 들어가는가</a></li>
+  <li><a href="#java-명령은-무엇을-시작하는가">java 명령은 무엇을 시작하는가</a></li>
+  <li><a href="#javap로-bytecode를-확인하는-법">javap로 bytecode를 확인하는 법</a></li>
+  <li><a href="#흔한-오해와-정리-포인트">흔한 오해와 정리 포인트</a></li>
+  <li><a href="#conclusion">Conclusion</a></li>
+  <li><a href="#next-step">Next Step</a></li>
+</ol>
+
+<h3 id="overview">Overview</h3>
+<hr />
+<p>Java는 보통 이렇게 움직인다.</p>
+
+<ol>
+  <li><code class="language-plaintext highlighter-rouge">.java</code> 파일을 작성한다.</li>
+  <li><code class="language-plaintext highlighter-rouge">javac</code>가 이를 <code class="language-plaintext highlighter-rouge">class</code> 파일로 바꾼다.</li>
+  <li><code class="language-plaintext highlighter-rouge">java</code>가 JVM을 통해 실행한다.</li>
+</ol>
+
+<p>핵심은 소스와 실행이 분리된다는 점이다.</p>
+
+<p>예를 들면 아래 같은 파일이 있다고 하자.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">HelloWorld</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kt">int</span> <span class="n">count</span> <span class="o">=</span> <span class="mi">3</span><span class="o">;</span>
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">count</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Hello, Java "</span> <span class="o">+</span> <span class="n">i</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>이 코드는 사람이 읽기 쉽지만, JVM이 그대로 읽는 형태는 아니다.</p>
+
+<h3 id="java는-어떻게-실행되는가">Java는 어떻게 실행되는가</h3>
+<hr />
+<p>작은 예제 하나만 보자.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">HelloWorld</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Hello, Java"</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>이 파일은 <code class="language-plaintext highlighter-rouge">javac</code>를 거쳐 <code class="language-plaintext highlighter-rouge">HelloWorld.class</code>가 되고, <code class="language-plaintext highlighter-rouge">java HelloWorld</code>가 JVM을 시작한다.</p>
+
+<p>즉, Java 실행은 두 단계다.</p>
+
+<ul>
+  <li>컴파일 단계: 소스 코드를 bytecode로 바꾼다.</li>
+  <li>실행 단계: JVM이 bytecode를 읽고 실행한다.</li>
+</ul>
+
+<p>흐름만 적으면 이렇다.</p>
+
+<ol>
+  <li><code class="language-plaintext highlighter-rouge">javac HelloWorld.java</code></li>
+  <li><code class="language-plaintext highlighter-rouge">HelloWorld.class</code> 생성</li>
+  <li><code class="language-plaintext highlighter-rouge">java HelloWorld</code></li>
+  <li>JVM이 <code class="language-plaintext highlighter-rouge">main</code> 호출</li>
+</ol>
+
+<h3 id="javac는-무엇을-하는가">javac는 무엇을 하는가</h3>
+<hr />
+<p><code class="language-plaintext highlighter-rouge">javac</code>는 Java 소스 코드를 읽어서 문법과 타입을 검사한 뒤, JVM이 실행할 수 있는 <code class="language-plaintext highlighter-rouge">class</code> 파일로 바꿔주는 컴파일러다.</p>
+
+<p>쉽게 말하면 사람이 작성한 <code class="language-plaintext highlighter-rouge">.java</code> 파일을 기계가 읽을 수 있는 bytecode 형태로 번역하는 도구다.</p>
+
+<p>컴파일 오류와 실행 오류는 다르다. 문법/타입 오류는 <code class="language-plaintext highlighter-rouge">javac</code> 단계에서 막히고, null 참조나 배열 범위 초과는 실행 중에 드러난다.</p>
+
+<p>예를 들면 아래 코드는 컴파일 단계에서 막힌다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="n">value</span> <span class="o">=</span> <span class="s">"3"</span><span class="o">;</span>
+</code></pre></div></div>
+
+<p>반대로 아래 코드는 컴파일은 되지만 실행 중에 터질 수 있다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">String</span> <span class="n">name</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">name</span><span class="o">.</span><span class="na">length</span><span class="o">());</span>
+</code></pre></div></div>
+
+<p>즉, <code class="language-plaintext highlighter-rouge">javac</code>는 문법과 타입이 맞는지 먼저 확인하는 관문이다.</p>
+
+<h3 id="class-파일에는-무엇이-들어가는가">class 파일에는 무엇이 들어가는가</h3>
+<hr />
+<p><code class="language-plaintext highlighter-rouge">class</code> 파일은 소스 코드가 아니라 JVM이 읽을 바이너리 정보다. 클래스 이름, 상속 관계, 필드, 메서드, bytecode, <code class="language-plaintext highlighter-rouge">constant pool</code>, 부가 정보가 들어간다.</p>
+
+<p>구조적으로 보면 magic number, 버전 정보, constant pool, 접근 제어자, 클래스/부모 클래스 정보, 인터페이스, 필드, 메서드, attribute 순으로 구성된다.</p>
+
+<p>특히 <code class="language-plaintext highlighter-rouge">constant pool</code>은 문자열과 메서드/필드 참조를 담아 실행 중 심볼 해석을 가능하게 한다.</p>
+
+<p>예를 들어 아래 코드를 생각해보자.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Sample</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">String</span> <span class="n">message</span> <span class="o">=</span> <span class="s">"hello"</span><span class="o">;</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">message</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>이 코드가 <code class="language-plaintext highlighter-rouge">class</code> 파일로 바뀌면, <code class="language-plaintext highlighter-rouge">"hello"</code> 같은 문자열과 <code class="language-plaintext highlighter-rouge">System.out.println</code> 참조가 <code class="language-plaintext highlighter-rouge">constant pool</code>에 들어간다.</p>
+
+<h3 id="java-명령은-무엇을-시작하는가">java 명령은 무엇을 시작하는가</h3>
+<hr />
+<p><code class="language-plaintext highlighter-rouge">java</code>는 소스 파일을 직접 해석하지 않는다. <code class="language-plaintext highlighter-rouge">class</code> 파일을 로드해 <code class="language-plaintext highlighter-rouge">main</code> 메서드부터 실행한다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span>
+</code></pre></div></div>
+
+<p>정확히는 <code class="language-plaintext highlighter-rouge">java</code> 명령이 JVM을 시작하고, JVM이 기존에 컴파일해둔 <code class="language-plaintext highlighter-rouge">.class</code> 파일을 읽는다. 그 과정에서 클래스 로딩과 링킹이 진행되고, 필요하면 static 초기화가 수행된 뒤 <code class="language-plaintext highlighter-rouge">main</code> 메서드 실행으로 이어진다.</p>
+
+<h3 id="javap로-bytecode를-확인하는-법">javap로 bytecode를 확인하는 법</h3>
+<hr />
+<p><code class="language-plaintext highlighter-rouge">javap</code>는 <code class="language-plaintext highlighter-rouge">class</code> 파일을 확인할 때 유용하다.</p>
+
+<p>예를 들면 아래처럼 컴파일한 뒤:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>javac HelloWorld.java
+javap <span class="nt">-c</span> <span class="nt">-v</span> HelloWorld
+</code></pre></div></div>
+
+<p>bytecode 수준의 명령을 볼 수 있다. <code class="language-plaintext highlighter-rouge">println</code> 호출도 여러 bytecode로 바뀐다.</p>
+
+<p>예를 들면 <code class="language-plaintext highlighter-rouge">if</code>는 이런 흐름으로 읽을 수 있다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="o">(</span><span class="n">count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+    <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"ok"</span><span class="o">);</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>bytecode 관점에서는 조건을 평가하고, 맞지 않으면 분기 점프를 한다.</p>
+
+<p><code class="language-plaintext highlighter-rouge">for</code>도 같은 방식이다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+    <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">i</span><span class="o">);</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>이 코드는 초기화, 조건 검사, 본문 실행, 증가식이 bytecode 명령으로 나뉜다.</p>
+
+<h3 id="흔한-오해와-정리-포인트">흔한 오해와 정리 포인트</h3>
+<hr />
+<p>자주 생기는 오해만 정리하면 된다.</p>
+
+<ol>
+  <li>Java는 소스 그대로 실행되지 않는다.</li>
+  <li><code class="language-plaintext highlighter-rouge">class</code> 파일은 소스 코드 복사본이 아니다.</li>
+  <li><code class="language-plaintext highlighter-rouge">javac</code>가 하는 일과 JVM이 하는 일을 구분해야 한다.</li>
+  <li><code class="language-plaintext highlighter-rouge">java</code> 명령은 실행을 시작할 뿐, 모든 단계를 다 직접 처리하지 않는다.</li>
+  <li><code class="language-plaintext highlighter-rouge">if</code>, <code class="language-plaintext highlighter-rouge">for</code>, 메서드 호출도 결국 bytecode 명령들의 조합으로 바뀐다.</li>
+</ol>
+
+<p>한 줄로 정리하면 이렇다.</p>
+
+<ul>
+  <li>소스 코드는 사람이 읽는 형태다.</li>
+  <li><code class="language-plaintext highlighter-rouge">class</code> 파일은 JVM이 읽는 형태다.</li>
+  <li>JVM은 <code class="language-plaintext highlighter-rouge">class</code> 파일을 바탕으로 실행을 맡는다.</li>
+</ul>
+
+<h3 id="conclusion">Conclusion</h3>
+<hr />
+<p>Java는 소스 코드와 실행 코드가 분리되어 있다.</p>
+
+<p><code class="language-plaintext highlighter-rouge">javac</code>는 소스를 bytecode로 바꾸고, <code class="language-plaintext highlighter-rouge">java</code>는 그 결과물을 JVM에서 실행한다.</p>
+
+<h3 id="next-step">Next Step</h3>
+<hr />
+<p>다음 글에서는 <a href="/java-class-file-anatomy.html"><code class="language-plaintext highlighter-rouge">class</code> 파일 내부 구조</a>를 본다. constant pool, field, method, attribute를 정리해보자.</p>
+
+</article>
+      </div>
+    </main>
+    <script type="module" src="/assets/js/mermaid-init.js"></script>
+  </body>
+</html>

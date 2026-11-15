@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Transactional Outbox in Practice: Thin Poller and At-least-once</title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Transactional Outbox in Practice: Thin Poller and At-least-once" />
+<meta name="author" content="HwiRyung Kim" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="TOC Overview Thin Poller의 역할 발행과 마킹의 순서 At-least-once 수용 운영 관점 Conclusion Next Step" />
+<meta property="og:description" content="TOC Overview Thin Poller의 역할 발행과 마킹의 순서 At-least-once 수용 운영 관점 Conclusion Next Step" />
+<link rel="canonical" href="https://hrllk.github.io/transactional-outbox-in-practice-thin-poller-and-at-least-once.html" />
+<meta property="og:url" content="https://hrllk.github.io/transactional-outbox-in-practice-thin-poller-and-at-least-once.html" />
+<meta property="og:site_name" content="knowledge.log" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-04-23T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Transactional Outbox in Practice: Thin Poller and At-least-once" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"HwiRyung Kim"},"dateModified":"2026-04-23T00:00:00+00:00","datePublished":"2026-04-23T00:00:00+00:00","description":"TOC Overview Thin Poller의 역할 발행과 마킹의 순서 At-least-once 수용 운영 관점 Conclusion Next Step","headline":"Transactional Outbox in Practice: Thin Poller and At-least-once","mainEntityOfPage":{"@type":"WebPage","@id":"https://hrllk.github.io/transactional-outbox-in-practice-thin-poller-and-at-least-once.html"},"url":"https://hrllk.github.io/transactional-outbox-in-practice-thin-poller-and-at-least-once.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="https://hrllk.github.io/feed.xml" title="knowledge.log" /><link rel="shortcut icon" type="image/x-icon" href="/logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.css" integrity="sha384-OH8qNTHoMMVNVcKdKewlipV4SErXqccxxlg6HC9Cwjr5oZu2AdBej1TndeCirael" crossorigin="anonymous">
+
+</head>
+<body a="dark">
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">..</a><article>
+  <p class="post-meta">
+    <time datetime="2026-04-23 00:00:00 +0000">2026-04-23</time>
+  </p>
+  
+  <h1>Transactional Outbox in Practice: Thin Poller and At-least-once</h1>
+
+  <h3 id="toc">TOC</h3>
+<hr />
+<ol>
+  <li><a href="#overview">Overview</a></li>
+  <li><a href="#thin-poller의-역할">Thin Poller의 역할</a></li>
+  <li><a href="#발행과-마킹의-순서">발행과 마킹의 순서</a></li>
+  <li><a href="#at-least-once-수용">At-least-once 수용</a></li>
+  <li><a href="#운영-관점">운영 관점</a></li>
+  <li><a href="#conclusion">Conclusion</a></li>
+  <li><a href="#next-step">Next Step</a></li>
+</ol>
+
+<h3 id="overview">Overview</h3>
+<hr />
+<p>이전 글에서 비즈니스 데이터와 발행 의도를 Outbox table에 안전하게 저장했다. 이제 남은 일은 그 row를 Kafka로 보내고, 성공한 row를 발행 완료로 표시하는 것이다.</p>
+
+<p>이번 글의 핵심은 폴러를 얇게 유지하는 것이다. 폴러는 비즈니스 로직을 처리하지 않고, <strong>미발행 row를 가져와 발행하고 마킹하는 일</strong>만 맡는다.</p>
+
+<h3 id="thin-poller의-역할">Thin Poller의 역할</h3>
+<hr />
+<p>폴러가 외부 API 호출, 상태 전이, 실패 분류까지 떠안으면 거대한 배치 잡이 된다.</p>
+
+<p>Outbox 폴러는 인프라성 컴포넌트로 두고, 실제 비즈니스 처리는 Kafka 컨슈머에게 넘긴다. 그래야 발행 실패와 소비 실패를 서로 다른 지점에서 관측하고 재시도할 수 있다.</p>
+
+<h3 id="발행과-마킹의-순서">발행과 마킹의 순서</h3>
+<hr />
+<p>폴러는 row를 <code class="language-plaintext highlighter-rouge">PENDING</code>에서 <code class="language-plaintext highlighter-rouge">PROCESSING</code>으로 클레임한 뒤 Kafka send를 시도하고, send가 성공한 시점에 <code class="language-plaintext highlighter-rouge">SENT</code>로 전환한다. 실패하면 재시도 카운트를 올리거나 일정 횟수를 넘기면 <code class="language-plaintext highlighter-rouge">DEAD</code>로 분리한다. send를 먼저 했다고 가정하고 row를 미리 <code class="language-plaintext highlighter-rouge">SENT</code>로 바꾸면, send 실패 시 row가 이미 발행된 것처럼 보이기 때문이다.</p>
+
+<p>하지만 send 성공 직후 <code class="language-plaintext highlighter-rouge">SENT</code> 전환 직전에 애플리케이션이 죽으면 같은 <code class="language-plaintext highlighter-rouge">PROCESSING</code> row가 다음 폴링에서 다시 발행될 수 있다. 이것이 Outbox가 기본적으로 <strong>at-least-once</strong>인 이유다.</p>
+
+<details>
+<summary><strong>at-least-once 전달 보장이란?</strong></summary>
+<br />
+
+메시지 전달 보장에는 세 가지 수준이 있다.
+
+| 보장 수준 | 의미 | 중복 가능 | 유실 가능 |
+|---|---|---|---|
+| **at-most-once** | 최대 한 번 | 없음 | 있음 |
+| **at-least-once** | 최소 한 번 | 있음 | 없음 |
+| **exactly-once** | 정확히 한 번 | 없음 | 없음 |
+
+Outbox 폴러가 at-least-once인 이유는 **`PROCESSING` → `SENT` 전환 사이에 윈도우**가 있기 때문이다.
+
+```
+① PENDING → PROCESSING  (클레임)
+② Kafka send 성공
+③ ← 이 순간 애플리케이션이 죽으면 row는 여전히 PROCESSING
+④ 재시작된 폴러가 같은 row를 다시 발행
+```
+
+유실 없는 도달을 보장하는 대신, 중복 도달 가능성을 수용한다. exactly-once를 구현하려면 분산 트랜잭션(2PC) 같은 훨씬 무거운 프로토콜이 필요해지며, 그 비용이 실익보다 크다. 이 시리즈는 **중복을 Consumer가 흡수하는 설계**로 at-least-once를 실용적으로 처리한다.
+
+</details>
+
+<h3 id="at-least-once-수용">At-least-once 수용</h3>
+<hr />
+<p>이 시리즈에서는 그 비용을 치르지 않고, 중복을 컨슈머가 흡수하는 방향을 선택한다.</p>
+
+<p>따라서 message key는 같은 대상이 같은 파티션으로 가도록 신중히 잡아야 한다. 예를 들어 상세 ID를 key로 쓰면 같은 상세에 대한 중복 메시지는 같은 순서 안에서 처리될 가능성이 높아진다. 같은 파티션에서 직렬로 도착해야 멱등 가드가 제대로 작동하는 이유는 3편 Race Condition 대응에서 자세히 다룬다.</p>
+
+<h3 id="운영-관점">운영 관점</h3>
+<hr />
+<p>폴 주기는 latency와 DB 부하 사이의 trade-off다. 짧게 잡으면 발행 지연은 줄지만 빈 SELECT가 늘고, 길게 잡으면 DB 부담은 줄지만 메시지 도착이 늦어진다.</p>
+
+<p>운영에서는 미발행 row 수와 발행 지연 시간을 함께 봐야 한다. 이 두 값이 Outbox 폴러의 건강 상태를 가장 직접적으로 보여준다.</p>
+
+<h3 id="conclusion">Conclusion</h3>
+<hr />
+<p>이 단계에서 보장되는 것은 발행 책임의 분리다. 저장은 producer가, 발행은 폴러가, 중복 처리는 consumer가 맡는다.</p>
+
+<h3 id="next-step">Next Step</h3>
+<hr />
+<p>다음 포스트에서는 <strong><a href="/transactional-outbox-in-practice-idempotent-consumer.html">Idempotent Consumer</a></strong>를 다룬다. at-least-once로 도착한 메시지를 어떻게 안전하게 소비할지 정리한다.</p>
+
+</article>
+      </div>
+    </main>
+    <script type="module" src="/assets/js/mermaid-init.js"></script>
+  </body>
+</html>
